@@ -28,9 +28,9 @@ class Product extends Model
     protected $with = ['category', 'material'];
 
     public function category()
-    {
-        return $this->belongsTo(Category::class);
-    }
+{
+    return $this->belongsTo(Category::class, 'category_id', 'category_id');
+}
 
     public function material()
     {

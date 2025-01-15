@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -13,18 +14,70 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::with(['category', 'material', 'tags']);
+        try {
+            $query = Product::with(['category', 'material', 'tags']);
 
-        if ($request->search) {
-            $query->where('name', 'like', "%{$request->search}%")
-                  ->orWhere('brand', 'like', "%{$request->search}%");
+            // Handle search
+            if ($request->filled('search')) {
+                $searchTerm = $request->search;
+                $query->where(function($q) use ($searchTerm) {
+                    $q->where('name', 'like', "%{$searchTerm}%")
+                      ->orWhere('brand', 'like', "%{$searchTerm}%");
+                });
+            }
+
+            // Handle sorting
+            $sortField = $request->input('sort_field', 'created_at');
+            $sortDirection = $request->input('sort_direction', 'desc');
+
+            // Define allowed sort fields and their corresponding database columns
+            $allowedSortFields = [
+                'brand' => 'brand',
+                'name' => 'name',
+                'category' => 'category_id',
+                'price' => 'price',
+                'stock_quantity' => 'stock_quantity',
+                'created_at' => 'created_at'
+            ];
+
+            if (array_key_exists($sortField, $allowedSortFields)) {
+                $dbField = $allowedSortFields[$sortField];
+
+                // Special handling for category sorting
+                if ($sortField === 'category') {
+                    $query->join('categories', 'products.category_id', '=', 'categories.id')
+                          ->orderBy('categories.name', $sortDirection)
+                          ->select('products.*');
+                } else {
+                    $query->orderBy($dbField, $sortDirection);
+                }
+            }
+
+            // Handle pagination
+            $perPage = $request->input('per_page', 10);
+            $perPage = in_array($perPage, [10, 25, 50, 100]) ? $perPage : 10;
+
+            $products = $query->paginate($perPage);
+
+            return [
+                'data' => ProductResource::collection($products),
+                'current_page' => $products->currentPage(),
+                'per_page' => $products->perPage(),
+                'last_page' => $products->lastPage(),
+                'total' => $products->total(),
+                'sort' => [
+                    'field' => $sortField,
+                    'direction' => $sortDirection
+                ]
+            ];
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error fetching products',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        $products = $query->paginate(10);
-
-        return response()->json($products);
     }
-
     public function store(Request $request)
     {
         $validated = $request->validate([
