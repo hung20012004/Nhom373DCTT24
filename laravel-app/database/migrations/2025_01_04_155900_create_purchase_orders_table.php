@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('supplier_id')->constrained('suppliers','supplier_id');
             $table->foreignId('create_by_user_id')->constrained('users','id');
             $table->timestamp('order_date');
+            $table->timestamp('expected_date')->nullable();
             $table->decimal('total_amount', 10, 2);
             $table->string('status'); // draft, ordered, received, cancelled
             $table->text('note')->nullable();
