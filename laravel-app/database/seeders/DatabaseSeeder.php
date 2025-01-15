@@ -13,31 +13,47 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         $this->call([
-            RoleSeeder::class,
+            RoleSeeder::class,        // Roles for users
+            SizeSeeder::class,        // Product sizes
+            ColorSeeder::class,       // Product colors
+            MaterialSeeder::class,    // Product materials
+            TagSeeder::class,         // Product tags
+            CategorySeeder::class,    // Product categories
+        ]);
 
-            UserSeeder::class,
-            UserProfileSeeder::class,
-            CategorySeeder::class,
-            TagSeeder::class,
-            SizeSeeder::class,
-            ColorSeeder::class,
-            MaterialSeeder::class,
-            SupplierSeeder::class,
-            ProductSeeder::class,
-            ProductTagSeeder::class,
-            PromotionSeeder::class,
-            ShippingAddressSeeder::class,
-            ProductsVariantsSeeder::class,
-            OrderSeeder::class,
-            OrderHistorySeeder::class,
-            PaymentSeeder::class,
-            WishlistSeeder::class,
-            NotificationSeeder::class,
-            ProductReviewSeeder::class,
-            CartSeeder::class,
-            InventorySeeder::class,
-            InventoryCheckSeeder::class,
-            // InventoryReceiptSeeder::class,
+        $this->call([
+            UserSeeder::class,        // Users (depends on roles)
+            UserProfileSeeder::class, // User profiles (depends on users)
+            ShippingAddressSeeder::class, // Shipping addresses (depends on users)
+        ]);
+
+        $this->call([
+            SupplierSeeder::class,    // Suppliers
+            ProductSeeder::class,     // Products (depends on categories, materials)
+            ProductTagSeeder::class,  // Product-Tag relationships
+            // ProductImageSeeder::class, // Product images
+            ProductVariantSeeder::class, // Product variants (depends on products, sizes, colors)
+        ]);
+
+        $this->call([
+            InventorySeeder::class,   // Initial inventory
+            InventoryCheckSeeder::class, // Inventory checks
+            PurchaseOrderSeeder::class,  // Purchase orders
+            // InventoryReceiptSeeder::class, // Inventory receipts
+        ]);
+
+        $this->call([
+            PromotionSeeder::class,   // Promotions
+            CartSeeder::class,        // Shopping carts
+            OrderSeeder::class,       // Orders
+            OrderHistorySeeder::class, // Order history
+            PaymentSeeder::class,     // Payments
+            ProductReviewSeeder::class, // Product reviews
+            WishlistSeeder::class,    // Wishlists
+        ]);
+
+        $this->call([
+            NotificationSeeder::class, // User notifications
         ]);
     }
 }
@@ -123,19 +139,21 @@ class CategorySeeder extends Seeder
     public function run()
     {
         $categories = [
-            ['name' => 'Electronics', 'slug' => 'electronics'],
-            ['name' => 'Clothing', 'slug' => 'clothing'],
-            ['name' => 'Books', 'slug' => 'books'],
-            ['name' => 'Home & Garden', 'slug' => 'home-garden'],
-            ['name' => 'Sports', 'slug' => 'sports'],
-            ['name' => 'Toys', 'slug' => 'toys'],
+            ['name' => 'Men\'s Clothing', 'slug' => 'mens-clothing'],
+            ['name' => 'Women\'s Clothing', 'slug' => 'womens-clothing'],
+            ['name' => 'Kids\' Clothing', 'slug' => 'kids-clothing'],
+            ['name' => 'Accessories', 'slug' => 'accessories'],
+            ['name' => 'Sportswear', 'slug' => 'sportswear'],
+            ['name' => 'Footwear', 'slug' => 'footwear'],
+            ['name' => 'Underwear', 'slug' => 'underwear'],
+            ['name' => 'Outerwear', 'slug' => 'outerwear']
         ];
 
         foreach ($categories as $category) {
             DB::table('categories')->insert([
                 'name' => $category['name'],
                 'slug' => $category['slug'],
-                'description' => "Category for {$category['name']}",
+                'description' => "Quality {$category['name']} for all occasions",
                 'is_active' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -169,14 +187,20 @@ class MaterialSeeder extends Seeder
     public function run()
     {
         $materials = [
-            'Cotton', 'Leather', 'Plastic', 'Metal', 'Wood',
-            'Glass', 'Ceramic'
+            ['name' => 'Cotton', 'description' => 'Soft and breathable natural fabric'],
+            ['name' => 'Polyester', 'description' => 'Durable and quick-drying synthetic material'],
+            ['name' => 'Denim', 'description' => 'Sturdy cotton twill fabric'],
+            ['name' => 'Wool', 'description' => 'Natural, warm, and moisture-wicking material'],
+            ['name' => 'Silk', 'description' => 'Luxurious natural fabric with smooth texture'],
+            ['name' => 'Linen', 'description' => 'Light and breathable natural fabric'],
+            ['name' => 'Spandex', 'description' => 'Stretchy synthetic fabric for athletic wear'],
+            ['name' => 'Nylon', 'description' => 'Strong and water-resistant synthetic material']
         ];
 
         foreach ($materials as $material) {
             DB::table('materials')->insert([
-                'name' => $material,
-                'description' => "High quality $material material",
+                'name' => $material['name'],
+                'description' => $material['description'],
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -215,59 +239,85 @@ class ProductSeeder extends Seeder
         $categoryIds = DB::table('categories')->pluck('category_id');
         $materialIds = DB::table('materials')->pluck('material_id');
 
-        for ($i = 0; $i < 15; $i++) {
-            $price = $faker->randomFloat(2, 10, 1000);
-            $name = $faker->unique()->name;
+        // Define clothing-specific product templates
+        $productTemplates = [
+            ['name' => 'Classic T-Shirt', 'price_range' => [19.99, 29.99]],
+            ['name' => 'Slim Fit Jeans', 'price_range' => [49.99, 89.99]],
+            ['name' => 'Summer Dress', 'price_range' => [39.99, 79.99]],
+            ['name' => 'Athletic Shorts', 'price_range' => [24.99, 34.99]],
+            ['name' => 'Casual Hoodie', 'price_range' => [39.99, 59.99]],
+            ['name' => 'Button-Up Shirt', 'price_range' => [34.99, 54.99]],
+            ['name' => 'Yoga Pants', 'price_range' => [44.99, 64.99]],
+            ['name' => 'Winter Jacket', 'price_range' => [89.99, 149.99]]
+        ];
 
-            $productId = DB::table('products')->insertGetId([
-                'category_id' => $faker->randomElement($categoryIds),
-                'material_id' => $faker->randomElement($materialIds),
-                'name' => $name,
-                'slug' => Str::slug($name), // Convert name to URL-friendly slug
-                'description' => $faker->paragraph,
-                'price' => $price,
-                'sale_price' => $faker->optional(0.3)->randomFloat(2, 5, $price),
-                'brand' => $faker->company,
-                'sku' => $faker->unique()->ean8,
-                'stock_quantity' => $faker->numberBetween(0, 100),
-                'min_purchase_quantity' => 1,
-                'max_purchase_quantity' => $faker->numberBetween(5, 20),
-                'gender' => $faker->randomElement(['male', 'female', 'unisex']),
-                'care_instruction' => $faker->text(100),
-                'is_active' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+        foreach ($productTemplates as $template) {
+            for ($i = 0; $i < 2; $i++) { // Create 2 variants of each template
+                $price = $faker->randomFloat(2, $template['price_range'][0], $template['price_range'][1]);
+                $name = $template['name'] . ' ' . $faker->randomElement(['Premium', 'Comfort', 'Deluxe', 'Essential']);
 
-            // Create product variants
-            $sizes = ['S', 'M', 'L', 'XL'];
-            $colors = ['Red', 'Blue', 'Green', 'Black', 'White'];
+                $slugBase = Str::slug($name);
+                $slug = $slugBase;
+                $counter = 1;
+                while (DB::table('products')->where('slug', $slug)->exists()) {
+                    $slug = "{$slugBase}-{$counter}";
+                    $counter++;
+                }
 
-            foreach ($faker->randomElements($sizes, 2) as $size) {
-                foreach ($faker->randomElements($colors, 2) as $color) {
-                    DB::table('product_variants')->insert([
+                $productId = DB::table('products')->insertGetId([
+                    'category_id' => $faker->randomElement($categoryIds),
+                    'material_id' => $faker->randomElement($materialIds),
+                    'name' => $name,
+                    'slug' => $slug ,
+                    'description' => $faker->paragraph(3) . "\n\nFeatures:\n- Premium quality fabric\n- Modern fit\n- Easy care",
+                    'price' => $price,
+                    'sale_price' => $faker->optional(0.3)->randomFloat(2, $price * 0.7, $price * 0.9),
+                    'brand' => $faker->randomElement(['StyleCo', 'Fashion Elite', 'Urban Trends', 'Comfort Plus', 'Modern Basics']),
+                    'sku' => 'CLT-' . $faker->unique()->numberBetween(1000, 9999),
+                    'stock_quantity' => $faker->numberBetween(10, 100),
+                    'min_purchase_quantity' => 1,
+                    'max_purchase_quantity' => 5,
+                    'gender' => $faker->randomElement(['male', 'female', 'unisex']),
+                    'care_instruction' => "Machine wash cold\nTumble dry low\nDo not bleach\nIron on low if needed",
+                    'is_active' => true,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                $colorIds = DB::table('colors')->pluck('color_id')->toArray();
+                $sizeIds = DB::table('sizes')->pluck('size_id')->toArray();
+
+                if(empty($colorIds) || empty($sizeIds)) {
+                    throw new \Exception('Colors or Sizes not found. Please run ColorSeeder and SizeSeeder first.');
+                }
+
+                foreach ($faker->randomElements($sizeIds, 4) as $sizeId) {
+                    foreach ($faker->randomElements($colorIds, 3) as $colorId) {
+                        DB::table('product_variants')->insert([
+                            'product_id' => $productId,
+                            'size_id' => $sizeId,
+                            'color_id' => $colorId, // Đảm bảo color_id luôn có giá trị
+                            'sku' => 'CLT-' . $faker->unique()->numberBetween(10000, 99999),
+                            'price' => $price + $faker->randomFloat(2, 0, 5),
+                            'stock_quantity' => $faker->numberBetween(5, 30),
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                    }
+                }
+
+                // Create product images
+                $imageTypes = ['front', 'back', 'detail'];
+                foreach ($imageTypes as $index => $type) {
+                    DB::table('product_images')->insert([
                         'product_id' => $productId,
-                        'size_id' => DB::table('sizes')->where('name', $size)->value('size_id'),
-                        'color_id' => DB::table('colors')->where('name', $color)->value('color_id'),
-                        'sku' => $faker->unique()->ean8,
-                        'price' => $price + $faker->randomFloat(2, 0, 20),
-                        'stock_quantity' => $faker->numberBetween(0, 50),
+                        'image_url' => $faker->imageUrl(800, 1200, 'fashion'),
+                        'display_order' => $index + 1,
+                        'is_primary' => $index === 0,
                         'created_at' => now(),
                         'updated_at' => now(),
                     ]);
                 }
-            }
-
-            // Create product images
-            for ($j = 0; $j < 3; $j++) {
-                DB::table('product_images')->insert([
-                    'product_id' => $productId,
-                    'image_url' => $faker->imageUrl(800, 600, 'products'),
-                    'display_order' => $j + 1,
-                    'is_primary' => $j === 0,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
             }
         }
     }
@@ -1201,7 +1251,7 @@ class PurchaseOrderSeeder extends Seeder
                 // Tạo purchase order
                 $poId = DB::table('purchase_orders')->insertGetId([
                     'supplier_id' => $supplierId,
-                    'create_by(user_id)' => $validUsers->random(),
+                    'create_by_user_id' => $validUsers->random(),
                     'order_date' => $faker->dateTimeBetween('-3 months', 'now'),
                     'expected_date' => $faker->dateTimeBetween('now', '+2 months'),
                     'total_amount' => 0, // Sẽ cập nhật sau
@@ -1210,17 +1260,24 @@ class PurchaseOrderSeeder extends Seeder
                 ]);
 
                 // Tạo chi tiết cho 3-7 sản phẩm
-                $selectedVariants = $faker->randomElements($variants->toArray(), $faker->numberBetween(3, 7));
+                $selectedVariants = collect($faker->randomElements($variants->toArray(), $faker->numberBetween(3, 7)))->unique('product_id');
                 $totalAmount = 0;
 
                 foreach ($selectedVariants as $variant) {
+                    $existingDetail = DB::table('purchase_order_details')
+                        ->where('po_id', $poId)
+                        ->where('product_id', $variant->product_id)
+                        ->first();
+
+                    if ($existingDetail) {
+                        continue; // Bỏ qua nếu sản phẩm đã tồn tại trong đơn hàng này
+                    }
+
                     $quantity = $faker->numberBetween(10, 100);
-                    // Giá nhập sẽ thấp hơn giá bán một chút
                     $unitPrice = $faker->randomFloat(2, $variant->regular_price * 0.6, $variant->regular_price * 0.8);
                     $subtotal = $quantity * $unitPrice;
                     $totalAmount += $subtotal;
 
-                    // Tạo purchase order detail
                     DB::table('purchase_order_details')->insert([
                         'po_id' => $poId,
                         'product_id' => $variant->product_id,
