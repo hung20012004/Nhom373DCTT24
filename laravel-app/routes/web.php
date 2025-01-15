@@ -13,7 +13,11 @@ Route::get('/', function () {
         'phpVersion' => PHP_VERSION,
     ]);
 });
-
+Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
+    Route::get('/products', function () {
+        return Inertia::render('Admin/Products/Index');
+    })->name('admin.products');
+});
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
