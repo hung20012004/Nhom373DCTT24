@@ -1,21 +1,20 @@
 <?php
 
 use App\Http\Controllers\API\CategoryController;
-use App\Http\Controllers\API\ProductController as APIProductController;
-use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\API\ProductController;
+use App\Http\Controllers\API\MaterialController;
+use App\Http\Controllers\API\SupplierController;
+use App\Http\Controllers\API\ColorController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
+    // Routes API công khai
     Route::get('/categories', [CategoryController::class, 'index']);
-    Route::get('/products', [APIProductController::class, 'index']);
-    Route::get('/products/featured', [APIProductController::class, 'featured']);
+    Route::get('/products', [ProductController::class, 'index']);
+    Route::get('/products/featured', [ProductController::class, 'featured']);
+    Route::get('/materials', [MaterialController::class, 'index']);
+    Route::get('/suppliers', [SupplierController::class, 'index']);
+    Route::get('/colors', [ColorController::class, 'index']);
 });
 
-Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
-    Route::apiResource('products', AdminProductController::class);
-    Route::get('categories', [CategoryController::class, 'index']);
-    // Route::get('materials', [MaterialController::class, 'index']);
-    // Route::get('tags', [TagController::class, 'index']);
-    // Route::get('sizes', [SizeController::class, 'index']);
-    // Route::get('colors', [ColorController::class, 'index']);
-});
+
