@@ -18,6 +18,12 @@ import {
     Database,
     Heart,
     UserCog,
+    Image,
+    Box,
+    Palette,
+    Star,
+    MapPin,
+    Send
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -44,6 +50,10 @@ const Sidebar = () => {
                 { title: 'Kho hàng', icon: <Database size={20} />, path: '/admin/inventory' },
                 { title: 'Nhà cung cấp', icon: <Truck size={20} />, path: '/admin/suppliers' },
                 { title: 'Kiểm kho', icon: <ClipboardList size={20} />, path: '/admin/inventory-checks' },
+                { title: 'Kích thước', icon: <Box size={20} />, path: '/admin/sizes' },
+                { title: 'Màu sắc', icon: <Palette size={20} />, path: '/admin/colors' },
+                { title: 'Hình ảnh sản phẩm', icon: <Image size={20} />, path: '/admin/product-images' },
+                { title: 'Chất liệu', icon: <Package size={20} />, path: '/admin/materials' },
             ]
         },
         {
@@ -51,20 +61,24 @@ const Sidebar = () => {
             items: [
                 { title: 'Đơn hàng', icon: <ShoppingBag size={20} />, path: '/admin/orders' },
                 { title: 'Đơn nhập hàng', icon: <ShoppingCart size={20} />, path: '/admin/purchase-orders' },
+                { title: 'Lịch sử đơn hàng', icon: <FileText size={20} />, path: '/admin/order-history' },
+                { title: 'Thanh toán', icon: <ShoppingCart size={20} />, path: '/admin/payments' },
             ]
         },
         {
             title: 'Quản lý khách hàng',
             items: [
                 { title: 'Khách hàng', icon: <Users size={20} />, path: '/admin/users' },
+                { title: 'Hồ sơ khách hàng', icon: <UserCog size={20} />, path: '/admin/user-profiles' },
                 { title: 'Wishlist', icon: <Heart size={20} />, path: '/admin/wishlists' },
-                { title: 'Đánh giá', icon: <FileText size={20} />, path: '/admin/reviews' },
+                { title: 'Đánh giá', icon: <Star size={20} />, path: '/admin/reviews' },
             ]
         },
         {
             title: 'Marketing',
             items: [
                 { title: 'Khuyến mãi', icon: <Percent size={20} />, path: '/admin/promotions' },
+                { title: 'Gửi thông báo', icon: <Send size={20} />, path: '/admin/notifications-send' },
             ]
         },
         {
@@ -72,6 +86,7 @@ const Sidebar = () => {
             items: [
                 { title: 'Cấu hình', icon: <Settings size={20} />, path: '/admin/settings' },
                 { title: 'Quản lý nhân viên', icon: <UserCog size={20} />, path: '/admin/staff' },
+                { title: 'Phân quyền', icon: <Users size={20} />, path: '/admin/roles' },
             ]
         },
     ];
