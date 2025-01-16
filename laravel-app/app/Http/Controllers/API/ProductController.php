@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
@@ -10,7 +9,7 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::with(['category', 'variants'])
+        $query = Product::with(['category', 'variants', 'images'])
             ->select('products.*')
             ->where('products.is_active', true);
 
@@ -42,13 +41,16 @@ class ProductController extends Controller
     }
 
     public function featured()
-    {
-        $products = Product::with(['category', 'variants'])
-            ->where('is_active', true)
-            ->orderBy('sale_price', 'desc')
-            ->limit(8)
-            ->get();
+{
+    $products = Product::with(['category', 'variants', 'images'])
+        ->where('is_active', true)
+        ->orderBy('sale_price', 'desc')
+        ->limit(8)
+        ->get();
 
-        return response()->json($products);
-    }
+    // Thêm dòng này để debug
+    logger()->info('Products data', ['products' => $products]);
+
+    return response()->json($products);
+}
 }

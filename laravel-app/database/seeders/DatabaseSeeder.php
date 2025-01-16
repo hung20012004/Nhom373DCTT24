@@ -242,27 +242,27 @@ class ProductSeeder extends Seeder
         // Define image URLs for each product type
         $imageUrlsByProduct = [
             'Classic T-Shirt' => [
-                'https://product.hstatic.net/1000271846/product/01_6c25dc81d6c6455486ee446d346d5860_master.jpg',
-                'https://product.hstatic.net/1000271846/product/02_e0093e2a8fc14130a97249deed58ab43_master.jpg',
-                'https://product.hstatic.net/1000271846/product/01_f67375a72ca4443f913eb7a90ff79ac2_master.png',
-                'https://product.hstatic.net/1000271846/product/01_2e0a22a34a164d33b3f1d1613490f563_master.png',
-                'https://product.hstatic.net/1000271846/product/01_4de779f17f064f899845db7a59837aff_master.png',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737014324/hubzhpoaol5hq65ax92q.jpg',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737026642/qwicd0caeac6xydtkkmn.jpg',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737026653/lzvqkjkrwla1qdnh9fvj.png',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737026663/nihqsoyllkxdqiwumrcw.png',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737026674/orvh9zox2txesjjgnrqf.png',
             ],
             'Slim Fit Jeans' => [
-                'https://d3vfig6e0r0snz.cloudfront.net/rcYjnYuenaTH5vyDF/images/products/e2845ba7001a79434330257110b10b1c.webp',
-                'https://d3vfig6e0r0snz.cloudfront.net/rcYjnYuenaTH5vyDF/images/products/dcf45391c9e5da80e588736113a399c4.webp',
-                'https://d3vfig6e0r0snz.cloudfront.net/rcYjnYuenaTH5vyDF/images/products/07acca15ee5ca42b293aedba0935cab2.webp',
-                'https://d3vfig6e0r0snz.cloudfront.net/rcYjnYuenaTH5vyDF/images/products/95088f181448df4079dbc6f711e19bb7.webp',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737026786/aidc0zzjmvqav98cwzod.webp',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737026819/mtvtbm0hsi3fo8efhyon.webp',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737026852/kqdeh8jgxbjmladxccuh.webp',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737026888/n9subucfkveqzq99itio.webp',
             ],
             'Summer Dress' => [
-                'https://content.pancake.vn/2-24/s2850x3450/2024/10/15/2a7c23a09499fdb31d704c44ef602ee1806cc5a6.jpg',
-                'https://content.pancake.vn/2-24/s2850x3450/2024/10/15/1d77a7a9055989576778e4c87f8a92450994bc94.jpg',
-                'https://content.pancake.vn/2-24/s2850x3450/2024/10/15/03f22e22e1c60691c125bc7bd66d2fc6ca04317f.jpg',
-                'https://content.pancake.vn/2-24/s2850x3450/2024/8/10/458fd9ce01c203d7210c20e384a48265d268a6cd.jpg',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737026923/yejguslisvfmpwm2qll0.jpg',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737026933/efxdxkvv04xnvm1jqi5n.jpg',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737026977/mcrxeiurnwzwnjy6gq0z.jpg',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737027005/kvpuljrely6rjkfflrzk.jpg',
             ],
             'Athletic Shorts' => [
-                'https://media3.coolmate.me/cdn-cgi/image/quality=80,format=auto/uploads/December2023/advanced_fast-1_97.png',
-                'https://media3.coolmate.me/cdn-cgi/image/quality=80,format=auto/uploads/December2023/advance6.913_copy_copy.png',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737027075/oomkufswbkvytmje0uxi.webp',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737027118/eibc1ksf8hlneppnsodx.webp',
                 'https://media3.coolmate.me/cdn-cgi/image/quality=80,format=auto/uploads/May2024/CMQST.RN002.fixmau7_82.jpg',
                 'https://media3.coolmate.me/cdn-cgi/image/quality=80,format=auto/uploads/December2023/xcbadvance6.913_copy_copy_2.jpg',
                 'https://media3.coolmate.me/cdn-cgi/image/quality=80,format=auto/uploads/May2024/CMQST.RN002.fixmau2_26.jpg',
@@ -367,13 +367,13 @@ class ProductSeeder extends Seeder
                     }
                 }
 
-                // Create product images
-                $imageTypes = ['front', 'back', 'detail'];
                 $imageUrls = $imageUrlsByProduct[$template['name']];
-                foreach ($imageTypes as $index => $type) {
+
+
+                foreach ($imageUrls as $index => $url) {
                     DB::table('product_images')->insert([
                         'product_id' => $productId,
-                        'image_url' => $imageUrls[$index % count($imageUrls)],
+                        'image_url' => $url,
                         'display_order' => $index + 1,
                         'is_primary' => $index === 0,
                         'created_at' => now(),
