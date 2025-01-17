@@ -285,8 +285,16 @@ class ProductSeeder extends Seeder
                 'https://res.cloudinary.com/deczn9jtq/image/upload/v1737026819/mtvtbm0hsi3fo8efhyon.webp',
                 'https://res.cloudinary.com/deczn9jtq/image/upload/v1737026852/kqdeh8jgxbjmladxccuh.webp',
                 'https://res.cloudinary.com/deczn9jtq/image/upload/v1737026888/n9subucfkveqzq99itio.webp',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737026786/aidc0zzjmvqav98cwzod.webp',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737026819/mtvtbm0hsi3fo8efhyon.webp',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737026852/kqdeh8jgxbjmladxccuh.webp',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737026888/n9subucfkveqzq99itio.webp',
             ],
             'Summer Dress' => [
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737026923/yejguslisvfmpwm2qll0.jpg',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737026933/efxdxkvv04xnvm1jqi5n.jpg',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737026977/mcrxeiurnwzwnjy6gq0z.jpg',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737027005/kvpuljrely6rjkfflrzk.jpg',
                 'https://res.cloudinary.com/deczn9jtq/image/upload/v1737026923/yejguslisvfmpwm2qll0.jpg',
                 'https://res.cloudinary.com/deczn9jtq/image/upload/v1737026933/efxdxkvv04xnvm1jqi5n.jpg',
                 'https://res.cloudinary.com/deczn9jtq/image/upload/v1737026977/mcrxeiurnwzwnjy6gq0z.jpg',
@@ -399,13 +407,13 @@ class ProductSeeder extends Seeder
                     }
                 }
 
-                // Create product images
-                $imageTypes = ['front', 'back', 'detail'];
                 $imageUrls = $imageUrlsByProduct[$template['name']];
-                foreach ($imageTypes as $index => $type) {
+
+
+                foreach ($imageUrls as $index => $url) {
                     DB::table('product_images')->insert([
                         'product_id' => $productId,
-                        'image_url' => $imageUrls[$index % count($imageUrls)],
+                        'image_url' => $url,
                         'display_order' => $index + 1,
                         'is_primary' => $index === 0,
                         'created_at' => now(),
