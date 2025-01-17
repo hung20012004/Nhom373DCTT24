@@ -1,26 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, ShoppingCart } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ShoppingCart, Heart, ArrowUp } from 'lucide-react';
 import Layout from '@/Layouts/Layout';
 import axios from 'axios';
+import { Link } from '@inertiajs/react';
 
 const Welcome = () => {
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentImageIndexes, setCurrentImageIndexes] = useState({});
+  const [wishlist, setWishlist] = useState([]);
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [categoriesResponse, productsResponse] = await Promise.all([
+        const [categoriesResponse, productsResponse, wishlistResponse] = await Promise.all([
           axios.get('/api/v1/categories'),
-          axios.get('/api/v1/products/featured')
+          axios.get('/api/v1/products/featured'),
+          axios.get('/api/v1/wishlist')
         ]);
 
         setCategories(categoriesResponse.data);
         setProducts(productsResponse.data);
+        setWishlist(wishlistResponse.data);
 
-        // Khởi tạo index cho slider ảnh
         const indexes = {};
         productsResponse.data.forEach(product => {
           indexes[product.product_id] = 0;
@@ -34,6 +38,13 @@ const Welcome = () => {
     };
 
     fetchData();
+
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 300);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const nextImage = (productId) => {
@@ -49,6 +60,26 @@ const Welcome = () => {
       [productId]: (prev[productId] - 1 + (products.find(p => p.product_id === productId)?.images?.length || 1)) %
                    (products.find(p => p.product_id === productId)?.images?.length || 1)
     }));
+  };
+
+  const toggleWishlist = async (productId) => {
+    try {
+      const response = await axios.post(`/api/v1/wishlist/toggle/${productId}`);
+      if (response.data.added) {
+        setWishlist([...wishlist, productId]);
+      } else {
+        setWishlist(wishlist.filter(id => id !== productId));
+      }
+    } catch (error) {
+      console.error('Error toggling wishlist:', error);
+    }
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   };
 
   if (loading) {
@@ -69,12 +100,13 @@ const Welcome = () => {
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Categories</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {categories.map((category) => (
-              <div
+              <Link
                 key={category.category_id}
+                href={`/categories/${category.slug}`}
                 className="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow cursor-pointer"
               >
                 <h3 className="text-lg font-medium text-gray-900">{category.name}</h3>
-              </div>
+              </Link>
             ))}
           </div>
         </section>
@@ -100,19 +132,42 @@ const Welcome = () => {
                   {product.images.length > 1 && (
                     <>
                       <button
-                        onClick={() => prevImage(product.product_id)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          prevImage(product.product_id);
+                        }}
                         className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 p-1 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <ChevronLeft className="w-6 h-6" />
                       </button>
                       <button
-                        onClick={() => nextImage(product.product_id)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          nextImage(product.product_id);
+                        }}
                         className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 p-1 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <ChevronRight className="w-6 h-6" />
                       </button>
                     </>
                   )}
+
+                  {/* Wishlist Button */}
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      toggleWishlist(product.product_id);
+                    }}
+                    className="absolute top-2 right-2 p-2 rounded-full bg-white/80 hover:bg-white transition-colors"
+                  >
+                    <Heart
+                      className={`w-5 h-5 ${
+                        wishlist.includes(product.product_id)
+                          ? 'fill-red-500 text-red-500'
+                          : 'text-gray-600'
+                      }`}
+                    />
+                  </button>
                 </div>
 
                 {/* Product Info with Semi-transparent Background */}
@@ -151,7 +206,7 @@ const Welcome = () => {
 
                   {/* Out of Stock Badge */}
                   {product.stock_quantity <= 0 && (
-                    <span className="absolute top-4 right-4 px-2 py-1 text-xs font-semibold text-white bg-red-500 rounded-full">
+                    <span className="absolute top-4 left-4 px-2 py-1 text-xs font-semibold text-white bg-red-500 rounded-full">
                       Out of Stock
                     </span>
                   )}
@@ -160,6 +215,16 @@ const Welcome = () => {
             ))}
           </div>
         </section>
+
+        {/* Scroll to Top Button */}
+        {showScrollTop && (
+          <button
+            onClick={scrollToTop}
+            className="fixed bottom-8 right-8 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-all duration-300 z-50"
+          >
+            <ArrowUp className="w-6 h-6" />
+          </button>
+        )}
       </div>
     </Layout>
   );

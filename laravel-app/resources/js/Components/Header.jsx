@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, usePage } from '@inertiajs/react';
-import { Menu, X, ShoppingCart, User } from 'lucide-react';
+import { Menu, X, ShoppingCart, User, Heart } from 'lucide-react';
 import Dropdown from '@/Components/Dropdown';
 import axios from 'axios';
 
@@ -10,6 +10,7 @@ const Header = () => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -24,6 +25,13 @@ const Header = () => {
     };
 
     fetchCategories();
+
+    // Add scroll listener for sticky header
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 0);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   // Transform categories data for dropdown
@@ -33,7 +41,6 @@ const Header = () => {
       label: name,
       count: products_count
     })),
-    // Add "View All Categories" as the last item
     {
       href: '/categories',
       label: 'View All Categories'
@@ -41,7 +48,9 @@ const Header = () => {
   ];
 
   return (
-    <nav className="bg-white shadow-lg">
+    <nav className={`bg-white transition-all duration-300 ${
+      isScrolled ? 'fixed top-0 left-0 right-0 shadow-md z-50' : ''
+    }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           {/* Logo and Navigation Links */}
@@ -89,8 +98,20 @@ const Header = () => {
 
           {/* Right Side Buttons */}
           <div className="flex items-center">
-            <Link href="/cart" className="p-2 text-gray-400 hover:text-gray-500">
+            {/* Wishlist */}
+            <Link href="/wishlist" className="p-2 text-gray-400 hover:text-gray-500 relative">
+              <Heart className="h-6 w-6" />
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                0
+              </span>
+            </Link>
+
+            {/* Cart */}
+            <Link href="/cart" className="p-2 text-gray-400 hover:text-gray-500 relative">
               <ShoppingCart className="h-6 w-6" />
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                0
+              </span>
             </Link>
 
             {/* Authentication Buttons */}
@@ -184,7 +205,6 @@ const Header = () => {
             >
               Products
             </Link>
-            {/* Mobile Categories Menu */}
             {loading ? (
               <div className="pl-3 pr-4 py-2">
                 <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
@@ -218,13 +238,13 @@ const Header = () => {
                 </div>
                 <Link
                   href="/profile"
-                  className="block w-full text-left px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
+                  className="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
                 >
                   Your Profile
                 </Link>
                 <Link
                   href="/orders"
-                  className="block w-full text-left px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
+                  className="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
                 >
                   Your Orders
                 </Link>
@@ -241,13 +261,13 @@ const Header = () => {
               <div className="space-y-1">
                 <Link
                   href="/login"
-                  className="block w-full text-left px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
+                  className="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
                 >
                   Sign in
                 </Link>
                 <Link
                   href="/register"
-                  className="block w-full text-left px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
+                  className="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
                 >
                   Sign up
                 </Link>

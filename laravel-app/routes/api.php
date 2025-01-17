@@ -5,6 +5,7 @@ use App\Http\Controllers\API\ProductController;
 use App\Http\Controllers\API\MaterialController;
 use App\Http\Controllers\API\SupplierController;
 use App\Http\Controllers\API\ColorController;
+use App\Http\Controllers\API\WishlistController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -15,6 +16,12 @@ Route::prefix('v1')->group(function () {
     Route::get('/materials', [MaterialController::class, 'index']);
     Route::get('/suppliers', [SupplierController::class, 'index']);
     Route::get('/colors', [ColorController::class, 'index']);
+
+    Route::get('/wishlist', [WishlistController::class, 'index']);
+    Route::post('/wishlist/toggle/{productId}', [WishlistController::class, 'toggle']);
+    Route::delete('/wishlist/{productId}', [WishlistController::class, 'remove']);
+    Route::delete('/wishlist', [WishlistController::class, 'clear']);
+    Route::get('/wishlist/check/{productId}', [WishlistController::class, 'check']);
 });
 
 
