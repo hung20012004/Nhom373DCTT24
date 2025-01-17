@@ -52,11 +52,12 @@ const HeroBanner = ({ banners }) => {
             {currentBanner.subtitle}
           </p>
           <button
-            className="px-8 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium rounded-lg shadow-lg hover:shadow-xl hover:from-blue-600 hover:to-indigo-700 focus:ring-4 focus:ring-blue-300 transition-all duration-300"
-            onClick={() => window.location.href = currentBanner.button_link}
-          >
-            {currentBanner.button_text}
-          </button>
+  className="px-8 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium rounded-lg shadow-lg hover:shadow-2xl hover:from-blue-600 hover:to-indigo-700 focus:ring-4 focus:ring-blue-300 transition-all duration-300 transform hover:scale-105"
+  onClick={() => window.location.href = currentBanner.button_link}
+>
+  {currentBanner.button_text}
+</button>
+
         </div>
 
         {/* Banner Navigation Dots */}
