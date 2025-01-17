@@ -149,11 +149,43 @@ class CategorySeeder extends Seeder
             ['name' => 'Outerwear', 'slug' => 'outerwear']
         ];
 
+        $imageUrlsByCategory = [
+            'Men\'s Clothing' => [
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737074285/fwho28icrdmqjqru7fwy.png',
+            ],
+            'Women\'s Clothing' => [
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737074395/nbtq6wshyzhyudlgop4z.jpg',
+            ],
+            'Kids\' Clothing' => [
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737074524/atqr1mqzzlnulry1lhup.jpg',
+            ],
+            'Accessories' => [
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737075403/xqmrah2vcmp5srsghx7a.jpg',
+            ],
+            'Sportswear' => [
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737074825/ukhk1yma41xyas4j92z5.jpg',
+            ],
+            'Footwear' => [
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737074701/mwznttv3shpxh5sj6h2p.jpg',
+            ],
+            'Underwear' => [
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737074746/p2veibsod42bq1cimxz0.jpg',
+            ],
+            'Outerwear' => [
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737074612/cqv1aqhqv3pq0q10eeb2.jpg',
+            ],
+        ];
+
         foreach ($categories as $category) {
+            $imageUrl = isset($imageUrlsByCategory[$category['name']]) && !empty($imageUrlsByCategory[$category['name']])
+                ? $imageUrlsByCategory[$category['name']][0] // Lấy URL đầu tiên
+                : null;
+
             DB::table('categories')->insert([
                 'name' => $category['name'],
                 'slug' => $category['slug'],
                 'description' => "Quality {$category['name']} for all occasions",
+                'image_url' => $imageUrl,
                 'is_active' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -243,12 +275,16 @@ class ProductSeeder extends Seeder
         $imageUrlsByProduct = [
             'Classic T-Shirt' => [
                 'https://res.cloudinary.com/deczn9jtq/image/upload/v1737014324/hubzhpoaol5hq65ax92q.jpg',
-                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737026642/qwicd0caeac6xydtkkmn.jpg',
                 'https://res.cloudinary.com/deczn9jtq/image/upload/v1737026653/lzvqkjkrwla1qdnh9fvj.png',
                 'https://res.cloudinary.com/deczn9jtq/image/upload/v1737026663/nihqsoyllkxdqiwumrcw.png',
                 'https://res.cloudinary.com/deczn9jtq/image/upload/v1737026674/orvh9zox2txesjjgnrqf.png',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737026642/qwicd0caeac6xydtkkmn.jpg',
             ],
             'Slim Fit Jeans' => [
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737026786/aidc0zzjmvqav98cwzod.webp',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737026819/mtvtbm0hsi3fo8efhyon.webp',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737026852/kqdeh8jgxbjmladxccuh.webp',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737026888/n9subucfkveqzq99itio.webp',
                 'https://res.cloudinary.com/deczn9jtq/image/upload/v1737026786/aidc0zzjmvqav98cwzod.webp',
                 'https://res.cloudinary.com/deczn9jtq/image/upload/v1737026819/mtvtbm0hsi3fo8efhyon.webp',
                 'https://res.cloudinary.com/deczn9jtq/image/upload/v1737026852/kqdeh8jgxbjmladxccuh.webp',
@@ -259,44 +295,48 @@ class ProductSeeder extends Seeder
                 'https://res.cloudinary.com/deczn9jtq/image/upload/v1737026933/efxdxkvv04xnvm1jqi5n.jpg',
                 'https://res.cloudinary.com/deczn9jtq/image/upload/v1737026977/mcrxeiurnwzwnjy6gq0z.jpg',
                 'https://res.cloudinary.com/deczn9jtq/image/upload/v1737027005/kvpuljrely6rjkfflrzk.jpg',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737026923/yejguslisvfmpwm2qll0.jpg',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737026933/efxdxkvv04xnvm1jqi5n.jpg',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737026977/mcrxeiurnwzwnjy6gq0z.jpg',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737027005/kvpuljrely6rjkfflrzk.jpg',
             ],
             'Athletic Shorts' => [
                 'https://res.cloudinary.com/deczn9jtq/image/upload/v1737027075/oomkufswbkvytmje0uxi.webp',
                 'https://res.cloudinary.com/deczn9jtq/image/upload/v1737027118/eibc1ksf8hlneppnsodx.webp',
-                'https://media3.coolmate.me/cdn-cgi/image/quality=80,format=auto/uploads/May2024/CMQST.RN002.fixmau7_82.jpg',
-                'https://media3.coolmate.me/cdn-cgi/image/quality=80,format=auto/uploads/December2023/xcbadvance6.913_copy_copy_2.jpg',
-                'https://media3.coolmate.me/cdn-cgi/image/quality=80,format=auto/uploads/May2024/CMQST.RN002.fixmau2_26.jpg',
-                'https://media3.coolmate.me/cdn-cgi/image/quality=80,format=auto/uploads/December2023/xbdadvance6.913_copy_copy.jpg',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737049483/pf5jwrj1nxlszc8bbohi.webp',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737049522/kk1t6vj1oi49jrcl1at5.webp',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737049544/npyljcfhsucbsndln5bo.webp',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737049565/rpysmhv2kca2pmd3ddbu.webp',
             ],
             'Casual Hoodie' => [
-                'https://thoitrangbigsize.vn/wp-content/uploads/2022/09/BSX1121-800x800.jpg',
-                'https://thoitrangbigsize.vn/wp-content/uploads/2022/09/BSX1121-1-800x800.jpg',
-                'https://dytbw3ui6vsu6.cloudfront.net/media/catalog/product/resize/914x914/0/0/000-ADLV-23SS-HDLESL-IVY-002_1_5.webp',
-                'https://dytbw3ui6vsu6.cloudfront.net/media/catalog/product/resize/914x914/0/0/000-ADLV-23SS-HDLESL-IVY-006_1_5.webp',
-                'https://dytbw3ui6vsu6.cloudfront.net/media/catalog/product/resize/914x914/0/0/000-ADLV-23SS-HDLESL-IVY-add1_1_5.webp',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737049608/zpnntcii6zmi87wqe1vl.jpg',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737049631/ignk0yiureqwg3cvevzo.jpg',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737049659/s2l9x1fgng5zpk6w5weu.webp',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737049736/drxlwbrmzybfgjx4xbk1.webp',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737049758/bplyjytp23it52k2isrm.webp',
             ],
             'Button-Up Shirt' => [
-                'https://media3.coolmate.me/cdn-cgi/image/quality=80,format=auto/uploads/November2024/24CMCW.SM007_-_Xanh_1.jpg',
-                'https://media3.coolmate.me/cdn-cgi/image/quality=80,format=auto/uploads/October2024/24CMCW.SM007_-_Xanh_4.JPG',
-                'https://media3.coolmate.me/cdn-cgi/image/quality=80,format=auto/uploads/November2024/24CMCW.SM007_-_Xanh_3.jpg',
-                'https://media3.coolmate.me/cdn-cgi/image/quality=80,format=auto/uploads/October2024/24CMCW.SM007_-_Xanh_6.JPG',
-                'https://media3.coolmate.me/cdn-cgi/image/quality=80,format=auto/uploads/November2024/24CMCW.SM007_-_Den_2.jpg',
-                'https://media3.coolmate.me/cdn-cgi/image/quality=80,format=auto/uploads/November2024/24CMCW.SM007_-_DEN.jpg',
-                'https://media3.coolmate.me/cdn-cgi/image/quality=80,format=auto/uploads/October2024/24CMCW.SM007_-_Den_7.JPG',
-                'https://media3.coolmate.me/cdn-cgi/image/quality=80,format=auto/uploads/November2024/24CMCW.SM007_-_Trang_1.jpg',
-                'https://media3.coolmate.me/cdn-cgi/image/quality=80,format=auto/uploads/October2024/24CMCW.SM007_-_Trang_4.JPG',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737049779/r9weeueibgysicrn3lqb.webp',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737049849/xmd3tagvp5rek1x8wha2.jpg',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737049866/ful8sox0khtgib1t9ydo.webp',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737049888/e7gw7ub9tkrzf1xpzexk.webp',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737049921/nkmrzsbaff3ml4hs6dag.webp',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737050826/glvkukpfhciepbp1j2vn.jpg',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737073363/o16zqf5itxegevr2ityq.webp',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737073398/xrsit5akkrd3szjbiy2t.webp',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737073420/vvrn4hqq6akdha3jx9ay.webp',
             ],
             'Yoga Pants' => [
-                'https://sieuthiyte.com.vn/assets/uploads/31545709289.nv.png',
-                'https://sieuthiyte.com.vn/assets/uploads/1231534761240.nv.png',
-                'https://sieuthiyte.com.vn/assets/uploads/123-11534761240.nv.png',
-                'https://sieuthiyte.com.vn/assets/uploads/1321534761240.nv.png',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737073443/kfymfqideklutaik4ypq.jpg',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737073465/cfjcmosexgdzdnbsz3pm.jpg',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737073480/ac3rfjaofh375hgxu6qx.jpg',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737073487/qecelyr4velb2a60u2bf.jpg',
             ],
             'Winter Jacket' => [
-                'https://thoitrangmanza.com/wp-content/uploads/2022/10/18.jpg',
-                'https://thoitrangmanza.com/wp-content/uploads/2022/10/20.jpg',
-                'https://thoitrangmanza.com/wp-content/uploads/2022/10/19.jpg',
-                'https://thoitrangmanza.com/wp-content/uploads/2022/10/16.jpg',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737073496/fbc2oe1b0nqz0pkmy2uq.jpg',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737073506/sfisii0ioljhylgalbww.jpg',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737073512/s6cxq3z0fefwbakr70ep.jpg',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737073516/od5oyzhorsfgyb5og3wr.jpg',
             ],
         ];
 
