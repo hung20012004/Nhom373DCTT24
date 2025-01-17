@@ -6,6 +6,7 @@ use App\Http\Controllers\API\MaterialController;
 use App\Http\Controllers\API\SupplierController;
 use App\Http\Controllers\API\ColorController;
 use App\Http\Controllers\API\WishlistController;
+use App\Http\Controllers\Api\BannerController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -22,6 +23,9 @@ Route::prefix('v1')->group(function () {
     Route::delete('/wishlist/{productId}', [WishlistController::class, 'remove']);
     Route::delete('/wishlist', [WishlistController::class, 'clear']);
     Route::get('/wishlist/check/{productId}', [WishlistController::class, 'check']);
+
+    Route::get('/banners/active', [BannerController::class, 'getActiveBanners']);
+    Route::post('/banners', [BannerController::class, 'store'])->middleware('auth:sanctum');
 });
 
 

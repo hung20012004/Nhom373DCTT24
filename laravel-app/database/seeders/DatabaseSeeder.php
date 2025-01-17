@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             MaterialSeeder::class,    // Product materials
             TagSeeder::class,         // Product tags
             CategorySeeder::class,    // Product categories
+
         ]);
 
         $this->call([
@@ -54,10 +55,59 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             NotificationSeeder::class, // User notifications
+            BannerSeeder::class,
         ]);
     }
 }
+class BannerSeeder extends Seeder
+{
+    public function run(): void
+    {
+        $banners = [
+            [
+                'title' => 'Summer Collection 2024',
+                'subtitle' => 'Discover the latest trends in fashion',
+                'button_text' => 'Shop Now',
+                'button_link' => '/collections/summer-2024',
+                'image_url' => 'https://aeonmall-review-rikkei.cdn.vccloud.vn/public/wp/16/news/s9WfvFSiTbiVEJmQve3GKYGWdm0DNleXzsThn7Ff.jpg',
+                'is_active' => true,
+                'order_sequence' => 1,
+            ],
+            [
+                'title' => 'New Arrivals',
+                'subtitle' => 'Check out our newest products',
+                'button_text' => 'Explore',
+                'button_link' => '/new-arrivals',
+                'image_url' => 'https://thebodyshop.com.vn/media/wysiwyg/home-banner/pre-tet-sale-2023-banner-D.jpg',
+                'is_active' => true,
+                'order_sequence' => 2,
+            ],
+            [
+                'title' => 'Special Offers',
+                'subtitle' => 'Up to 50% off on selected items',
+                'button_text' => 'Shop Sale',
+                'button_link' => '/sale',
+                'image_url' => 'https://4men.com.vn/images/thumbs/2021/01/-news-598.png',
+                'is_active' => true,
+                'order_sequence' => 3,
+            ],
+        ];
 
+        foreach ($banners as $banner) {
+            DB::table('banners')->insert([
+                'title' => $banner['title'],
+                'subtitle' => $banner[ 'subtitle'],
+                'button_text' =>$banner['button_text'],
+                'button_link' =>$banner['button_link'],
+                'image_url' =>$banner['image_url'],
+                'is_active' => true,
+                'order_sequence' => $banner['order_sequence'],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+    }
+}
 class RoleSeeder extends Seeder
 {
     public function run()
