@@ -15,6 +15,6 @@ class Size extends Model
 
     public function variants()
     {
-        return $this->hasMany(ProductVariant::class);
+        return $this->hasMany(ProductVariant::class,'size_id','size_id');
     }
 }

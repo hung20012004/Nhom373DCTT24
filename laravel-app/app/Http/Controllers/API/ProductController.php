@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
@@ -9,11 +10,16 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::with(['category', 'variants', 'images'])
-            ->select('products.*')
-            ->where('products.is_active', true);
+        $query = Product::with([
+            'category',
+            'material',
+            'images',
+            'variants.color',
+            'variants.size'
+        ])->select('products.*')
+          ->where('products.is_active', true);
 
-        // Xử lý sort
+        // Handle sorting
         if ($request->has('sort')) {
             switch ($request->sort) {
                 case 'price_asc':
@@ -30,27 +36,89 @@ class ProductController extends Controller
             }
         }
 
-        // Xử lý filter by category
+        // Handle category filter
         if ($request->has('category')) {
             $query->where('category_id', $request->category);
         }
 
+        // Handle material filter
+        if ($request->has('material')) {
+            $query->where('material_id', $request->material);
+        }
+
         $products = $query->paginate(12);
+
+        // Transform the products data to include organized variants
+        $products->through(function ($product) {
+            // Group variants by color and size
+            $variantsGrouped = $product->variants->groupBy(function ($variant) {
+                return $variant->color->name;
+            })->map(function ($colorGroup) {
+                return $colorGroup->pluck('size.name')->unique()->values();
+            });
+
+            // Add organized variants to the product
+            $product->available_colors = $product->variants->pluck('color')->unique('color_id')->values();
+            $product->available_sizes = $product->variants->pluck('size')->unique('size_id')->values();
+            $product->variants_matrix = $variantsGrouped;
+
+            return $product;
+        });
 
         return response()->json($products);
     }
 
     public function featured()
-{
-    $products = Product::with(['category', 'variants', 'images'])
-        ->where('is_active', true)
-        ->orderBy('sale_price', 'desc')
-        ->limit(8)
-        ->get();
+    {
+        $products = Product::with([
+            'category',
+            'material',
+            'images',
+            'variants.color',
+            'variants.size'
+        ])->where('is_active', true)
+          ->orderBy('sale_price', 'desc')
+          ->limit(8)
+          ->get();
 
-    // Thêm dòng này để debug
-    logger()->info('Products data', ['products' => $products]);
+        // Transform the products data
+        $products->transform(function ($product) {
+            $variantsGrouped = $product->variants->groupBy(function ($variant) {
+                return $variant->color->name;
+            })->map(function ($colorGroup) {
+                return $colorGroup->pluck('size.name')->unique()->values();
+            });
 
-    return response()->json($products);
-}
+            $product->available_colors = $product->variants->pluck('color')->unique('color_id')->values();
+            $product->available_sizes = $product->variants->pluck('size')->unique('size_id')->values();
+            $product->variants_matrix = $variantsGrouped;
+
+            return $product;
+        });
+        return response()->json($products);
+    }
+
+    public function show($id)
+    {
+        $product = Product::with([
+            'category',
+            'material',
+            'images',
+            'variants.color',
+            'variants.size'
+        ])->findOrFail($id);
+
+        // Organize variants data
+        $variantsGrouped = $product->variants->groupBy(function ($variant) {
+            return $variant->color->name;
+        })->map(function ($colorGroup) {
+            return $colorGroup->pluck('size.name')->unique()->values();
+        });
+
+        $product->available_colors = $product->variants->pluck('color')->unique('color_id')->values();
+        $product->available_sizes = $product->variants->pluck('size')->unique('size_id')->values();
+        $product->variants_matrix = $variantsGrouped;
+
+        return response()->json($product);
+    }
 }

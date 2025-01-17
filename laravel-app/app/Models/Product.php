@@ -34,14 +34,13 @@ class Product extends Model
 
     public function material()
     {
-        return $this->belongsTo(Material::class);
+        return $this->belongsTo(Material::class,'material_id','material_id');
     }
 
     public function variants()
     {
-        return $this->hasMany(ProductVariant::class);
+        return $this->hasMany(ProductVariant::class, 'product_id', 'product_id');
     }
-
     public function images()
     {
         return $this->hasMany(ProductImage::class, 'product_id', 'product_id');
