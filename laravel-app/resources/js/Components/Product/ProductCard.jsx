@@ -1,4 +1,3 @@
-// resources/js/Components/Product/ProductCard.jsx
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight, ShoppingCart, Heart } from 'lucide-react';
 import { ProductPrice } from './ProductPrice';
@@ -7,13 +6,27 @@ import ProductDialog from './ProductDialog';
 
 const ProductCard = ({
   product,
-  currentImageIndex,
-  onPrevImage,
-  onNextImage,
   onToggleWishlist,
   isInWishlist
 }) => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const handlePrevImage = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentImageIndex((prev) =>
+      prev === 0 ? product.images.length - 1 : prev - 1
+    );
+  };
+
+  const handleNextImage = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentImageIndex((prev) =>
+      prev === product.images.length - 1 ? 0 : prev + 1
+    );
+  };
 
   return (
     <>
@@ -21,7 +34,6 @@ const ProductCard = ({
         className="bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition-shadow group relative cursor-pointer"
         onClick={() => setIsDialogOpen(true)}
       >
-        {/* Existing ProductCard content */}
         <div className="relative aspect-w-1 aspect-h-1">
           <img
             src={product.images[currentImageIndex]?.image_url || '/path/to/fallback.jpg'}
@@ -32,22 +44,14 @@ const ProductCard = ({
           {product.images.length > 1 && (
             <div className="absolute inset-0 flex items-center justify-between px-2 opacity-0 group-hover:opacity-100 transition-opacity">
               <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onPrevImage();
-                }}
-                className="bg-black/50 p-1 rounded-full text-white"
+                onClick={handlePrevImage}
+                className="bg-black/50 p-1 rounded-full text-white hover:bg-black/70 transition-colors"
               >
                 <ChevronLeft className="w-6 h-6" />
               </button>
               <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onNextImage();
-                }}
-                className="bg-black/50 p-1 rounded-full text-white"
+                onClick={handleNextImage}
+                className="bg-black/50 p-1 rounded-full text-white hover:bg-black/70 transition-colors"
               >
                 <ChevronRight className="w-6 h-6" />
               </button>
@@ -62,7 +66,9 @@ const ProductCard = ({
             }}
             className="absolute top-2 right-2 p-2 rounded-full bg-white/80 hover:bg-white transition-colors"
           >
-            <Heart className={`w-5 h-5 ${isInWishlist ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
+            <Heart
+              className={`w-5 h-5 ${isInWishlist ? 'fill-red-500 text-red-500' : 'text-gray-600'}`}
+            />
           </button>
         </div>
 
@@ -78,7 +84,7 @@ const ProductCard = ({
                 e.preventDefault();
                 e.stopPropagation();
               }}
-              className="bg-white/20 hover:bg-white/30 p-2 rounded-full transition-colors"
+              className="bg-white/20 hover:bg-white/30 p-2 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={product.stock_quantity <= 0}
             >
               <ShoppingCart className="w-6 h-6 text-white" />
