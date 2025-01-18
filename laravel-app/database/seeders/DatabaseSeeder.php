@@ -32,7 +32,6 @@ class DatabaseSeeder extends Seeder
             SupplierSeeder::class,    // Suppliers
             ProductSeeder::class,     // Products (depends on categories, materials)
             ProductTagSeeder::class,  // Product-Tag relationships
-            // ProductImageSeeder::class, // Product images
             ProductVariantSeeder::class, // Product variants (depends on products, sizes, colors)
         ]);
 
@@ -96,10 +95,10 @@ class BannerSeeder extends Seeder
         foreach ($banners as $banner) {
             DB::table('banners')->insert([
                 'title' => $banner['title'],
-                'subtitle' => $banner[ 'subtitle'],
-                'button_text' =>$banner['button_text'],
-                'button_link' =>$banner['button_link'],
-                'image_url' =>$banner['image_url'],
+                'subtitle' => $banner['subtitle'],
+                'button_text' => $banner['button_text'],
+                'button_link' => $banner['button_link'],
+                'image_url' => $banner['image_url'],
                 'is_active' => true,
                 'order_sequence' => $banner['order_sequence'],
                 'created_at' => now(),
@@ -139,11 +138,11 @@ class UserSeeder extends Seeder
         $faker = Faker::create();
         $this->call(RoleSeeder::class);
         $customerRoleId = DB::table('roles')
-        ->where('name', 'Customer')
-        ->value('role_id');
+            ->where('name', 'Customer')
+            ->value('role_id');
         $warehouseStaffRoleId = DB::table('roles')
-        ->where('name', 'Warehouse Staff')
-        ->value('role_id');
+            ->where('name', 'Warehouse Staff')
+            ->value('role_id');
         DB::table('users')->insert([
             'name' => 'Admin User',
             'email' => 'admin@example.com',
@@ -201,7 +200,7 @@ class CategorySeeder extends Seeder
 
         $imageUrlsByCategory = [
             'Men\'s Clothing' => [
-                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737074285/fwho28icrdmqjqru7fwy.png',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737187930/idl68tt0gkhtexxpcbj5.jpg',
             ],
             'Women\'s Clothing' => [
                 'https://res.cloudinary.com/deczn9jtq/image/upload/v1737074395/nbtq6wshyzhyudlgop4z.jpg',
@@ -249,8 +248,14 @@ class TagSeeder extends Seeder
     public function run()
     {
         $tags = [
-            'New Arrival', 'Best Seller', 'Sale', 'Featured', 'Limited Edition',
-            'Eco-Friendly', 'Premium', 'Clearance'
+            'New Arrival',
+            'Best Seller',
+            'Sale',
+            'Featured',
+            'Limited Edition',
+            'Eco-Friendly',
+            'Premium',
+            'Clearance'
         ];
 
         foreach ($tags as $tag) {
@@ -419,7 +424,7 @@ class ProductSeeder extends Seeder
                     'category_id' => $faker->randomElement($categoryIds),
                     'material_id' => $faker->randomElement($materialIds),
                     'name' => $name,
-                    'slug' => $slug ,
+                    'slug' => $slug,
                     'description' => $faker->paragraph(3) . "\n\nFeatures:\n- Premium quality fabric\n- Modern fit\n- Easy care",
                     'price' => $price,
                     'sale_price' => $faker->optional(0.3)->randomFloat(2, $price * 0.7, $price * 0.9),
@@ -438,7 +443,7 @@ class ProductSeeder extends Seeder
                 $colorIds = DB::table('colors')->pluck('color_id')->toArray();
                 $sizeIds = DB::table('sizes')->pluck('size_id')->toArray();
 
-                if(empty($colorIds) || empty($sizeIds)) {
+                if (empty($colorIds) || empty($sizeIds)) {
                     throw new \Exception('Colors or Sizes not found. Please run ColorSeeder and SizeSeeder first.');
                 }
 
@@ -940,7 +945,7 @@ class InventorySeeder extends Seeder
                 $referenceType = $faker->randomElement(['initial_stock', 'purchase', 'adjustment', 'return']);
 
                 // Generate appropriate reference ID based on type
-                $referenceId = match($referenceType) {
+                $referenceId = match ($referenceType) {
                     'initial_stock' => 'INIT-' . $faker->bothify('####'),
                     'purchase' => 'PO-' . $faker->bothify('####'),
                     'adjustment' => 'ADJ-' . $faker->bothify('####'),
@@ -948,7 +953,7 @@ class InventorySeeder extends Seeder
                 };
 
                 // Generate quantity change based on reference type
-                $quantityChange = match($referenceType) {
+                $quantityChange = match ($referenceType) {
                     'adjustment' => $faker->numberBetween(-20, 50),
                     'return' => $faker->numberBetween(1, 10),
                     default => $faker->numberBetween(10, 100)
@@ -964,12 +969,12 @@ class InventorySeeder extends Seeder
                 }
 
                 // Generate appropriate note based on type and quantity
-                $note = match($referenceType) {
+                $note = match ($referenceType) {
                     'initial_stock' => 'Initial stock entry',
                     'purchase' => "Purchase order received from supplier",
                     'adjustment' => $quantityChange >= 0
-                        ? "Inventory adjustment - Stock count correction (+" . abs($quantityChange) . ")"
-                        : "Inventory adjustment - Stock count correction (-" . abs($quantityChange) . ")",
+                    ? "Inventory adjustment - Stock count correction (+" . abs($quantityChange) . ")"
+                    : "Inventory adjustment - Stock count correction (-" . abs($quantityChange) . ")",
                     'return' => "Customer return - Added back to inventory",
                 };
 
@@ -997,97 +1002,98 @@ class InventorySeeder extends Seeder
     }
 }
 class InventoryCheckSeeder extends Seeder
-{       public function run()
-        {
-            $faker = Faker::create();
+{
+    public function run()
+    {
+        $faker = Faker::create();
 
-            // Get active products
-            $products = DB::table('products')
-                ->where('is_active', true)
-                ->get();
+        // Get active products
+        $products = DB::table('products')
+            ->where('is_active', true)
+            ->get();
 
-            if ($products->isEmpty()) {
-                throw new \Exception('No products found. Please run ProductsSeeder first.');
-            }
+        if ($products->isEmpty()) {
+            throw new \Exception('No products found. Please run ProductsSeeder first.');
+        }
 
-            // Get users who are active and don't have Admin, Guest, or Customer roles
-            $validUsers = DB::table('users')
-                ->join('roles', 'users.role_id', '=', 'roles.role_id')
-                ->where('users.is_active', true)
-                ->whereNotIn('roles.name', ['Admin', 'Guest', 'Customer'])
-                ->pluck('users.id');
+        // Get users who are active and don't have Admin, Guest, or Customer roles
+        $validUsers = DB::table('users')
+            ->join('roles', 'users.role_id', '=', 'roles.role_id')
+            ->where('users.is_active', true)
+            ->whereNotIn('roles.name', ['Admin', 'Guest', 'Customer'])
+            ->pluck('users.id');
 
-            if ($validUsers->isEmpty()) {
-                throw new \Exception('No valid staff users found for inventory management.');
-            }
+        if ($validUsers->isEmpty()) {
+            throw new \Exception('No valid staff users found for inventory management.');
+        }
 
-            foreach ($products as $product) {
-                DB::beginTransaction();
+        foreach ($products as $product) {
+            DB::beginTransaction();
 
-                // Generate 3-5 history records per product
-                $numberOfRecords = $faker->numberBetween(3, 5);
-                $currentQuantity = 0;
+            // Generate 3-5 history records per product
+            $numberOfRecords = $faker->numberBetween(3, 5);
+            $currentQuantity = 0;
 
-                for ($i = 0; $i < $numberOfRecords; $i++) {
-                    $referenceType = $faker->randomElement(['initial_stock', 'purchase', 'adjustment', 'return']);
+            for ($i = 0; $i < $numberOfRecords; $i++) {
+                $referenceType = $faker->randomElement(['initial_stock', 'purchase', 'adjustment', 'return']);
 
-                    // Generate appropriate reference ID based on type
-                    $referenceId = match($referenceType) {
-                        'initial_stock' => 'INIT-' . $faker->bothify('####'),
-                        'purchase' => 'PO-' . $faker->bothify('####'),
-                        'adjustment' => 'ADJ-' . $faker->bothify('####'),
-                        'return' => 'RET-' . $faker->bothify('####'),
-                    };
+                // Generate appropriate reference ID based on type
+                $referenceId = match ($referenceType) {
+                    'initial_stock' => 'INIT-' . $faker->bothify('####'),
+                    'purchase' => 'PO-' . $faker->bothify('####'),
+                    'adjustment' => 'ADJ-' . $faker->bothify('####'),
+                    'return' => 'RET-' . $faker->bothify('####'),
+                };
 
-                    // Generate quantity change based on reference type
-                    $quantityChange = match($referenceType) {
-                        'adjustment' => $faker->numberBetween(-20, 50),
-                        'return' => $faker->numberBetween(1, 10),
-                        default => $faker->numberBetween(10, 100)
-                    };
+                // Generate quantity change based on reference type
+                $quantityChange = match ($referenceType) {
+                    'adjustment' => $faker->numberBetween(-20, 50),
+                    'return' => $faker->numberBetween(1, 10),
+                    default => $faker->numberBetween(10, 100)
+                };
 
-                    // Update current quantity
-                    $currentQuantity += $quantityChange;
+                // Update current quantity
+                $currentQuantity += $quantityChange;
 
-                    // Ensure quantity doesn't go below 0
-                    if ($currentQuantity < 0) {
-                        $quantityChange -= $currentQuantity;
-                        $currentQuantity = 0;
-                    }
-
-                    // Generate appropriate note based on type and quantity
-                    $note = match($referenceType) {
-                        'initial_stock' => 'Initial stock entry',
-                        'purchase' => "Purchase order received from supplier",
-                        'adjustment' => $quantityChange >= 0
-                            ? "Inventory adjustment - Stock count correction (+" . abs($quantityChange) . ")"
-                            : "Inventory adjustment - Stock count correction (-" . abs($quantityChange) . ")",
-                        'return' => "Customer return - Added back to inventory",
-                    };
-
-                    // Insert inventory history record
-                    DB::table('inventory_history')->insert([
-                        'product_id' => $product->product_id,
-                        'create_by' => $validUsers->random(),  // Random valid staff user
-                        'reference_id' => $referenceId,
-                        'reference_type' => $referenceType,
-                        'quantity_change' => $quantityChange,
-                        'remaining_quantity' => $currentQuantity,
-                        'note' => $note
-                    ]);
+                // Ensure quantity doesn't go below 0
+                if ($currentQuantity < 0) {
+                    $quantityChange -= $currentQuantity;
+                    $currentQuantity = 0;
                 }
 
-                // Update product's stock quantity to match final remaining quantity
-                DB::table('products')
-                    ->where('product_id', $product->product_id)
-                    ->update([
-                        'stock_quantity' => $currentQuantity
-                    ]);
+                // Generate appropriate note based on type and quantity
+                $note = match ($referenceType) {
+                    'initial_stock' => 'Initial stock entry',
+                    'purchase' => "Purchase order received from supplier",
+                    'adjustment' => $quantityChange >= 0
+                    ? "Inventory adjustment - Stock count correction (+" . abs($quantityChange) . ")"
+                    : "Inventory adjustment - Stock count correction (-" . abs($quantityChange) . ")",
+                    'return' => "Customer return - Added back to inventory",
+                };
 
-                DB::commit();
+                // Insert inventory history record
+                DB::table('inventory_history')->insert([
+                    'product_id' => $product->product_id,
+                    'create_by' => $validUsers->random(),  // Random valid staff user
+                    'reference_id' => $referenceId,
+                    'reference_type' => $referenceType,
+                    'quantity_change' => $quantityChange,
+                    'remaining_quantity' => $currentQuantity,
+                    'note' => $note
+                ]);
             }
+
+            // Update product's stock quantity to match final remaining quantity
+            DB::table('products')
+                ->where('product_id', $product->product_id)
+                ->update([
+                    'stock_quantity' => $currentQuantity
+                ]);
+
+            DB::commit();
         }
     }
+}
 class SizeSeeder extends Seeder
 {
     public function run()
@@ -1292,31 +1298,6 @@ class InventoryReceiptSeeder extends Seeder
 }
 
 
-class ProductImageSeeder extends Seeder
-{
-    public function run()
-    {
-        $faker = Faker::create();
-        $products = DB::table('products')->pluck('product_id');
-
-        foreach ($products as $productId) {
-            $numberOfImages = $faker->numberBetween(3, 5);
-
-            for ($i = 0; $i < $numberOfImages; $i++) {
-                DB::table('product_images')->insert([
-                    'product_id' => $productId,
-                    'image_url' => $faker->imageUrl(800, 600, 'products'),
-                    'display_order' => $i + 1,
-                    'is_primary' => $i === 0, // First image is primary
-                    'alt_text' => $faker->words(3, true),
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-            }
-        }
-    }
-}
-
 class ProductVariantSeeder extends Seeder
 {
     public function run()
@@ -1397,54 +1378,54 @@ class PurchaseOrderSeeder extends Seeder
         for ($i = 0; $i < 10; $i++) {
             DB::beginTransaction();
 
-                // Chọn random một supplier
-                $supplierId = $suppliers->random();
+            // Chọn random một supplier
+            $supplierId = $suppliers->random();
 
-                // Tạo purchase order
-                $poId = DB::table('purchase_orders')->insertGetId([
-                    'supplier_id' => $supplierId,
-                    'create_by_user_id' => $validUsers->random(),
-                    'order_date' => $faker->dateTimeBetween('-3 months', 'now'),
-                    'expected_date' => $faker->dateTimeBetween('now', '+2 months'),
-                    'total_amount' => 0, // Sẽ cập nhật sau
-                    'status' => $faker->randomElement(['pending', 'processing', 'completed']),
-                    'note' => $faker->optional()->sentence()
-                ]);
+            // Tạo purchase order
+            $poId = DB::table('purchase_orders')->insertGetId([
+                'supplier_id' => $supplierId,
+                'create_by_user_id' => $validUsers->random(),
+                'order_date' => $faker->dateTimeBetween('-3 months', 'now'),
+                'expected_date' => $faker->dateTimeBetween('now', '+2 months'),
+                'total_amount' => 0, // Sẽ cập nhật sau
+                'status' => $faker->randomElement(['pending', 'processing', 'completed']),
+                'note' => $faker->optional()->sentence()
+            ]);
 
-                // Tạo chi tiết cho 3-7 sản phẩm
-                $selectedVariants = collect($faker->randomElements($variants->toArray(), $faker->numberBetween(3, 7)))->unique('product_id');
-                $totalAmount = 0;
+            // Tạo chi tiết cho 3-7 sản phẩm
+            $selectedVariants = collect($faker->randomElements($variants->toArray(), $faker->numberBetween(3, 7)))->unique('product_id');
+            $totalAmount = 0;
 
-                foreach ($selectedVariants as $variant) {
-                    $existingDetail = DB::table('purchase_order_details')
-                        ->where('po_id', $poId)
-                        ->where('product_id', $variant->product_id)
-                        ->first();
+            foreach ($selectedVariants as $variant) {
+                $existingDetail = DB::table('purchase_order_details')
+                    ->where('po_id', $poId)
+                    ->where('product_id', $variant->product_id)
+                    ->first();
 
-                    if ($existingDetail) {
-                        continue; // Bỏ qua nếu sản phẩm đã tồn tại trong đơn hàng này
-                    }
-
-                    $quantity = $faker->numberBetween(10, 100);
-                    $unitPrice = $faker->randomFloat(2, $variant->regular_price * 0.6, $variant->regular_price * 0.8);
-                    $subtotal = $quantity * $unitPrice;
-                    $totalAmount += $subtotal;
-
-                    DB::table('purchase_order_details')->insert([
-                        'po_id' => $poId,
-                        'product_id' => $variant->product_id,
-                        'quantity' => $quantity,
-                        'unit_price' => $unitPrice,
-                        'subtotal' => $subtotal
-                    ]);
+                if ($existingDetail) {
+                    continue; // Bỏ qua nếu sản phẩm đã tồn tại trong đơn hàng này
                 }
 
-                // Cập nhật tổng tiền trong purchase order
-                DB::table('purchase_orders')
-                    ->where('po_id', $poId)
-                    ->update(['total_amount' => $totalAmount]);
+                $quantity = $faker->numberBetween(10, 100);
+                $unitPrice = $faker->randomFloat(2, $variant->regular_price * 0.6, $variant->regular_price * 0.8);
+                $subtotal = $quantity * $unitPrice;
+                $totalAmount += $subtotal;
 
-                DB::commit();
+                DB::table('purchase_order_details')->insert([
+                    'po_id' => $poId,
+                    'product_id' => $variant->product_id,
+                    'quantity' => $quantity,
+                    'unit_price' => $unitPrice,
+                    'subtotal' => $subtotal
+                ]);
+            }
+
+            // Cập nhật tổng tiền trong purchase order
+            DB::table('purchase_orders')
+                ->where('po_id', $poId)
+                ->update(['total_amount' => $totalAmount]);
+
+            DB::commit();
 
         }
     }
