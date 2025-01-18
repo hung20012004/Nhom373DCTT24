@@ -34,7 +34,7 @@ const ProductCard = ({
         className="bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition-shadow group relative cursor-pointer"
         onClick={() => setIsDialogOpen(true)}
       >
-        <div className="relative w-full pt-[133%]"> {/* Create a square aspect ratio container */}
+        <div className="relative w-full pt-[133%]">
           <div className="absolute inset-0">
             <img
               src={product.images[currentImageIndex]?.image_url || '/path/to/fallback.jpg'}
@@ -75,9 +75,11 @@ const ProductCard = ({
         </div>
 
         <div className="absolute bottom-0 left-0 right-0 bg-black/40 backdrop-blur-sm p-4 text-white">
-          <div className="flex justify-between items-start">
-            <div>
-              <h3 className="text-lg font-medium truncate">{product.name}</h3>
+          <div className="flex justify-between items-start gap-4">
+            <div className="min-w-0 flex-1">
+              <h3 className="text-lg font-medium truncate max-w-full sm:text-base md:text-lg lg:text-xl">
+                {product.name}
+              </h3>
               <ProductPrice price={product.price} salePrice={product.sale_price} />
             </div>
 
@@ -86,7 +88,7 @@ const ProductCard = ({
                 e.preventDefault();
                 e.stopPropagation();
               }}
-              className="bg-white/20 hover:bg-white/30 p-2 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-shrink-0 bg-white/20 hover:bg-white/30 p-2 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={product.stock_quantity <= 0}
             >
               <ShoppingCart className="w-6 h-6 text-white" />
