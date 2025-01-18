@@ -5,69 +5,62 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::with([
-            'category',
-            'material',
-            'images',
-            'variants.color',
-            'variants.size'
-        ])->select('products.*')
-          ->where('products.is_active', true);
-
-        // Handle sorting
-        if ($request->has('sort')) {
-            switch ($request->sort) {
-                case 'price_asc':
-                    $query->orderBy('sale_price', 'asc');
-                    break;
-                case 'price_desc':
-                    $query->orderBy('sale_price', 'desc');
-                    break;
-                case 'newest':
-                    $query->latest();
-                    break;
-                default:
-                    $query->latest();
-            }
-        }
+        $query = Product::query()
+            ->with([
+                'category',
+                'material',
+                'images',
+                'variants.color',
+                'variants.size'
+            ])
+            ->where('is_active', true)
+            ->select('*', DB::raw('CASE
+                WHEN sale_price > 0 THEN sale_price
+                ELSE price
+                END as final_price'));
 
         // Handle category filter
-        if ($request->has('category')) {
-            $query->where('category_id', $request->category);
+        if ($request->filled('category')) {
+            $query->whereHas('category', function($q) use ($request) {
+                $q->where('slug', $request->category);
+            });
         }
 
-        // Handle material filter
-        if ($request->has('material')) {
-            $query->where('material_id', $request->material);
+        // Handle sorting với raw SQL
+        switch ($request->input('sort', 'newest')) {
+            case 'price_asc':
+                $query->orderByRaw('CASE
+                    WHEN sale_price > 0 THEN sale_price
+                    ELSE price
+                    END ASC');
+                break;
+            case 'price_desc':
+                $query->orderByRaw('CASE
+                    WHEN sale_price > 0 THEN sale_price
+                    ELSE price
+                    END DESC');
+                break;
+            case 'name_asc':
+                $query->orderBy('name', 'asc');
+                break;
+            case 'name_desc':
+                $query->orderBy('name', 'desc');
+                break;
+            case 'newest':
+            default:
+                $query->latest('created_at');
+                break;
         }
 
         $products = $query->paginate(12);
-
-        // Transform the products data to include organized variants
-        $products->through(function ($product) {
-            // Group variants by color and size
-            $variantsGrouped = $product->variants->groupBy(function ($variant) {
-                return $variant->color->name;
-            })->map(function ($colorGroup) {
-                return $colorGroup->pluck('size.name')->unique()->values();
-            });
-
-            // Add organized variants to the product
-            $product->available_colors = $product->variants->pluck('color')->unique('color_id')->values();
-            $product->available_sizes = $product->variants->pluck('size')->unique('size_id')->values();
-            $product->variants_matrix = $variantsGrouped;
-
-            return $product;
-        });
-
         return response()->json($products);
     }
-
     public function featured()
     {
         $products = Product::with([
@@ -77,9 +70,9 @@ class ProductController extends Controller
             'variants.color',
             'variants.size'
         ])->where('is_active', true)
-          ->orderBy('sale_price', 'desc')
-          ->limit(8)
-          ->get();
+            ->orderBy('sale_price', 'desc')
+            ->limit(8)
+            ->get();
 
         // Transform the products data
         $products->transform(function ($product) {
