@@ -17,7 +17,7 @@ export const CartDialog = () => {
 
   const fetchCart = async () => {
     try {
-      const response = await axios.get('/api/cart');
+      const response = await axios.get('/api/v1/cart');
       setCart(response.data.data);
     } catch (error) {
       console.error('Error fetching cart:', error);
@@ -32,7 +32,7 @@ export const CartDialog = () => {
 
   const updateQuantity = async (cartItemId, quantity) => {
     try {
-      await axios.put(`/api/cart/items/${cartItemId}`, { quantity });
+      await axios.put(`/api/v1/cart/items/${cartItemId}`, { quantity });
       await fetchCart();
     } catch (error) {
       console.error('Error updating quantity:', error);
@@ -41,7 +41,7 @@ export const CartDialog = () => {
 
   const removeItem = async (cartItemId) => {
     try {
-      await axios.delete(`/api/cart/items/${cartItemId}`);
+      await axios.delete(`/api/v1/cart/items/${cartItemId}`);
       await fetchCart();
     } catch (error) {
       console.error('Error removing item:', error);
@@ -50,7 +50,7 @@ export const CartDialog = () => {
 
   const clearCart = async () => {
     try {
-      await axios.delete('/api/cart/clear');
+      await axios.delete('/api/v1/cart/clear');
       await fetchCart();
     } catch (error) {
       console.error('Error clearing cart:', error);

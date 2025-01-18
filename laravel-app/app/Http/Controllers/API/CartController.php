@@ -29,7 +29,7 @@ class CartController extends Controller
     public function add(Request $request): JsonResponse
     {
         $request->validate([
-            'variant_id' => 'required|exists:products_variants,variant_id',
+            'variant_id' => 'required|exists:product_variants,variant_id',
             'quantity' => 'required|integer|min:1'
         ]);
 

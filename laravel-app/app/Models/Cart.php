@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Cart extends Model
 {
-    protected $table = 'shipping_carts';
+    protected $table = 'shopping_carts';
     protected $primaryKey = 'cart_id';
 
     protected $fillable = [
@@ -16,11 +16,11 @@ class Cart extends Model
 
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'user_id','id');
     }
 
     public function items(): HasMany
     {
-        return $this->hasMany(CartItem::class, 'cart_id');
+        return $this->hasMany(CartItem::class, 'cart_id','cart_id');
     }
 }

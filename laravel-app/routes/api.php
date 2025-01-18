@@ -29,9 +29,11 @@ Route::prefix('v1')->group(function () {
     Route::post('/banners', [BannerController::class, 'store'])->middleware('auth:sanctum');
 
     Route::get('/cart', [CartController::class, 'index']);
-    Route::post('/cart/add', [CartController::class, 'add']);
-    Route::put('/cart/{cart}', [CartController::class, 'update']);
-    Route::delete('/cart/{cart}', [CartController::class, 'remove']);
+    Route::middleware(['auth:sanctum', 'verified'])->group(function () {
+        Route::post('/cart/add', [CartController::class, 'add']);
+        Route::put('/cart/{cart}', [CartController::class, 'update']);
+        Route::delete('/cart/{cart}', [CartController::class, 'remove']);
+    });
 });
 
 
