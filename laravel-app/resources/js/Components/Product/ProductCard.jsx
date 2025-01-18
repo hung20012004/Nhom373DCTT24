@@ -34,42 +34,44 @@ const ProductCard = ({
         className="bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition-shadow group relative cursor-pointer"
         onClick={() => setIsDialogOpen(true)}
       >
-        <div className="relative aspect-w-1 aspect-h-1">
-          <img
-            src={product.images[currentImageIndex]?.image_url || '/path/to/fallback.jpg'}
-            alt={product.name}
-            className="w-full h-full object-cover"
-          />
-
-          {product.images.length > 1 && (
-            <div className="absolute inset-0 flex items-center justify-between px-2 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button
-                onClick={handlePrevImage}
-                className="bg-black/50 p-1 rounded-full text-white hover:bg-black/70 transition-colors"
-              >
-                <ChevronLeft className="w-6 h-6" />
-              </button>
-              <button
-                onClick={handleNextImage}
-                className="bg-black/50 p-1 rounded-full text-white hover:bg-black/70 transition-colors"
-              >
-                <ChevronRight className="w-6 h-6" />
-              </button>
-            </div>
-          )}
-
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onToggleWishlist();
-            }}
-            className="absolute top-2 right-2 p-2 rounded-full bg-white/80 hover:bg-white transition-colors"
-          >
-            <Heart
-              className={`w-5 h-5 ${isInWishlist ? 'fill-red-500 text-red-500' : 'text-gray-600'}`}
+        <div className="relative w-full pt-[133%]"> {/* Create a square aspect ratio container */}
+          <div className="absolute inset-0">
+            <img
+              src={product.images[currentImageIndex]?.image_url || '/path/to/fallback.jpg'}
+              alt={product.name}
+              className="w-full h-full object-cover"
             />
-          </button>
+
+            {product.images.length > 1 && (
+              <div className="absolute inset-y-0 w-full flex items-center justify-between px-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button
+                  onClick={handlePrevImage}
+                  className="bg-black/50 p-1 rounded-full text-white hover:bg-black/70 transition-colors"
+                >
+                  <ChevronLeft className="w-6 h-6" />
+                </button>
+                <button
+                  onClick={handleNextImage}
+                  className="bg-black/50 p-1 rounded-full text-white hover:bg-black/70 transition-colors"
+                >
+                  <ChevronRight className="w-6 h-6" />
+                </button>
+              </div>
+            )}
+
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onToggleWishlist();
+              }}
+              className="absolute top-2 right-2 p-2 rounded-full bg-white/80 hover:bg-white transition-colors"
+            >
+              <Heart
+                className={`w-5 h-5 ${isInWishlist ? 'fill-red-500 text-red-500' : 'text-gray-600'}`}
+              />
+            </button>
+          </div>
         </div>
 
         <div className="absolute bottom-0 left-0 right-0 bg-black/40 backdrop-blur-sm p-4 text-white">

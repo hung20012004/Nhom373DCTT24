@@ -5,12 +5,37 @@ import Dropdown from '@/Components/Dropdown';
 import axios from 'axios';
 
 const Header = () => {
+  const { url } = usePage();
   const { auth } = usePage().props;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
+
+  // Function to check if a link is active
+  const isActive = (path) => {
+    if (path === '/') {
+      return url === '/';
+    }
+    return url.startsWith(path);
+  };
+
+  // Get link classes based on active state
+  const getLinkClasses = (path) => {
+    const baseClasses = "inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium";
+    return isActive(path)
+      ? `${baseClasses} border-blue-500 text-gray-900`
+      : `${baseClasses} border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700`;
+  };
+
+  // Get mobile link classes based on active state
+  const getMobileLinkClasses = (path) => {
+    const baseClasses = "block pl-3 pr-4 py-2 border-l-4 text-base font-medium";
+    return isActive(path)
+      ? `${baseClasses} bg-blue-50 border-blue-500 text-blue-700`
+      : `${baseClasses} border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700`;
+  };
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -26,7 +51,6 @@ const Header = () => {
 
     fetchCategories();
 
-    // Add scroll listener for sticky header
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 0);
     };
@@ -34,7 +58,6 @@ const Header = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Transform categories data for dropdown
   const dropdownItems = [
     ...(categories || []).map(({ slug, name, products_count }) => ({
       href: `/categories/${slug}`,
@@ -63,16 +86,10 @@ const Header = () => {
 
             {/* Desktop Navigation */}
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-              <Link
-                href="/"
-                className="border-b-2 border-blue-500 text-gray-900 inline-flex items-center px-1 pt-1 text-sm font-medium"
-              >
+              <Link href="/" className={getLinkClasses('/')}>
                 Home
               </Link>
-              <Link
-                href="/products"
-                className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-              >
+              <Link href="/products" className={getLinkClasses('/products')}>
                 Products
               </Link>
 
@@ -87,10 +104,7 @@ const Header = () => {
                 />
               )}
 
-              <Link
-                href="/about"
-                className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-              >
+              <Link href="/about" className={getLinkClasses('/about')}>
                 About
               </Link>
             </div>
@@ -99,7 +113,7 @@ const Header = () => {
           {/* Right Side Buttons */}
           <div className="flex items-center">
             {/* Wishlist */}
-            <Link href="/wishlist" className="p-2 text-gray-400 hover:text-gray-500 relative">
+            <Link href="/wishlist" className={`p-2 relative ${getLinkClasses('/wishlist')}`}>
               <Heart className="h-6 w-6" />
               <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                 0
@@ -107,7 +121,7 @@ const Header = () => {
             </Link>
 
             {/* Cart */}
-            <Link href="/cart" className="p-2 text-gray-400 hover:text-gray-500 relative">
+            <Link href="/cart" className={`p-2 relative ${getLinkClasses('/cart')}`}>
               <ShoppingCart className="h-6 w-6" />
               <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                 0
@@ -133,13 +147,13 @@ const Header = () => {
                     <div className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
                       <Link
                         href="/profile"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        className={`block px-4 py-2 text-sm ${isActive('/profile') ? 'bg-gray-100 text-gray-900' : 'text-gray-700 hover:bg-gray-100'}`}
                       >
                         Your Profile
                       </Link>
                       <Link
                         href="/orders"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        className={`block px-4 py-2 text-sm ${isActive('/orders') ? 'bg-gray-100 text-gray-900' : 'text-gray-700 hover:bg-gray-100'}`}
                       >
                         Your Orders
                       </Link>
@@ -193,16 +207,10 @@ const Header = () => {
       {isMenuOpen && (
         <div className="sm:hidden">
           <div className="pt-2 pb-3 space-y-1">
-            <Link
-              href="/"
-              className="bg-blue-50 border-blue-500 text-blue-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium"
-            >
+            <Link href="/" className={getMobileLinkClasses('/')}>
               Home
             </Link>
-            <Link
-              href="/products"
-              className="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium"
-            >
+            <Link href="/products" className={getMobileLinkClasses('/products')}>
               Products
             </Link>
             {loading ? (
@@ -214,16 +222,13 @@ const Header = () => {
                 <Link
                   key={index}
                   href={item.href}
-                  className="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium"
+                  className={getMobileLinkClasses(item.href)}
                 >
                   {item.label}
                 </Link>
               ))
             )}
-            <Link
-              href="/about"
-              className="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium"
-            >
+            <Link href="/about" className={getMobileLinkClasses('/about')}>
               About
             </Link>
           </div>
@@ -238,13 +243,13 @@ const Header = () => {
                 </div>
                 <Link
                   href="/profile"
-                  className="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
+                  className={getMobileLinkClasses('/profile')}
                 >
                   Your Profile
                 </Link>
                 <Link
                   href="/orders"
-                  className="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
+                  className={getMobileLinkClasses('/orders')}
                 >
                   Your Orders
                 </Link>
@@ -261,13 +266,13 @@ const Header = () => {
               <div className="space-y-1">
                 <Link
                   href="/login"
-                  className="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
+                  className={getMobileLinkClasses('/login')}
                 >
                   Sign in
                 </Link>
                 <Link
                   href="/register"
-                  className="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
+                  className={getMobileLinkClasses('/register')}
                 >
                   Sign up
                 </Link>
