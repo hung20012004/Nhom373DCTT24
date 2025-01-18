@@ -32,7 +32,7 @@ class ProductController extends Controller
             });
         }
 
-        // Handle sorting với raw SQL
+        // Handle sorting
         switch ($request->input('sort', 'newest')) {
             case 'price_asc':
                 $query->orderByRaw('CASE
@@ -58,9 +58,27 @@ class ProductController extends Controller
                 break;
         }
 
+        // Get paginated products
         $products = $query->paginate(12);
+
+        // Transform products data
+        $products->getCollection()->transform(function ($product) {
+            $variantsGrouped = $product->variants->groupBy(function ($variant) {
+                return $variant->color->name;
+            })->map(function ($colorGroup) {
+                return $colorGroup->pluck('size.name')->unique()->values();
+            });
+
+            $product->available_colors = $product->variants->pluck('color')->unique('color_id')->values();
+            $product->available_sizes = $product->variants->pluck('size')->unique('size_id')->values();
+            $product->variants_matrix = $variantsGrouped;
+
+            return $product;
+        });
+
         return response()->json($products);
     }
+
     public function featured()
     {
         $products = Product::with([
