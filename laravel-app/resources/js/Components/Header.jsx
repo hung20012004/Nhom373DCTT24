@@ -60,12 +60,12 @@ const Header = () => {
 
   const dropdownItems = [
     ...(categories || []).map(({ slug, name, products_count }) => ({
-      href: `/categories/${slug}`,
+      href: `/products?category=${slug}`, // Sửa lại đường dẫn khi click vào category
       label: name,
       count: products_count
     })),
     {
-      href: '/categories',
+      href: '/products', // Link xem tất cả sản phẩm
       label: 'View All Categories'
     }
   ];
