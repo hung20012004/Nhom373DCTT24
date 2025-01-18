@@ -1,4 +1,3 @@
-// resources/js/Pages/Admin/Dashboard.jsx
 import React from 'react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { Head } from '@inertiajs/react';
