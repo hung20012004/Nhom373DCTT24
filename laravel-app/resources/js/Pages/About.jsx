@@ -1,9 +1,28 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { ArrowUp } from 'lucide-react';
 import Layout from '@/Layouts/Layout';
 import { Link } from '@inertiajs/react';
 import { Users, Award, Heart, Clock } from 'lucide-react';
 
 const About = () => {
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 300);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  };
+
   return (
     <Layout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -74,6 +93,16 @@ const About = () => {
           </Link>
         </div>
       </div>
+
+      {/* Scroll to Top Button */}
+      {showScrollTop && (
+        <button
+          onClick={scrollToTop}
+          className="fixed bottom-8 right-8 p-3 bg-white/80 backdrop-blur-sm border border-neutral-200 rounded-full shadow-lg transition-all duration-300 hover:bg-white"
+        >
+          <ArrowUp className="w-5 h-5" />
+        </button>
+      )}
     </Layout>
   );
 };
