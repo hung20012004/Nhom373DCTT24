@@ -201,7 +201,7 @@ class CategorySeeder extends Seeder
 
         $imageUrlsByCategory = [
             'Men\'s Clothing' => [
-                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737074285/fwho28icrdmqjqru7fwy.png',
+                'https://res.cloudinary.com/deczn9jtq/image/upload/v1737171246/xxxunrc6uqglqsvesre2.jpg',
             ],
             'Women\'s Clothing' => [
                 'https://res.cloudinary.com/deczn9jtq/image/upload/v1737074395/nbtq6wshyzhyudlgop4z.jpg',

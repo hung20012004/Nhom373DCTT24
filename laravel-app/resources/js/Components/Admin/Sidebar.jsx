@@ -46,7 +46,7 @@ const Sidebar = () => {
             title: 'Quản lý sản phẩm',
             items: [
                 { title: 'Sản phẩm', icon: <Package size={20} />, path: '/admin/products' },
-                { title: 'Danh mục', icon: <Tags size={20} />, path: '/admin/categories' },
+                { title: 'Loại sản phẩm', icon: <Tags size={20} />, path: '/admin/categories' },
                 { title: 'Kho hàng', icon: <Database size={20} />, path: '/admin/inventory' },
                 { title: 'Nhà cung cấp', icon: <Truck size={20} />, path: '/admin/suppliers' },
                 { title: 'Kiểm kho', icon: <ClipboardList size={20} />, path: '/admin/inventory-checks' },
@@ -54,6 +54,7 @@ const Sidebar = () => {
                 { title: 'Màu sắc', icon: <Palette size={20} />, path: '/admin/colors' },
                 { title: 'Hình ảnh sản phẩm', icon: <Image size={20} />, path: '/admin/product-images' },
                 { title: 'Chất liệu', icon: <Package size={20} />, path: '/admin/materials' },
+                { title: 'Danh mục', icon: <Tags size={20} />, path: '/admin/tags' },
             ]
         },
         {
