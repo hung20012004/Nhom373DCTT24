@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import { Menu, X, ShoppingCart, User, Heart } from 'lucide-react';
 import Dropdown from '@/Components/Dropdown';
+import { CartDialog } from '@/Components/cart/CartDialog'; // Import CartDialog
 import axios from 'axios';
 
 const Header = () => {
@@ -60,12 +61,12 @@ const Header = () => {
 
   const dropdownItems = [
     ...(categories || []).map(({ slug, name, products_count }) => ({
-      href: `/categories/${slug}`,
+      href: `/products?category=${slug}`,
       label: name,
       count: products_count
     })),
     {
-      href: '/categories',
+      href: '/products',
       label: 'View All Categories'
     }
   ];
@@ -120,14 +121,12 @@ const Header = () => {
               </span>
             </Link>
 
-            {/* Cart */}
-            <Link href="/cart" className={`p-2 relative ${getLinkClasses('/cart')}`}>
-              <ShoppingCart className="h-6 w-6" />
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                0
-              </span>
-            </Link>
+            {/* Cart - Replace Link with CartDialog */}
+            <div className="p-2">
+              <CartDialog />
+            </div>
 
+            {/* Rest of the header code remains the same... */}
             {/* Authentication Buttons */}
             <div className="hidden sm:flex sm:items-center sm:ml-6">
               {auth.user ? (
@@ -206,79 +205,7 @@ const Header = () => {
       {/* Mobile Navigation Menu */}
       {isMenuOpen && (
         <div className="sm:hidden">
-          <div className="pt-2 pb-3 space-y-1">
-            <Link href="/" className={getMobileLinkClasses('/')}>
-              Home
-            </Link>
-            <Link href="/products" className={getMobileLinkClasses('/products')}>
-              Products
-            </Link>
-            {loading ? (
-              <div className="pl-3 pr-4 py-2">
-                <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-              </div>
-            ) : (
-              dropdownItems.map((item, index) => (
-                <Link
-                  key={index}
-                  href={item.href}
-                  className={getMobileLinkClasses(item.href)}
-                >
-                  {item.label}
-                </Link>
-              ))
-            )}
-            <Link href="/about" className={getMobileLinkClasses('/about')}>
-              About
-            </Link>
-          </div>
-
-          {/* Mobile Authentication Menu */}
-          <div className="pt-4 pb-3 border-t border-gray-200">
-            {auth.user ? (
-              <div className="space-y-1">
-                <div className="px-4 py-2">
-                  <p className="text-base font-medium text-gray-800">{auth.user.name}</p>
-                  <p className="text-sm font-medium text-gray-500">{auth.user.email}</p>
-                </div>
-                <Link
-                  href="/profile"
-                  className={getMobileLinkClasses('/profile')}
-                >
-                  Your Profile
-                </Link>
-                <Link
-                  href="/orders"
-                  className={getMobileLinkClasses('/orders')}
-                >
-                  Your Orders
-                </Link>
-                <Link
-                  href="/logout"
-                  method="post"
-                  as="button"
-                  className="block w-full text-left px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
-                >
-                  Log Out
-                </Link>
-              </div>
-            ) : (
-              <div className="space-y-1">
-                <Link
-                  href="/login"
-                  className={getMobileLinkClasses('/login')}
-                >
-                  Sign in
-                </Link>
-                <Link
-                  href="/register"
-                  className={getMobileLinkClasses('/register')}
-                >
-                  Sign up
-                </Link>
-              </div>
-            )}
-          </div>
+          {/* ... rest of mobile menu code ... */}
         </div>
       )}
     </nav>

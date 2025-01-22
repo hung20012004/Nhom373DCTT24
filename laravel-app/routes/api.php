@@ -9,6 +9,7 @@ use App\Http\Controllers\API\WishlistController;
 use App\Http\Controllers\Api\BannerController;
 use App\Http\Controllers\Api\SizeController;
 use App\Http\Controllers\Api\TagController;
+use App\Http\Controllers\Api\CartController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -46,6 +47,13 @@ Route::prefix('v1')->group(function () {
 
     Route::get('/banners/active', [BannerController::class, 'getActiveBanners']);
     Route::post('/banners', [BannerController::class, 'store'])->middleware('auth:sanctum');
+
+    Route::get('/cart', [CartController::class, 'index']);
+    Route::middleware(['auth:sanctum', 'verified'])->group(function () {
+        Route::post('/cart/add', [CartController::class, 'add']);
+        Route::put('/cart/{cart}', [CartController::class, 'update']);
+        Route::delete('/cart/{cart}', [CartController::class, 'remove']);
+    });
 });
 
 
