@@ -3,18 +3,17 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\ColorResource;
-use App\Models\Color;
+use App\Http\Resources\TagResource;
+use App\Models\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class ColorController extends Controller
+class TagController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Color::query()
-            ->with(['variants'])
-            ->select('colors.*');
+        $query = Tag::query()
+            ->select('tags.*');
 
         if ($request->filled('search')) {
             $searchTerm = $request->search;
@@ -26,7 +25,7 @@ class ColorController extends Controller
         $sortDirection = $request->input('sort_direction', 'asc');
 
         $allowedSortFields = [
-            'name' => 'name'
+            'name' => 'name',
         ];
 
         if (array_key_exists($sortField, $allowedSortFields)) {
@@ -38,14 +37,14 @@ class ColorController extends Controller
         $perPage = $request->input('per_page', 10);
         $perPage = in_array($perPage, [10, 25, 50, 100]) ? $perPage : 10;
 
-        $colors = $query->paginate($perPage);
+        $tags = $query->paginate($perPage);
 
         return [
-            'data' => ColorResource::collection($colors),
-            'current_page' => $colors->currentPage(),
-            'per_page' => $colors->perPage(),
-            'last_page' => $colors->lastPage(),
-            'total' => $colors->total(),
+            'data' => TagResource::collection($tags),
+            'current_page' => $tags->currentPage(),
+            'per_page' => $tags->perPage(),
+            'last_page' => $tags->lastPage(),
+            'total' => $tags->total(),
             'sort' => [
                 'field' => $sortField,
                 'direction' => $sortDirection
@@ -55,92 +54,91 @@ class ColorController extends Controller
 
     public function show($id)
     {
-        $color = Color::with(['variants'])->findOrFail($id);
-        return response()->json($color);
+        $tag = Tag::with(['products'])->findOrFail($id);
+        return response()->json(new TagResource($tag));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'nullable|string'
+            'slug' => 'nullable|string|max:255'
         ]);
 
         DB::beginTransaction();
         try {
-            $color = Color::create($validated);
+            $tag = Tag::create($validated);
 
             DB::commit();
-            return response()->json($color, 201);
+            return response()->json(new TagResource($tag), 201);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['message' => 'Error creating color'], 500);
+            return response()->json(['message' => 'Error creating tag'], 500);
         }
     }
 
-    public function update(Request $request, $colorId)
+    public function update(Request $request, $tagId)
     {
         $rules = [
             'name' => 'string|max:255',
-            'description' => 'nullable|string'
+            'slug' => 'nullable|string|max:255'
         ];
 
         $validated = $request->validate($rules);
 
         DB::beginTransaction();
         try {
-            $color = Color::findOrFail($colorId);
+            $tag = Tag::findOrFail($tagId);
             $updateData = [];
 
             if ($request->has('name')) {
                 $updateData['name'] = $validated['name'];
             }
 
-            if ($request->has('description')) {
-                $updateData['description'] = $validated['description'];
+            if ($request->has('slug')) {
+                $updateData['slug'] = $validated['slug'];
             }
 
             if (!empty($updateData)) {
-                $color->update($updateData);
+                $tag->update($updateData);
             }
 
             DB::commit();
-            return response()->json($color);
+            return response()->json(new TagResource($tag));
 
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
-                'message' => 'Error updating color',
+                'message' => 'Error updating tag',
                 'error' => $e->getMessage(),
                 'data' => $request->all()
             ], 500);
         }
     }
 
-    public function destroy($colorId)
+    public function destroy($tagId)
     {
         DB::beginTransaction();
 
         try {
-            $color = Color::findOrFail($colorId);
+            $tag = Tag::findOrFail($tagId);
 
-            // Check if color has associated variants
-            if ($color->variants()->exists()) {
-                return response()->json([
-                    'message' => 'Cannot delete color because it has associated product variants'
-                ], 400);
-            }
+            // if ($tag->products()->exists()) {
+            //     return response()->json([
+            //         'message' => 'Cannot delete tag because it has associated products'
+            //     ], 400);
+            // }
 
-            $color->delete();
+            $tag->delete();
 
             DB::commit();
             return response()->json([
-                'message' => 'Color deleted successfully'
+                'message' => 'Tag deleted successfully'
             ], 200);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['message' => 'Unable to delete color'], 500);
+            return response()->json(['message' => 'Unable to delete tag'], 500);
         }
     }
 }

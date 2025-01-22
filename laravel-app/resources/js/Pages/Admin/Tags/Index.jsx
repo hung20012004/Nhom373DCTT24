@@ -12,16 +12,16 @@ import {
     TableRow,
 } from '@/Components/ui/table';
 import Breadcrumb from '@/Components/Breadcrumb';
-import ColorForm from './ColorForm';
+import TagForm from './TagForm.jsx';
 import axios from 'axios';
 import { ArrowUpDown } from 'lucide-react';
 
 export default function Index() {
-    const [colors, setColors] = useState([]);
+    const [tags, setTags] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [showForm, setShowForm] = useState(false);
-    const [editColor, setEditColor] = useState(null);
+    const [editTag, setEditTag] = useState(null);
     const [pagination, setPagination] = useState({
         current_page: 1,
         per_page: 10,
@@ -31,10 +31,10 @@ export default function Index() {
     const [sortField, setSortField] = useState('name');
     const [sortDirection, setSortDirection] = useState('asc');
 
-    const fetchColors = async () => {
+    const fetchTags = async () => {
         try {
             setLoading(true);
-            const response = await axios.get('/api/v1/colors', {
+            const response = await axios.get('/api/v1/tags', {
                 params: {
                     search,
                     page: pagination.current_page,
@@ -45,7 +45,7 @@ export default function Index() {
             });
 
             if (response.data && response.data.data) {
-                setColors(response.data.data);
+                setTags(response.data.data);
                 setPagination({
                     current_page: response.data.current_page,
                     per_page: response.data.per_page,
@@ -54,8 +54,8 @@ export default function Index() {
                 });
             }
         } catch (error) {
-            console.error('Error fetching colors:', error);
-            setColors([]);
+            console.error('Error fetching tags:', error);
+            setTags([]);
         } finally {
             setLoading(false);
         }
@@ -63,7 +63,7 @@ export default function Index() {
 
     useEffect(() => {
         const timeoutId = setTimeout(() => {
-            fetchColors();
+            fetchTags();
         }, 300);
 
         return () => clearTimeout(timeoutId);
@@ -78,23 +78,23 @@ export default function Index() {
         }
     };
 
-    const handleDelete = async (colorId) => {
-        if (confirm('Are you sure you want to delete this color?')) {
+    const handleDelete = async (tagId) => {
+        if (confirm('Are you sure you want to delete this tag?')) {
             try {
-                const response = await axios.delete(`/api/v1/colors/${colorId}`);
+                const response = await axios.delete(`/api/v1/tags/${tagId}`);
                 if (response.status === 200) {
-                    fetchColors();
-                    alert('Color deleted successfully');
+                    fetchTags();
+                    alert('Tag deleted successfully');
                 }
             } catch (error) {
-                console.error('Error deleting color:', error);
-                alert(error.response?.data?.message || `Error deleting color ${colorId}`);
+                console.error('Error deleting tag:', error);
+                alert(error.response?.data?.message || `Error deleting tag ${tagId}`);
             }
         }
     };
 
     const breadcrumbItems = [
-        { label: 'Colors', href: '/admin/colors' }
+        { label: 'Tags', href: '/admin/tags' }
     ];
 
     const renderPagination = () => {
@@ -128,17 +128,17 @@ export default function Index() {
 
     return (
         <AdminLayout>
-            <Head title="Colors Management" />
+            <Head title="Tags Management" />
 
             <div className="container mx-auto py-6 px-4">
                 <Breadcrumb items={breadcrumbItems} />
 
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                    <h1 className="text-3xl font-bold text-gray-900">Colors</h1>
+                    <h1 className="text-3xl font-bold text-gray-900">Tags</h1>
                     <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
                         <Input
                             type="text"
-                            placeholder="Search colors..."
+                            placeholder="Search tags..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             className="w-full sm:w-64"
@@ -146,11 +146,11 @@ export default function Index() {
                         <Button
                             className="bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto"
                             onClick={() => {
-                                setEditColor(null);
+                                setEditTag(null);
                                 setShowForm(true);
                             }}
                         >
-                            Add New Color
+                            Add New Tag
                         </Button>
                     </div>
                 </div>
@@ -161,8 +161,8 @@ export default function Index() {
                             <TableHeader>
                                 <TableRow className="bg-gray-50">
                                     <SortableHeader field="name">Name</SortableHeader>
-                                    <TableHead className="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Description</TableHead>
-                                    <TableHead className="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</TableHead>
+                                    <SortableHeader field="slug">Slug</SortableHeader>
+                                    <TableHead className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -174,30 +174,27 @@ export default function Index() {
                                             </div>
                                         </TableCell>
                                     </TableRow>
-                                ) : !colors || colors.length === 0 ? (
+                                ) : !tags || tags.length === 0 ? (
                                     <TableRow>
                                         <TableCell colSpan={3} className="text-center py-4 text-gray-500">
-                                            No colors found
+                                            No tags found
                                         </TableCell>
                                     </TableRow>
                                 ) : (
-                                    colors.map((color) => (
+                                    tags.map((tag) => (
                                         <TableRow
-                                            key={color.id}
+                                            key={tag.id}
                                             className="hover:bg-gray-50 transition-colors"
                                         >
-                                            <TableCell className="py-4 px-6 text-sm text-gray-900">{color.name}</TableCell>
-                                            <TableCell className="py-4 px-6 text-center text-sm text-gray-900">
-                                                {color.description?.substring(0, 50)}
-                                                {color.description?.length > 50 ? '...' : ''}
-                                            </TableCell>
+                                            <TableCell className="py-4 px-6 text-sm text-gray-900">{tag.name}</TableCell>
+                                            <TableCell className="py-4 px-6 text-sm text-gray-900">{tag.slug}</TableCell>
                                             <TableCell className="py-4 px-6 text-sm text-gray-900">
-                                                <div className="flex justify-center gap-2">
+                                                <div className="flex gap-2">
                                                     <Button
                                                         variant="outline"
                                                         className="text-blue-600 hover:text-blue-700 border border-blue-600 hover:border-blue-700"
                                                         onClick={() => {
-                                                            setEditColor(color);
+                                                            setEditTag(tag);
                                                             setShowForm(true);
                                                         }}
                                                     >
@@ -205,8 +202,8 @@ export default function Index() {
                                                     </Button>
                                                     <Button
                                                         variant="destructive"
-                                                        className="bg-red-600 text-center hover:bg-red-700 text-white"
-                                                        onClick={() => handleDelete(color.id)}
+                                                        className="bg-red-600 hover:bg-red-700 text-white"
+                                                        onClick={() => handleDelete(tag.id)}
                                                     >
                                                         Delete
                                                     </Button>
@@ -221,7 +218,7 @@ export default function Index() {
 
                     <div className="flex justify-between items-center p-4 border-t">
                         <div className="text-sm text-gray-600">
-                            Showing {colors.length} of {pagination.total} results
+                            Showing {tags.length} of {pagination.total} results
                         </div>
                         <div className="flex gap-2">
                             {renderPagination()}
@@ -230,16 +227,16 @@ export default function Index() {
                 </div>
 
                 {showForm && (
-                    <ColorForm
-                        color={editColor}
+                    <TagForm
+                        tag={editTag}
                         onClose={() => {
                             setShowForm(false);
-                            setEditColor(null);
+                            setEditTag(null);
                         }}
                         onSuccess={() => {
                             setShowForm(false);
-                            setEditColor(null);
-                            fetchColors();
+                            setEditTag(null);
+                            fetchTags();
                         }}
                     />
                 )}
