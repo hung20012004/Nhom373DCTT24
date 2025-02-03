@@ -43,6 +43,12 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
     Route::get('/categories', function () {
         return Inertia::render('Admin/Categories/Index');
     })->name('admin.categories');
+    Route::get('/sizes', function () {
+        return Inertia::render('Admin/Sizes/Index');
+    })->name('admin.sizes');
+    Route::get('/tags', function () {
+        return Inertia::render('Admin/Tags/Index');
+    })->name('admin.tags');
     Route::get('/suppliers', function () {
         return Inertia::render('Admin/Suppliers/Index');
     })->name('admin.suppliers');

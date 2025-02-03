@@ -3,18 +3,18 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\ColorResource;
-use App\Models\Color;
+use App\Http\Resources\SizeResource;
+use App\Models\Size;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class ColorController extends Controller
+class SizeController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Color::query()
+        $query = Size::query()
             ->with(['variants'])
-            ->select('colors.*');
+            ->select('sizes.*');
 
         if ($request->filled('search')) {
             $searchTerm = $request->search;
@@ -38,14 +38,14 @@ class ColorController extends Controller
         $perPage = $request->input('per_page', 10);
         $perPage = in_array($perPage, [10, 25, 50, 100]) ? $perPage : 10;
 
-        $colors = $query->paginate($perPage);
+        $sizes = $query->paginate($perPage);
 
         return [
-            'data' => ColorResource::collection($colors),
-            'current_page' => $colors->currentPage(),
-            'per_page' => $colors->perPage(),
-            'last_page' => $colors->lastPage(),
-            'total' => $colors->total(),
+            'data' => SizeResource::collection($sizes),
+            'current_page' => $sizes->currentPage(),
+            'per_page' => $sizes->perPage(),
+            'last_page' => $sizes->lastPage(),
+            'total' => $sizes->total(),
             'sort' => [
                 'field' => $sortField,
                 'direction' => $sortDirection
@@ -55,8 +55,8 @@ class ColorController extends Controller
 
     public function show($id)
     {
-        $color = Color::with(['variants'])->findOrFail($id);
-        return response()->json($color);
+        $size = Size::with(['variants'])->findOrFail($id);
+        return response()->json(new SizeResource($size));
     }
 
     public function store(Request $request)
@@ -68,17 +68,17 @@ class ColorController extends Controller
 
         DB::beginTransaction();
         try {
-            $color = Color::create($validated);
+            $size = Size::create($validated);
 
             DB::commit();
-            return response()->json($color, 201);
+            return response()->json(new SizeResource($size), 201);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['message' => 'Error creating color'], 500);
+            return response()->json(['message' => 'Error creating size'], 500);
         }
     }
 
-    public function update(Request $request, $colorId)
+    public function update(Request $request, $sizeId)
     {
         $rules = [
             'name' => 'string|max:255',
@@ -89,7 +89,7 @@ class ColorController extends Controller
 
         DB::beginTransaction();
         try {
-            $color = Color::findOrFail($colorId);
+            $size = Size::findOrFail($sizeId);
             $updateData = [];
 
             if ($request->has('name')) {
@@ -101,46 +101,46 @@ class ColorController extends Controller
             }
 
             if (!empty($updateData)) {
-                $color->update($updateData);
+                $size->update($updateData);
             }
 
             DB::commit();
-            return response()->json($color);
+            return response()->json(new SizeResource($size));
 
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
-                'message' => 'Error updating color',
+                'message' => 'Error updating size',
                 'error' => $e->getMessage(),
                 'data' => $request->all()
             ], 500);
         }
     }
 
-    public function destroy($colorId)
+    public function destroy($sizeId)
     {
         DB::beginTransaction();
 
         try {
-            $color = Color::findOrFail($colorId);
+            $size = Size::findOrFail($sizeId);
 
-            // Check if color has associated variants
-            if ($color->variants()->exists()) {
+            // Check if size has associated variants
+            if ($size->variants()->exists()) {
                 return response()->json([
-                    'message' => 'Cannot delete color because it has associated product variants'
+                    'message' => 'Cannot delete size because it has associated product variants'
                 ], 400);
             }
 
-            $color->delete();
+            $size->delete();
 
             DB::commit();
             return response()->json([
-                'message' => 'Color deleted successfully'
+                'message' => 'Size deleted successfully'
             ], 200);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['message' => 'Unable to delete color'], 500);
+            return response()->json(['message' => 'Unable to delete size'], 500);
         }
     }
 }
