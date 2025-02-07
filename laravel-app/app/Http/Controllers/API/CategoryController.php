@@ -53,26 +53,15 @@ class CategoryController extends Controller
                 'direction' => $sortDirection
             ]
         ];
-
-        // $categories = $query->paginate(10);
-        // return response()->json($categories);
     }
 
     public function featured()
     {
-        $categories = Category::with(['products'])
-            ->where('is_active', true)
-            ->orderBy('display_order', 'asc')
-            ->limit(8)
+        $categories = Category::where('is_active', true)
+            ->select('category_id', 'name', 'image_url', 'slug', 'description')
+            ->orderBy('display_order')
+
             ->get();
-
-        // Transform the categories data
-        $categories->transform(function ($category) {
-            $category->product_count = $category->products()->count();
-            $category->has_children = $category->products()->exists();
-            return $category;
-        });
-
         return response()->json($categories);
     }
 

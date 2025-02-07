@@ -41,7 +41,7 @@ const Header = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get('/api/v1/categories');
+        const response = await axios.get('/api/v1/categories/featured');
         setCategories(response.data);
       } catch (error) {
         console.error('Error fetching categories:', error);

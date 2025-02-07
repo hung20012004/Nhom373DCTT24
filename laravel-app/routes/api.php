@@ -18,6 +18,7 @@ Route::prefix('v1')->group(function () {
     Route::post('/categories', [CategoryController::class, 'store']);
     Route::post('/categories/{categoryId}', [CategoryController::class, 'update']);
     Route::delete('/categories/{categoryId}', [CategoryController::class, 'destroy']);
+    Route::get('/categories/featured', [CategoryController::class, 'featured']);
 
     Route::get('/colors', [ColorController::class, 'index']);
     Route::post('/colors', [ColorController::class, 'store']);

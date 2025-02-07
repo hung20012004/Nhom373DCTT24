@@ -17,7 +17,7 @@ const Welcome = () => {
       try {
         const [bannersResponse, categoriesResponse, productsResponse, wishlistResponse] = await Promise.all([
           axios.get('/api/v1/banners/active'),
-          axios.get('/api/v1/categories'),
+          axios.get('/api/v1/categories/featured'),
           axios.get('/api/v1/products/featured'),
           axios.get('/api/v1/wishlist')
         ]);

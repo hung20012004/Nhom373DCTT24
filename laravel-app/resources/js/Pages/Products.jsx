@@ -55,7 +55,7 @@ const ProductsPage = () => {
             const [productsRes, categoriesRes, wishlistRes] = await Promise.all(
                 [
                     axios.get(`/api/v1/products?${params.toString()}`),
-                    axios.get("/api/v1/categories"),
+                    axios.get("/api/v1/categories/featured"),
                     axios.get("/api/v1/wishlist"),
                 ]
             );
