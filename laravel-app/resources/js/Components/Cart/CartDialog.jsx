@@ -1,16 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import { ShoppingCart } from 'lucide-react';
+import React, { useEffect, useState } from "react";
+import { ShoppingCart } from "lucide-react";
 import {
     Dialog,
     DialogContent,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { CartItem } from '@/Components/cart/CartItem';
-import { useCart } from '@/Contexts/CartContext';
-import { Link } from '@inertiajs/react';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { CartItem } from "@/Components/cart/CartItem";
+import { useCart } from "@/Contexts/CartContext";
+import { Link } from "@inertiajs/react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export const CartDialog = () => {
@@ -20,7 +20,7 @@ export const CartDialog = () => {
         fetchCart,
         updateQuantity,
         removeItem,
-        clearCart
+        clearCart,
     } = useCart();
 
     const [error, setError] = useState(null);
@@ -33,11 +33,12 @@ export const CartDialog = () => {
     const calculateTotal = () => {
         if (!cart?.items?.length) return 0;
         return cart.items.reduce((total, item) => {
-            return total + (item.variant.price * item.quantity);
+            return total + item.variant.price * item.quantity;
         }, 0);
     };
 
-    const totalItems = cart?.items?.reduce((total, item) => total + item.quantity, 0) || 0;
+    const totalItems =
+        cart?.items?.reduce((total, item) => total + item.quantity, 0) || 0;
 
     const handleUpdateQuantity = async (cartItemId, quantity) => {
         try {
@@ -45,8 +46,11 @@ export const CartDialog = () => {
             setError(null);
             await updateQuantity(cartItemId, quantity);
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to update quantity. Please try again.');
-            console.error('Update quantity error:', err);
+            setError(
+                err.response?.data?.message ||
+                    "Failed to update quantity. Please try again."
+            );
+            console.error("Update quantity error:", err);
         } finally {
             setIsUpdating(false);
         }
@@ -58,7 +62,7 @@ export const CartDialog = () => {
             setError(null);
             await removeItem(cartItemId);
         } catch (err) {
-            setError('Failed to remove item. Please try again.');
+            setError("Failed to remove item. Please try again.");
         } finally {
             setIsUpdating(false);
         }
@@ -70,7 +74,7 @@ export const CartDialog = () => {
             setError(null);
             await clearCart();
         } catch (err) {
-            setError('Failed to clear cart. Please try again.');
+            setError("Failed to clear cart. Please try again.");
         } finally {
             setIsUpdating(false);
         }
@@ -81,11 +85,9 @@ export const CartDialog = () => {
             <DialogTrigger asChild>
                 <div className="p-2 relative cursor-pointer inline-flex items-center border-b-2 border-transparent">
                     <ShoppingCart className="h-6 w-6" />
-                    {totalItems > 0 && (
-                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                            {totalItems}
-                        </span>
-                    )}
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                        {totalItems}
+                    </span>
                 </div>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
@@ -138,9 +140,7 @@ export const CartDialog = () => {
                                     asChild
                                     disabled={isUpdating}
                                 >
-                                    <Link href="/checkout">
-                                        Checkout
-                                    </Link>
+                                    <Link href="/checkout">Checkout</Link>
                                 </Button>
                             </div>
                         </div>

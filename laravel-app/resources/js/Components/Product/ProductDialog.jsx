@@ -402,6 +402,7 @@ const ProductDialog = ({
                                             onChange={handleQuantityChange}
                                             className="w-16 text-center border-x p-2"
                                         />
+
                                         <button
                                             type="button"
                                             onClick={incrementQuantity}

@@ -50,7 +50,7 @@ export const CartProvider = ({ children }) => {
 
     const clearCart = useCallback(async () => {
         try {
-            await axios.delete('/cart/clear');
+            await axios.delete('/cart/');
             await updateCart();
         } catch (error) {
             console.error('Error clearing cart:', error);

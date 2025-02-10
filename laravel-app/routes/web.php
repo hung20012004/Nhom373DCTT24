@@ -13,15 +13,24 @@ Route::get('/', function () {
         'phpVersion' => PHP_VERSION,
     ]);
 });
+
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::middleware(['auth:sanctum', 'verified'])->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+Route::get('/about', function () {
+    return Inertia::render('About');
+});
+Route::get('/products', function () {
+    return Inertia::render('Products');
+});
 
+Route::middleware(['auth:sanctum', 'verified'])->group(function () {
+    Route::prefix('profile')->group(function () {
+        Route::get('/', [ProfileController::class, 'edit'])->name('profile.edit');
+        Route::patch('/', [ProfileController::class, 'update'])->name('profile.update');
+        Route::delete('/', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    });
     Route::prefix('cart')->group(function () {
         Route::get('/', [CartController::class, 'index'])->name('cart.index');
         Route::post('/add', [CartController::class, 'add'])->name('cart.add');
@@ -29,13 +38,6 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
         Route::delete('/{cartItem}', [CartController::class, 'remove'])->name('cart.remove');
         Route::delete('/', [CartController::class, 'clear'])->name('cart.clear');
     });
-});
-
-Route::get('/about', function () {
-    return Inertia::render('About');
-});
-Route::get('/products', function () {
-    return Inertia::render('Products');
 });
 
 
