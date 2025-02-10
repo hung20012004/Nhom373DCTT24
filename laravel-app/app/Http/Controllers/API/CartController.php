@@ -10,7 +10,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
-
 class CartController extends Controller
 {
     public function index(): JsonResponse
@@ -29,7 +28,7 @@ class CartController extends Controller
         ]);
     }
 
-    public function add(Request $request)
+    public function add(Request $request): JsonResponse // Thay đổi kiểu trả về
     {
         $request->validate([
             'variant_id' => 'required|exists:product_variants,variant_id',
@@ -37,55 +36,69 @@ class CartController extends Controller
         ]);
 
         try {
-            DB::transaction(function () use ($request) {
-                $variant = ProductVariant::findOrFail($request->variant_id);
+            DB::beginTransaction();
 
-                if ($variant->stock_quantity < $request->quantity) {
-                    return to_route('products')->withErrors([
-                        'quantity' => 'Not enough stock available'
-                    ]);
-                }
+            $variant = ProductVariant::findOrFail($request->variant_id);
 
-                $cart = Cart::firstOrCreate([
-                    'user_id' => Auth::id()
-                ]);
+            if ($variant->stock_quantity < $request->quantity) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Not enough stock available'
+                ], 400);
+            }
 
-                $existingItem = CartItem::where([
+            $cart = Cart::firstOrCreate([
+                'user_id' => Auth::id()
+            ]);
+
+            $existingItem = CartItem::where([
+                'cart_id' => $cart->cart_id,
+                'variant_id' => $request->variant_id,
+            ])->first();
+
+            $totalQuantity = $request->quantity;
+            if ($existingItem) {
+                $totalQuantity += $existingItem->quantity;
+            }
+
+            if ($variant->stock_quantity < $totalQuantity) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Cannot add more items than available in stock'
+                ], 400);
+            }
+
+            CartItem::updateOrCreate(
+                [
                     'cart_id' => $cart->cart_id,
                     'variant_id' => $request->variant_id,
-                ])->first();
+                ],
+                [
+                    'quantity' => $totalQuantity
+                ]
+            );
 
-                $totalQuantity = $request->quantity;
-                if ($existingItem) {
-                    $totalQuantity += $existingItem->quantity;
-                }
+            DB::commit();
 
-                if ($variant->stock_quantity < $totalQuantity) {
-                    return to_route('products')->withErrors([
-                        'quantity' => 'Cannot add more items than available in stock'
-                    ]);
-                }
+            // Trả về cart đã cập nhật
+            $updatedCart = Cart::with(['items.variant.product'])
+                ->where('user_id', Auth::id())
+                ->first();
 
-                CartItem::updateOrCreate(
-                    [
-                        'cart_id' => $cart->cart_id,
-                        'variant_id' => $request->variant_id,
-                    ],
-                    [
-                        'quantity' => $totalQuantity
-                    ]
-                );
-            });
-
-            return redirect()->back()->with('success', 'Item added to cart successfully');
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Item added to cart successfully',
+                'data' => $updatedCart
+            ]);
 
         } catch (\Exception $e) {
-            return redirect()->back()->withErrors([
-                'error' => 'Failed to add item to cart'
-            ]);
+            DB::rollBack();
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to add item to cart'
+            ], 500);
         }
     }
-
 
     public function update(Request $request, CartItem $cartItem): JsonResponse
     {
@@ -93,52 +106,93 @@ class CartController extends Controller
             'quantity' => 'required|integer|min:1'
         ]);
 
-        if ($cartItem->cart->user_id !== Auth::id()) {
+        try {
+            if ($cartItem->cart->user_id !== Auth::id()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Unauthorized'
+                ], 403);
+            }
+
+            // Kiểm tra số lượng tồn kho
+            if ($cartItem->variant->stock_quantity < $request->quantity) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Not enough stock available'
+                ], 400);
+            }
+
+            $cartItem->update([
+                'quantity' => $request->quantity
+            ]);
+
+            // Trả về cart đã cập nhật
+            $updatedCart = Cart::with(['items.variant.product'])
+                ->where('user_id', Auth::id())
+                ->first();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Cart item updated',
+                'data' => $updatedCart
+            ]);
+        } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Unauthorized'
-            ], 403);
+                'message' => 'Failed to update cart item'
+            ], 500);
         }
-
-        $cartItem->update([
-            'quantity' => $request->quantity
-        ]);
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Cart item updated',
-            'data' => $cartItem
-        ]);
     }
 
     public function remove(CartItem $cartItem): JsonResponse
     {
-        if ($cartItem->cart->user_id !== Auth::id()) {
+        try {
+            if ($cartItem->cart->user_id !== Auth::id()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Unauthorized'
+                ], 403);
+            }
+
+            $cartItem->delete();
+
+            // Trả về cart đã cập nhật
+            $updatedCart = Cart::with(['items.variant.product'])
+                ->where('user_id', Auth::id())
+                ->first();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Item removed from cart',
+                'data' => $updatedCart
+            ]);
+        } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Unauthorized'
-            ], 403);
+                'message' => 'Failed to remove item from cart'
+            ], 500);
         }
-
-        $cartItem->delete();
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Item removed from cart'
-        ]);
     }
 
     public function clear(): JsonResponse
     {
-        $cart = Cart::where('user_id', Auth::id())->first();
+        try {
+            $cart = Cart::where('user_id', Auth::id())->first();
 
-        if ($cart) {
-            $cart->items()->delete();
+            if ($cart) {
+                $cart->items()->delete();
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Cart cleared',
+                'data' => $cart
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to clear cart'
+            ], 500);
         }
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Cart cleared'
-        ]);
     }
 }

@@ -32,4 +32,9 @@ class ProductVariant extends Model
     {
         return $this->belongsTo(Size::class, 'size_id', 'size_id');
     }
+    public function variant_images()
+    {
+        return $this->hasMany(VariantImage::class, 'variant_id', 'variant_id')
+                    ->orderBy('display_order');
+    }
 }

@@ -116,10 +116,11 @@ class ProductController extends Controller
             'material',
             'images',
             'variants.color',
-            'variants.size'
+            'variants.size',
+            'variants.variant_images' // Thêm dòng này
         ])->findOrFail($id);
 
-        // Organize variants data
+        // Giữ nguyên phần còn lại
         $variantsGrouped = $product->variants->groupBy(function ($variant) {
             return $variant->color->name;
         })->map(function ($colorGroup) {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { usePage } from '@inertiajs/react';
 import { router } from '@inertiajs/react';
+import { useCart } from '@/Contexts/CartContext';
 import {
     Dialog,
     DialogContent,
@@ -23,8 +24,7 @@ import { ProductPrice } from "./ProductPrice";
         const [selectedSize, setSelectedSize] = useState(null);
         const [isLoading, setIsLoading] = useState(false);
         const [error, setError] = useState(null);
-            console.log('Auth in regular layout:', auth); // Thêm log để debug
-        // Reset selections when dialog opens or product changes
+        const { updateCart } = useCart();
         useEffect(() => {
             if (isOpen) {
                 setSelectedColor(null);
@@ -54,17 +54,6 @@ import { ProductPrice } from "./ProductPrice";
             const variant = sizeVariants.get(colorId);
             return variant && variant.stock_quantity > 0;
         };
-
-        // Get available colors for selected size
-        const getAvailableColorsForSize = (sizeId) => {
-            const sizeVariants = variantMap.get(sizeId);
-            if (!sizeVariants) return [];
-
-            return Array.from(sizeVariants.entries())
-                .filter(([_, variant]) => variant.stock_quantity > 0)
-                .map(([colorId]) => colorId);
-        };
-
         // Get current variant based on selections
         const currentVariant = useMemo(() => {
             if (!selectedSize || !selectedColor) return null;
@@ -84,8 +73,8 @@ import { ProductPrice } from "./ProductPrice";
                 (prev) => (prev - 1 + product.images.length) % product.images.length
             );
         };
-
-        const addToCart = () => {
+        const { addToCart } = useCart();
+        const handleAddToCart = async () => {
             if (!auth.user) {
                 setError("Please login to add items to cart.");
                 return;
@@ -99,21 +88,15 @@ import { ProductPrice } from "./ProductPrice";
             setIsLoading(true);
             setError(null);
 
-            router.post('/cart/add', {
-                variant_id: currentVariant.variant_id,
-                quantity: 1
-            }, {
-                preserveState: true,
-                preserveScroll: true,
-                onSuccess: () => {
-                    setIsLoading(false);
-                    onClose();
-                },
-                onError: (errors) => {
-                    setIsLoading(false);
-                    setError(Object.values(errors).join('\n'));
-                }
-            });
+            const success = await addToCart(currentVariant.variant_id, 1);
+
+            if (success) {
+                setIsLoading(false);
+                onClose(); // Đóng dialog khi thêm thành công
+            } else {
+                setIsLoading(false);
+                setError("Failed to add item to cart. Please try again.");
+            }
         };
         return (
             <Dialog open={isOpen} onOpenChange={onClose}>
@@ -296,7 +279,7 @@ import { ProductPrice } from "./ProductPrice";
                                         currentVariant.stock_quantity <= 0 ||
                                         isLoading
                                     }
-                                    onClick={addToCart}
+                                    onClick={handleAddToCart}
                                 >
                                     <ShoppingCart className="w-5 h-5" />
                                     {isLoading
