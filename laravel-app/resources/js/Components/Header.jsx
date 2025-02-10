@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import { Menu, X, ShoppingCart, User, Heart } from 'lucide-react';
 import Dropdown from '@/Components/Dropdown';
-import { CartDialog } from '@/Components/cart/CartDialog'; // Import CartDialog
+import { CartDialog } from '@/Components/cart/CartDialog';
 import axios from 'axios';
 
 const Header = () => {
@@ -10,6 +10,7 @@ const Header = () => {
   const { auth } = usePage().props;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -32,7 +33,7 @@ const Header = () => {
 
   // Get mobile link classes based on active state
   const getMobileLinkClasses = (path) => {
-    const baseClasses = "block pl-3 pr-4 py-2 border-l-4 text-base font-medium";
+    const baseClasses = "block w-full pl-3 pr-4 py-2 border-l-4 text-base font-medium";
     return isActive(path)
       ? `${baseClasses} bg-blue-50 border-blue-500 text-blue-700`
       : `${baseClasses} border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700`;
@@ -70,6 +71,11 @@ const Header = () => {
       label: 'View All Categories'
     }
   ];
+
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [url]);
 
   return (
     <nav className={`bg-white transition-all duration-300 ${
@@ -121,13 +127,12 @@ const Header = () => {
               </span>
             </Link>
 
-            {/* Cart - Replace Link with CartDialog */}
+            {/* Cart */}
             <div className="p-2">
               <CartDialog />
             </div>
 
-            {/* Rest of the header code remains the same... */}
-            {/* Authentication Buttons */}
+            {/* Desktop Authentication Menu */}
             <div className="hidden sm:flex sm:items-center sm:ml-6">
               {auth.user ? (
                 <div className="relative ml-3">
@@ -146,13 +151,13 @@ const Header = () => {
                     <div className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
                       <Link
                         href="/profile"
-                        className={`block px-4 py-2 text-sm ${isActive('/profile') ? 'bg-gray-100 text-gray-900' : 'text-gray-700 hover:bg-gray-100'}`}
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                       >
                         Your Profile
                       </Link>
                       <Link
                         href="/orders"
-                        className={`block px-4 py-2 text-sm ${isActive('/orders') ? 'bg-gray-100 text-gray-900' : 'text-gray-700 hover:bg-gray-100'}`}
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                       >
                         Your Orders
                       </Link>
@@ -204,8 +209,124 @@ const Header = () => {
 
       {/* Mobile Navigation Menu */}
       {isMenuOpen && (
-        <div className="sm:hidden">
-          {/* ... rest of mobile menu code ... */}
+        <div className="sm:hidden bg-white border-b border-gray-200">
+          <div className="pt-2 pb-3 space-y-1">
+            <Link
+              href="/"
+              className={getMobileLinkClasses('/')}
+            >
+              Home
+            </Link>
+
+            <Link
+              href="/products"
+              className={getMobileLinkClasses('/products')}
+            >
+              Products
+            </Link>
+
+            {/* Mobile Categories Menu */}
+            <div className="relative">
+              <button
+                onClick={() => setIsCategoryMenuOpen(!isCategoryMenuOpen)}
+                className={`flex justify-between items-center w-full ${getMobileLinkClasses('/categories')}`}
+              >
+                <span>Categories</span>
+                <svg
+                  className={`w-5 h-5 transition-transform ${isCategoryMenuOpen ? 'transform rotate-180' : ''}`}
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </button>
+              {isCategoryMenuOpen && (
+                <div className="pl-4">
+                  {categories.map((category) => (
+                    <Link
+                      key={category.slug}
+                      href={`/products?category=${category.slug}`}
+                      className="block py-2 pl-3 text-gray-500 hover:text-gray-700"
+                    >
+                      {category.name}
+                    </Link>
+                  ))}
+                  <Link
+                    href="/products"
+                    className="block py-2 pl-3 text-gray-500 hover:text-gray-700"
+                  >
+                    View All Categories
+                  </Link>
+                </div>
+              )}
+            </div>
+
+            <Link
+              href="/about"
+              className={getMobileLinkClasses('/about')}
+            >
+              About
+            </Link>
+          </div>
+
+          {/* Mobile Authentication Menu */}
+          <div className="pt-4 pb-3 border-t border-gray-200">
+            {auth.user ? (
+              <>
+                <div className="flex items-center px-4">
+                  <div className="flex-shrink-0">
+                    <User className="h-8 w-8 rounded-full text-gray-400" />
+                  </div>
+                  <div className="ml-3">
+                    <div className="text-base font-medium text-gray-800">{auth.user.name}</div>
+                    <div className="text-sm font-medium text-gray-500">{auth.user.email}</div>
+                  </div>
+                </div>
+                <div className="mt-3 space-y-1">
+                  <Link
+                    href="/profile"
+                    className={getMobileLinkClasses('/profile')}
+                  >
+                    Your Profile
+                  </Link>
+                  <Link
+                    href="/orders"
+                    className={getMobileLinkClasses('/orders')}
+                  >
+                    Your Orders
+                  </Link>
+                  <Link
+                    href="/logout"
+                    method="post"
+                    as="button"
+                    className={getMobileLinkClasses('/logout')}
+                  >
+                    Log Out
+                  </Link>
+                </div>
+              </>
+            ) : (
+              <div className="mt-3 space-y-1 px-2">
+                <Link
+                  href="/login"
+                  className="flex justify-center w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                >
+                  Sign in
+                </Link>
+                <Link
+                  href="/register"
+                  className="flex justify-center w-full px-4 py-2 text-sm font-medium text-blue-600 bg-white border border-blue-600 rounded-md hover:bg-gray-50"
+                >
+                  Sign up
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </nav>

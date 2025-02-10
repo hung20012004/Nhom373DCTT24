@@ -1,12 +1,15 @@
 <?php
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\Cart;
 use App\Models\CartItem;
+use App\Models\ProductVariant;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+
 
 class CartController extends Controller
 {
@@ -26,31 +29,63 @@ class CartController extends Controller
         ]);
     }
 
-    public function add(Request $request): JsonResponse
+    public function add(Request $request)
     {
         $request->validate([
             'variant_id' => 'required|exists:product_variants,variant_id',
             'quantity' => 'required|integer|min:1'
         ]);
 
-        $cart = Cart::firstOrCreate(['user_id' => Auth::id()]);
+        try {
+            DB::transaction(function () use ($request) {
+                $variant = ProductVariant::findOrFail($request->variant_id);
 
-        $cartItem = CartItem::updateOrCreate(
-            [
-                'cart_id' => $cart->cart_id,
-                'variant_id' => $request->variant_id,
-            ],
-            [
-                'quantity' => $request->quantity
-            ]
-        );
+                if ($variant->stock_quantity < $request->quantity) {
+                    return to_route('products')->withErrors([
+                        'quantity' => 'Not enough stock available'
+                    ]);
+                }
 
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Item added to cart',
-            'data' => $cartItem
-        ]);
+                $cart = Cart::firstOrCreate([
+                    'user_id' => Auth::id()
+                ]);
+
+                $existingItem = CartItem::where([
+                    'cart_id' => $cart->cart_id,
+                    'variant_id' => $request->variant_id,
+                ])->first();
+
+                $totalQuantity = $request->quantity;
+                if ($existingItem) {
+                    $totalQuantity += $existingItem->quantity;
+                }
+
+                if ($variant->stock_quantity < $totalQuantity) {
+                    return to_route('products')->withErrors([
+                        'quantity' => 'Cannot add more items than available in stock'
+                    ]);
+                }
+
+                CartItem::updateOrCreate(
+                    [
+                        'cart_id' => $cart->cart_id,
+                        'variant_id' => $request->variant_id,
+                    ],
+                    [
+                        'quantity' => $totalQuantity
+                    ]
+                );
+            });
+
+            return redirect()->back()->with('success', 'Item added to cart successfully');
+
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors([
+                'error' => 'Failed to add item to cart'
+            ]);
+        }
     }
+
 
     public function update(Request $request, CartItem $cartItem): JsonResponse
     {

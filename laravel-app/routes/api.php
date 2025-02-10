@@ -6,19 +6,15 @@ use App\Http\Controllers\API\MaterialController;
 use App\Http\Controllers\API\SupplierController;
 use App\Http\Controllers\API\ColorController;
 use App\Http\Controllers\API\WishlistController;
-use App\Http\Controllers\Api\BannerController;
-use App\Http\Controllers\Api\SizeController;
-use App\Http\Controllers\Api\TagController;
-use App\Http\Controllers\Api\CartController;
+use App\Http\Controllers\API\BannerController;
+use App\Http\Controllers\API\SizeController;
+use App\Http\Controllers\API\TagController;
+use App\Http\Controllers\API\CartController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
     // Routes API công khai
-    Route::get('/categories', [CategoryController::class, 'index']);
-    Route::post('/categories', [CategoryController::class, 'store']);
-    Route::post('/categories/{categoryId}', [CategoryController::class, 'update']);
-    Route::delete('/categories/{categoryId}', [CategoryController::class, 'destroy']);
-    Route::get('/categories/featured', [CategoryController::class, 'featured']);
+
 
     Route::get('/colors', [ColorController::class, 'index']);
     Route::post('/colors', [ColorController::class, 'store']);
@@ -49,12 +45,11 @@ Route::prefix('v1')->group(function () {
     Route::get('/banners/active', [BannerController::class, 'getActiveBanners']);
     Route::post('/banners', [BannerController::class, 'store'])->middleware('auth:sanctum');
 
-    Route::get('/cart', [CartController::class, 'index']);
-    Route::middleware(['auth:sanctum', 'verified'])->group(function () {
-        Route::post('/cart/add', [CartController::class, 'add']);
-        Route::put('/cart/{cart}', [CartController::class, 'update']);
-        Route::delete('/cart/{cart}', [CartController::class, 'remove']);
-    });
+    Route::get('/categories', [CategoryController::class, 'index']);
+        Route::post('/categories', [CategoryController::class, 'store']);
+        Route::post('/categories/{categoryId}', [CategoryController::class, 'update']);
+        Route::delete('/categories/{categoryId}', [CategoryController::class, 'destroy']);
+        Route::get('/categories/featured', [CategoryController::class, 'featured']);
 });
 
 
