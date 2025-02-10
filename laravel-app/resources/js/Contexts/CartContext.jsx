@@ -60,18 +60,23 @@ export const CartProvider = ({ children }) => {
 
     const addToCart = useCallback(async (variantId, quantity = 1) => {
         try {
-            await axios.post('/cart/add', {
+            const response = await axios.post('/cart/add', {
                 variant_id: variantId,
                 quantity: quantity
             });
-            await updateCart(); // Cập nhật giỏ hàng ngay sau khi thêm
-            return true; // Trả về true nếu thành công
+            await updateCart();
+            return {
+                success: true,
+                message: 'Item added to cart successfully'
+            };
         } catch (error) {
             console.error('Error adding to cart:', error);
-            return false; // Trả về false nếu thất bại
+            return {
+                success: false,
+                message: error.response?.data?.message || 'Failed to add item to cart'
+            };
         }
     }, [updateCart]);
-
     const value = {
         cart,
         isLoading,
