@@ -7,19 +7,13 @@ export default defineConfig({
         laravel({
             input: 'resources/js/app.jsx',
             refresh: true,
-            // Thêm cấu hình này để Laravel biết vị trí build
-            buildDirectory: '../../public_html/build'
         }),
         react(),
     ],
     build: {
-        outDir: '../public_html/build',
-        assetsDir: '',
+        // Chỉ định thư mục output
+        outDir: 'public/build',
+        // Đảm bảo manifest được tạo
         manifest: true,
-        rollupOptions: {
-            output: {
-                manualChunks: undefined
-            }
-        }
     }
 });

@@ -2,9 +2,7 @@ import React, { useState, useEffect } from "react";
 import { SlidersHorizontal, Search, ArrowUp } from "lucide-react";
 import Layout from "@/Layouts/Layout";
 import ProductGrid from "@/Components/Product/ProductGrid";
-import axios from "axios";
-import { router } from "@inertiajs/react";
-
+import { Head } from '@inertiajs/react';
 const ProductsPage = () => {
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
@@ -150,6 +148,7 @@ const ProductsPage = () => {
 
     return (
         <Layout>
+            <Head title="Products" />
             <div className="bg-white">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <section className="py-20">

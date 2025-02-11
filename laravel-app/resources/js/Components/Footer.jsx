@@ -25,7 +25,7 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link href="/categories" className="text-gray-400 hover:text-white transition">
+                <Link href="/products" className="text-gray-400 hover:text-white transition">
                   Categories
                 </Link>
               </li>
@@ -96,7 +96,7 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="mt-8 pt-8 border-t border-gray-800">
           <p className="text-center text-gray-400">
-            © {new Date().getFullYear()} Your Shop Name. All rights reserved.
+            © {new Date().getFullYear()} StyleHub. All rights reserved.
           </p>
         </div>
       </div>

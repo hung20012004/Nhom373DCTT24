@@ -10,7 +10,6 @@ export const CartProvider = ({ children }) => {
     const fetchCart = useCallback(async () => {
         try {
             const response = await axios.get('/cart');
-            console.log('Cart response:', response.data.data?.items);
             setCart(response.data.data);
         } catch (error) {
             console.error('Error fetching cart:', error);

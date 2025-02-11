@@ -3,7 +3,7 @@ import { ArrowUp } from 'lucide-react';
 import Layout from '@/Layouts/Layout';
 import { Link } from '@inertiajs/react';
 import { Users, Award, Heart, Clock } from 'lucide-react';
-
+import { Head } from '@inertiajs/react';
 const About = () => {
   const [showScrollTop, setShowScrollTop] = useState(false);
 
@@ -25,6 +25,7 @@ const About = () => {
 
   return (
     <Layout>
+         <Head title="About" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Hero Section */}
         <div className="text-center mb-16">
