@@ -3,7 +3,7 @@ import { ArrowUp } from 'lucide-react';
 import Layout from '@/Layouts/Layout';
 import axios from 'axios';
 import { CategoryGrid, ProductGrid, HeroBanner } from '@/Components';
-
+import { Head } from '@inertiajs/react';
 const Welcome = () => {
   const [banners, setBanners] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -17,7 +17,7 @@ const Welcome = () => {
       try {
         const [bannersResponse, categoriesResponse, productsResponse, wishlistResponse] = await Promise.all([
           axios.get('/api/v1/banners/active'),
-          axios.get('/api/v1/categories'),
+          axios.get('/api/v1/categories/featured'),
           axios.get('/api/v1/products/featured'),
           axios.get('/api/v1/wishlist')
         ]);
@@ -75,6 +75,7 @@ const Welcome = () => {
 
   return (
     <Layout>
+         <Head title="Home" />
       {/* Hero Banner Section */}
       <HeroBanner banners={banners} />
 

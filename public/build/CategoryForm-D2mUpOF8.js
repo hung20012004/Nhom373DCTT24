@@ -1,0 +1,34 @@
+import{r as d,j as e,a as v}from"./app-DlvoDJJo.js";import{D as R,a as A,b as O,c as I,A as P,d as T}from"./alert-B7bscsUx.js";import{B as D}from"./button-g7U9L8Cx.js";import{I as j}from"./input-pDD4vCSl.js";import{L as m}from"./label-C_gtDDxQ.js";import{T as q}from"./textarea-Ct-gyCQG.js";import"./index-DV74KP8K.js";import"./createLucideIcon-Cvfh0g26.js";const S=d.forwardRef(({checked:s,onCheckedChange:p,disabled:x,className:i="",...l},u)=>e.jsx("button",{type:"button",role:"switch","aria-checked":s,"data-state":s?"checked":"unchecked",disabled:x,onClick:()=>p(!s),className:`
+        peer
+        inline-flex
+        h-6
+        w-11
+        shrink-0
+        cursor-pointer
+        items-center
+        rounded-full
+        border-2
+        border-transparent
+        transition-colors
+        focus-visible:outline-none
+        focus-visible:ring-2
+        focus-visible:ring-offset-2
+        focus-visible:ring-offset-white
+        disabled:cursor-not-allowed
+        disabled:opacity-50
+        data-[state=checked]:bg-blue-600
+        data-[state=unchecked]:bg-gray-200
+        ${i}
+      `,...l,ref:u,children:e.jsx("span",{"data-state":s?"checked":"unchecked",className:`
+          pointer-events-none
+          block
+          h-5
+          w-5
+          rounded-full
+          bg-white
+          shadow-lg
+          ring-0
+          transition-transform
+          data-[state=checked]:translate-x-5
+          data-[state=unchecked]:translate-x-0
+        `})}));S.displayName="Switch";const $="category_images",B="deczn9jtq";function Q({category:s,onClose:p,onSuccess:x}){const[i,l]=d.useState({name:"",slug:"",description:"",is_active:!0,display_order:0,image_url:""}),[u,b]=d.useState(!1),[o,w]=d.useState({}),[_,C]=d.useState(""),[c,f]=d.useState(null),[N,y]=d.useState(null);d.useEffect(()=>{s&&(l({name:s.name||"",slug:s.slug||"",description:s.description||"",is_active:s.is_active===1,display_order:s.display_order||0,image_url:s.image_url||""}),f(s.image_url||null))},[s]);const E=a=>{const t=a.target.files[0];if(!t)return;const n=URL.createObjectURL(t);f(n),y(t)},L=async a=>{const t=new FormData;t.append("file",a),t.append("upload_preset",$);try{return(await v.post(`https://api.cloudinary.com/v1_1/${B}/image/upload`,t,{headers:{"Content-Type":"multipart/form-data"}})).data.secure_url}catch(n){throw console.error("Error uploading to Cloudinary:",n),new Error("Failed to upload image")}},k=async a=>{var t,n;a.preventDefault(),b(!0),w({}),C("");try{let r={...i};if(N){const h=await L(N);r.image_url=h}else c?s&&(r.image_url=s.image_url):r.image_url="";if(s){const h={};Object.keys(r).forEach(g=>{r[g]!==s[g]&&(h[g]=r[g])}),await v.post(`/api/v1/categories/${s.id}`,h)}else await v.post("/api/v1/categories",r);c&&c.startsWith("blob:")&&URL.revokeObjectURL(c),x()}catch(r){(n=(t=r.response)==null?void 0:t.data)!=null&&n.errors?w(r.response.data.errors):C("An error occurred while saving the category. Please try again."),console.error("Error submitting category:",r)}finally{b(!1)}},U=a=>a.toLowerCase().replace(/[^\w\s-]/g,"").replace(/\s+/g,"-").replace(/--+/g,"-").trim(),F=a=>{const t=a.target.value;l(n=>({...n,name:t,slug:U(t)}))};return e.jsx(R,{open:!0,onOpenChange:p,children:e.jsxs(A,{className:"max-w-2xl max-h-[90vh] overflow-y-auto",children:[e.jsx(O,{children:e.jsx(I,{children:s?"Edit Category":"Add New Category"})}),_&&e.jsx(P,{variant:"destructive",children:e.jsx(T,{children:_})}),e.jsxs("form",{onSubmit:k,className:"space-y-6",children:[e.jsxs("div",{className:"space-y-2",children:[e.jsx(m,{children:"Category Image"}),e.jsxs("div",{className:"flex items-center gap-4",children:[c&&e.jsxs("div",{className:"relative",children:[e.jsx("img",{src:c,alt:"Preview",className:"w-24 h-24 object-cover rounded-lg"}),e.jsx("button",{type:"button",onClick:()=>{c.startsWith("blob:")&&URL.revokeObjectURL(c),f(null),y(null),l(a=>({...a,image_url:""}))},className:"absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center",children:"×"})]}),e.jsx(j,{type:"file",accept:"image/*",onChange:E,disabled:u})]}),o.image_url&&e.jsx("span",{className:"text-red-500 text-sm",children:o.image_url})]}),e.jsxs("div",{className:"space-y-4",children:[e.jsxs("div",{children:[e.jsx(m,{htmlFor:"name",children:"Name"}),e.jsx(j,{id:"name",value:i.name,onChange:F,required:!0}),o.name&&e.jsx("span",{className:"text-red-500 text-sm",children:o.name})]}),e.jsxs("div",{children:[e.jsx(m,{htmlFor:"slug",children:"Slug"}),e.jsx(j,{id:"slug",value:i.slug,onChange:a=>l({...i,slug:a.target.value}),required:!0}),o.slug&&e.jsx("span",{className:"text-red-500 text-sm",children:o.slug})]}),e.jsxs("div",{children:[e.jsx(m,{htmlFor:"description",children:"Description"}),e.jsx(q,{id:"description",value:i.description,onChange:a=>l({...i,description:a.target.value}),rows:4}),o.description&&e.jsx("span",{className:"text-red-500 text-sm",children:o.description})]}),e.jsxs("div",{className:"flex items-center space-x-2",children:[e.jsx(S,{id:"is_active",checked:i.is_active,onCheckedChange:a=>l({...i,is_active:a})}),e.jsx(m,{htmlFor:"is_active",children:"Active"})]})]}),e.jsxs("div",{className:"flex justify-end gap-2 pt-4",children:[e.jsx(D,{type:"button",variant:"outline",onClick:p,disabled:u,children:"Cancel"}),e.jsx(D,{type:"submit",disabled:u,className:"min-w-[100px]",children:u?"Saving...":s?"Update":"Create"})]})]})]})})}export{Q as default};

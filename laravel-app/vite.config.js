@@ -10,12 +10,10 @@ export default defineConfig({
         }),
         react(),
     ],
-    server: {
-        proxy: {
-            '/api': {
-                target: 'http://localhost:8000',
-                changeOrigin: true,
-            },
-        },
-    },
+    build: {
+        // Chỉ định thư mục output
+        outDir: 'public/build',
+        // Đảm bảo manifest được tạo
+        manifest: true,
+    }
 });

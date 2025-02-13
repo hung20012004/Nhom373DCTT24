@@ -1,14 +1,23 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { usePage } from '@inertiajs/react';
+import { usePage } from "@inertiajs/react";
+import { useCart } from "@/Contexts/CartContext";
 import {
     Dialog,
     DialogContent,
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import { ChevronLeft, ChevronRight, Heart, ShoppingCart } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+    ChevronLeft,
+    ChevronRight,
+    Heart,
+    ShoppingCart,
+    Plus,
+    Minus,
+} from "lucide-react";
 import { ProductPrice } from "./ProductPrice";
-import axios from '@/lib/axios';
+
 const ProductDialog = ({
     product,
     isOpen,
@@ -16,25 +25,31 @@ const ProductDialog = ({
     onToggleWishlist,
     isInWishlist,
 }) => {
+    const { auth } = usePage().props;
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [selectedColor, setSelectedColor] = useState(null);
     const [selectedSize, setSelectedSize] = useState(null);
+    const [quantity, setQuantity] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
-     const { auth, csrf_token } = usePage().props;
-        console.log('Auth in regular layout:', auth); // Thêm log để debug
-    // Reset selections when dialog opens or product changes
+    const [error, setError] = useState(null);
+    const { addToCart } = useCart();
+
     useEffect(() => {
         if (isOpen) {
             setSelectedColor(null);
             setSelectedSize(null);
+            setError(null);
+            setQuantity(1);
+            setCurrentImageIndex(0);
         }
     }, [isOpen, product]);
 
     // Organize variants by size and color
     const variantMap = useMemo(() => {
         const map = new Map();
+        if (!product?.variants) return map;
 
-        product.variants?.forEach(variant => {
+        product.variants.forEach((variant) => {
             if (!map.has(variant.size_id)) {
                 map.set(variant.size_id, new Map());
             }
@@ -42,7 +57,7 @@ const ProductDialog = ({
         });
 
         return map;
-    }, [product.variants]);
+    }, [product?.variants]);
 
     // Check if a specific size-color combination exists and has stock
     const hasVariant = (sizeId, colorId) => {
@@ -50,16 +65,6 @@ const ProductDialog = ({
         if (!sizeVariants) return false;
         const variant = sizeVariants.get(colorId);
         return variant && variant.stock_quantity > 0;
-    };
-
-    // Get available colors for selected size
-    const getAvailableColorsForSize = (sizeId) => {
-        const sizeVariants = variantMap.get(sizeId);
-        if (!sizeVariants) return [];
-
-        return Array.from(sizeVariants.entries())
-            .filter(([_, variant]) => variant.stock_quantity > 0)
-            .map(([colorId]) => colorId);
     };
 
     // Get current variant based on selections
@@ -73,43 +78,88 @@ const ProductDialog = ({
     }, [selectedSize, selectedColor, variantMap]);
 
     // Image navigation handlers
-    const nextImage = () => {
+    const nextImage = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         setCurrentImageIndex((prev) => (prev + 1) % product.images.length);
     };
 
-    const prevImage = () => {
+    const prevImage = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         setCurrentImageIndex(
             (prev) => (prev - 1 + product.images.length) % product.images.length
         );
     };
 
-    const addToCart = async () => {
-        if (!currentVariant) {
-            alert("Please select a color and size before adding to cart.");
+    // Quantity handlers
+    const incrementQuantity = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (currentVariant && quantity < currentVariant.stock_quantity) {
+            setQuantity((prev) => prev + 1);
+        }
+    };
+
+    const decrementQuantity = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (quantity > 1) {
+            setQuantity((prev) => prev - 1);
+        }
+    };
+
+    const handleQuantityChange = (e) => {
+        const value = parseInt(e.target.value);
+        if (!isNaN(value) && value >= 1) {
+            if (currentVariant && value <= currentVariant.stock_quantity) {
+                setQuantity(value);
+            } else if (currentVariant) {
+                setQuantity(currentVariant.stock_quantity);
+            }
+        }
+    };
+
+    const handleAddToCart = async () => {
+        if (!auth.user) {
+            setError("Please login to add items to cart.");
             return;
         }
 
-        setIsLoading(true);
+        if (!currentVariant) {
+            setError(
+                "Please select both size and color before adding to cart."
+            );
+            return;
+        }
 
         try {
-            const response = await axios.post("/api/v1/cart/add", {
-                variant_id: currentVariant.variant_id,
-                quantity: 1,
-            });
+            setIsLoading(true);
+            setError(null);
 
-            alert(response.data.message || "Item added to cart!");
-        } catch (error) {
-            console.error("Failed to add item to cart:", error);
-            if (error.response?.status === 401) {
-                alert("Please login to add items to cart");
+            const response = await addToCart(
+                currentVariant.variant_id,
+                quantity
+            );
+
+            if (response.success) {
+                onClose();
             } else {
-                alert(error.response?.data?.message || "An error occurred while adding to cart.");
+                setError(
+                    response.message ||
+                        "Failed to add item to cart. Please try again."
+                );
             }
+        } catch (err) {
+            setError(
+                "An error occurred while adding to cart. Please try again."
+            );
         } finally {
             setIsLoading(false);
         }
     };
 
+    if (!product) return null;
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
@@ -120,16 +170,26 @@ const ProductDialog = ({
                     </DialogTitle>
                 </DialogHeader>
 
+                {error && (
+                    <Alert variant="destructive" className="mt-4">
+                        <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                )}
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Image Gallery */}
+                    {/* Image Section */}
                     <div className="relative">
                         <div
                             className="relative overflow-hidden rounded-lg"
                             style={{ aspectRatio: "3/4" }}
                         >
                             <img
-                                src={product.images[currentImageIndex]?.image_url}
-                                alt={product.name}
+                                src={
+                                    product.images[currentImageIndex]?.image_url
+                                }
+                                alt={`${product.name} view ${
+                                    currentImageIndex + 1
+                                }`}
                                 className="w-full h-full object-cover"
                             />
 
@@ -151,6 +211,7 @@ const ProductDialog = ({
                             )}
                         </div>
 
+                        {/* Thumbnails */}
                         <div className="mt-4 flex gap-2 overflow-x-auto">
                             {product.images.map((image, index) => (
                                 <button
@@ -164,7 +225,9 @@ const ProductDialog = ({
                                 >
                                     <img
                                         src={image.image_url}
-                                        alt={`${product.name} thumbnail ${index + 1}`}
+                                        alt={`${product.name} thumbnail ${
+                                            index + 1
+                                        }`}
                                         className="w-full h-full object-cover"
                                     />
                                 </button>
@@ -177,17 +240,25 @@ const ProductDialog = ({
                         <div className="mb-4">
                             <ProductPrice
                                 price={currentVariant?.price || product.price}
-                                salePrice={currentVariant?.sale_price || product.sale_price}
+                                salePrice={
+                                    currentVariant?.sale_price ||
+                                    product.sale_price
+                                }
                             />
                         </div>
 
-                        <p className="text-gray-600 mb-6">{product.description}</p>
+                        <p className="text-gray-600 mb-6">
+                            {product.description}
+                        </p>
+
                         {product.material && (
                             <div className="mb-4">
                                 <h3 className="font-semibold text-gray-900 mb-2">
                                     Material
                                 </h3>
-                                <p className="text-gray-600">{product.material.name}</p>
+                                <p className="text-gray-600">
+                                    {product.material.name}
+                                </p>
                                 {product.material.description && (
                                     <p className="text-sm text-gray-500 mt-1">
                                         {product.material.description}
@@ -196,24 +267,30 @@ const ProductDialog = ({
                             </div>
                         )}
 
+                        {/* Size Selection */}
                         <div className="mb-4">
                             <h3 className="font-semibold text-gray-900 mb-2">
                                 Select Size
                             </h3>
                             <div className="flex flex-wrap gap-2">
-                                {product.available_sizes.map((size) => (
+                                {product.available_sizes?.map((size) => (
                                     <button
                                         key={size.size_id}
                                         onClick={() => {
                                             setSelectedSize(size);
-                                            // If the selected color isn't available for this size,
-                                            // clear the color selection
-                                            if (selectedColor && !hasVariant(size.size_id, selectedColor.color_id)) {
+                                            if (
+                                                selectedColor &&
+                                                !hasVariant(
+                                                    size.size_id,
+                                                    selectedColor.color_id
+                                                )
+                                            ) {
                                                 setSelectedColor(null);
                                             }
                                         }}
                                         className={`px-4 py-2 border rounded-md transition-colors ${
-                                            selectedSize?.size_id === size.size_id
+                                            selectedSize?.size_id ===
+                                            size.size_id
                                                 ? "border-blue-500 bg-blue-50"
                                                 : "hover:border-blue-500"
                                         }`}
@@ -224,17 +301,23 @@ const ProductDialog = ({
                             </div>
                         </div>
 
+                        {/* Color Selection */}
                         <div className="mb-6">
                             <h3 className="font-semibold text-gray-900 mb-2">
                                 Select Color
                             </h3>
                             <div className="flex flex-wrap gap-2">
-                                {product.available_colors.map((color) => {
+                                {product.available_colors?.map((color) => {
                                     const isAvailable = selectedSize
-                                        ? hasVariant(selectedSize.size_id, color.color_id)
-                                        : product.variants?.some(v =>
-                                            v.color_id === color.color_id &&
-                                            v.stock_quantity > 0
+                                        ? hasVariant(
+                                              selectedSize.size_id,
+                                              color.color_id
+                                          )
+                                        : product.variants?.some(
+                                              (v) =>
+                                                  v.color_id ===
+                                                      color.color_id &&
+                                                  v.stock_quantity > 0
                                           );
 
                                     return (
@@ -247,7 +330,8 @@ const ProductDialog = ({
                                             }}
                                             disabled={!isAvailable}
                                             className={`group relative p-1 rounded-full ${
-                                                selectedColor?.color_id === color.color_id
+                                                selectedColor?.color_id ===
+                                                color.color_id
                                                     ? "ring-2 ring-blue-500"
                                                     : ""
                                             } ${
@@ -256,8 +340,20 @@ const ProductDialog = ({
                                                     : ""
                                             }`}
                                             title={`${color.name}${
-                                                selectedSize && hasVariant(selectedSize.size_id, color.color_id)
-                                                    ? ` - ${variantMap.get(selectedSize.size_id).get(color.color_id).stock_quantity} in stock`
+                                                selectedSize &&
+                                                hasVariant(
+                                                    selectedSize.size_id,
+                                                    color.color_id
+                                                )
+                                                    ? ` - ${
+                                                          variantMap
+                                                              .get(
+                                                                  selectedSize.size_id
+                                                              )
+                                                              .get(
+                                                                  color.color_id
+                                                              ).stock_quantity
+                                                      } in stock`
                                                     : !isAvailable
                                                     ? " - Not available for selected size"
                                                     : ""
@@ -265,7 +361,10 @@ const ProductDialog = ({
                                         >
                                             <div
                                                 className="w-8 h-8 rounded-full border"
-                                                style={{ backgroundColor: color.description }}
+                                                style={{
+                                                    backgroundColor:
+                                                        color.description,
+                                                }}
                                             />
                                             <span className="absolute inset-0 rounded-full group-hover:bg-black/10" />
                                         </button>
@@ -274,21 +373,63 @@ const ProductDialog = ({
                             </div>
                         </div>
 
+                        {/* Quantity Controls */}
                         {currentVariant && (
-                            <p className="text-sm text-gray-600 mb-4">
-                                {currentVariant.stock_quantity} units available
-                            </p>
+                            <div className="space-y-4 mb-4">
+                                <p className="text-sm text-gray-600">
+                                    {currentVariant.stock_quantity} units
+                                    available
+                                </p>
+
+                                <div className="flex items-center space-x-4">
+                                    <span className="font-semibold text-gray-900">
+                                        Quantity:
+                                    </span>
+                                    <div className="flex items-center border rounded-lg">
+                                        <button
+                                            type="button"
+                                            onClick={decrementQuantity}
+                                            disabled={quantity <= 1}
+                                            className="p-2 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            <Minus className="w-4 h-4" />
+                                        </button>
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            max={currentVariant.stock_quantity}
+                                            value={quantity}
+                                            onChange={handleQuantityChange}
+                                            className="w-16 text-center border-x p-2"
+                                        />
+
+                                        <button
+                                            type="button"
+                                            onClick={incrementQuantity}
+                                            disabled={
+                                                quantity >=
+                                                currentVariant.stock_quantity
+                                            }
+                                            className="p-2 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            <Plus className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         )}
 
+                        {/* Action Buttons */}
                         <div className="mt-auto pt-6 flex gap-4">
                             <button
+                                type="button"
                                 className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                 disabled={
                                     !currentVariant ||
                                     currentVariant.stock_quantity <= 0 ||
                                     isLoading
                                 }
-                                onClick={addToCart}
+                                onClick={handleAddToCart}
                             >
                                 <ShoppingCart className="w-5 h-5" />
                                 {isLoading
@@ -300,7 +441,10 @@ const ProductDialog = ({
                                     : "Add to Cart"}
                             </button>
                             <button
-                                onClick={() => onToggleWishlist(product.product_id)}
+                                type="button"
+                                onClick={() =>
+                                    onToggleWishlist(product.product_id)
+                                }
                                 className="p-2 rounded-lg border hover:bg-gray-50"
                             >
                                 <Heart

@@ -5,7 +5,7 @@ import { Head } from '@inertiajs/react';
 export default function Dashboard() {
     return (
         <AdminLayout>
-            <Head title="Admin Dashboard" />
+            <Head title="Admin Panel" />
 
             <div className="py-12">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">

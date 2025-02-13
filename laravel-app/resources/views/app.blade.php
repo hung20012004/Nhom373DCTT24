@@ -3,9 +3,8 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-
-        <title inertia>{{ config('app.name', 'Laravel') }}</title>
-
+        {{-- <title>{{ str_replace('-', ' ', config('app.name')) }}</title> --}}
+        <link rel="icon" href="/logo.png" type="image/x-icon" sizes="96x96">
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
