@@ -53,9 +53,6 @@ class CategoryController extends Controller
                 'direction' => $sortDirection
             ]
         ];
-
-        // $categories = $query->paginate(10);
-        // return response()->json($categories);
     }
 
     public function featured()
