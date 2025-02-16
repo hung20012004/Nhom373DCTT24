@@ -221,3 +221,4 @@ export const CartDialog = () => {
         </Dialog>
     );
 };
+export default CartDialog;

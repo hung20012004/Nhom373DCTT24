@@ -60,23 +60,19 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
     // API Routes
     Route::middleware(['auth', 'verified'])->prefix('api')->group(function () {
         // Categories
-        Route::get('/categories', [CategoryController::class, 'index']);
         Route::post('/categories', [CategoryController::class, 'store']);
         Route::post('/categories/{categoryId}', [CategoryController::class, 'update']);
         Route::delete('/categories/{categoryId}', [CategoryController::class, 'destroy']);
         // Colors
-        Route::get('/colors', [ColorController::class, 'index']);
         Route::post('/colors', [ColorController::class, 'store']);
         Route::post('/colors/{colorId}', [ColorController::class, 'update']);
         Route::delete('/colors/{colorId}', [ColorController::class, 'destroy']);
         // Products
-        Route::get('/products', [ProductController::class, 'index']);
         Route::post('/products', [ProductController::class, 'store']);
         Route::post('/products/{productId}', [ProductController::class, 'update']);
         Route::delete('/products/{productId}', [ProductController::class, 'destroy']);
-        Route::get('/products/featured', [ProductController::class, 'featured']);
+
         // Materials
-        Route::get('/materials', [MaterialController::class, 'index']);
         Route::post('/materials', [MaterialController::class, 'store']);
         Route::post('/materials/{materialId}', [MaterialController::class, 'update']);
         Route::delete('/materials/{materialId}', [MaterialController::class, 'destroy']);

@@ -15,10 +15,12 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->group(function () {
     // Routes API công khai
     Route::get('/categories', [CategoryController::class, 'index']);
+    Route::get('/categories/featured', [CategoryController::class, 'featured']);
 
     Route::get('/colors', [ColorController::class, 'index']);
 
     Route::get('/products', [ProductController::class, 'index']);
+    Route::get('/products/featured', [ProductController::class, 'featured']);
 
     Route::get('/materials', [MaterialController::class, 'index']);
 
@@ -36,11 +38,4 @@ Route::prefix('v1')->group(function () {
 
     Route::get('/banners/active', [BannerController::class, 'getActiveBanners']);
     Route::post('/banners', [BannerController::class, 'store'])->middleware('auth:sanctum');
-
-    Route::get('/cart', [CartController::class, 'index']);
-    Route::middleware(['auth:sanctum', 'verified'])->group(function () {
-        Route::post('/cart/add', [CartController::class, 'add']);
-        Route::put('/cart/{cart}', [CartController::class, 'update']);
-        Route::delete('/cart/{cart}', [CartController::class, 'remove']);
-    });
 });
