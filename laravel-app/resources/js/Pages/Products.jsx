@@ -154,13 +154,13 @@ const ProductsPage = () => {
                     <section className="py-20">
                         <div className="mb-12 text-center">
                             <span className="text-sm uppercase tracking-wider text-neutral-500">
-                                Collection
+                                Bộ sưu tập
                             </span>
                             <h2 className="text-3xl font-light mt-2">
-                                Our Products
+                                Sản phẩm của chúng tôi
                             </h2>
                             <p className="mt-2 text-neutral-500">
-                                Discover our wide range of products
+                                Tìm kiếm sản phẩm phù hợp với nhu cầu của bạn
                             </p>
                         </div>
 
@@ -170,7 +170,7 @@ const ProductsPage = () => {
                                 <div className="bg-white border border-neutral-200 rounded-lg p-6 space-y-8">
                                     <div className="space-y-4">
                                         <h3 className="text-lg font-medium text-gray-900">
-                                            Sort By
+                                            Tìm kiếm theo
                                         </h3>
                                         <select
                                             value={filters.sort}
@@ -183,26 +183,26 @@ const ProductsPage = () => {
                                             className="w-full border-neutral-200 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                                         >
                                             <option value="newest">
-                                                Newest
+                                                Sản phẩm mới
                                             </option>
                                             <option value="price_asc">
-                                                Price: Low to High
+                                                Giá: Thấp đến cao
                                             </option>
                                             <option value="price_desc">
-                                                Price: High to Low
+                                                Giá: Cao đến thấp
                                             </option>
                                             <option value="name_asc">
-                                                Name: A to Z
+                                                Tên: A to Z
                                             </option>
                                             <option value="name_desc">
-                                                Name: Z to A
+                                                Tên: Z to A
                                             </option>
                                         </select>
                                     </div>
 
                                     <div className="space-y-4">
                                         <h3 className="text-lg font-medium text-gray-900">
-                                            Categories
+                                            Danh mục sản phẩm
                                         </h3>
                                         <div className="space-y-2">
                                             <button
@@ -218,7 +218,7 @@ const ProductsPage = () => {
                                                         : "hover:bg-neutral-50"
                                                 }`}
                                             >
-                                                All Categories
+                                                Toàn bộ sản phẩm
                                             </button>
                                             {categories.map((category) => (
                                                 <button
@@ -249,11 +249,10 @@ const ProductsPage = () => {
                                 {products.data?.length === 0 ? (
                                     <div className="text-center py-12 bg-white border border-neutral-200 rounded-lg">
                                         <h3 className="text-lg font-medium text-gray-900">
-                                            No products found
+                                            Chúng tôi không tìm thấy sản phẩm nào
                                         </h3>
                                         <p className="mt-2 text-neutral-500">
-                                            Try adjusting your search or filter
-                                            criteria
+                                            Hãy thử tìm kiếm lại hoặc xem các sản phẩm khác
                                         </p>
                                     </div>
                                 ) : (

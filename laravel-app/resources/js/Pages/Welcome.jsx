@@ -4,6 +4,7 @@ import Layout from '@/Layouts/Layout';
 import axios from 'axios';
 import { CategoryGrid, ProductGrid, HeroBanner } from '@/Components';
 import { Head } from '@inertiajs/react';
+
 const Welcome = () => {
   const [banners, setBanners] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -27,7 +28,7 @@ const Welcome = () => {
         setProducts(productsResponse.data);
         setWishlist(wishlistResponse.data);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Lỗi khi tải dữ liệu:', error);
       } finally {
         setLoading(false);
       }
@@ -52,7 +53,7 @@ const Welcome = () => {
         setWishlist(wishlist.filter(id => id !== productId));
       }
     } catch (error) {
-      console.error('Error toggling wishlist:', error);
+      console.error('Lỗi khi thay đổi danh sách yêu thích:', error);
     }
   };
 
@@ -75,25 +76,26 @@ const Welcome = () => {
 
   return (
     <Layout>
-         <Head title="Home" />
-      {/* Hero Banner Section */}
+      <Head title="Trang Chủ" />
+
+      {/* Phần banner chính */}
       <HeroBanner banners={banners} />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Categories Section */}
+        {/* Danh mục sản phẩm */}
         <section className="py-20">
           <div className="mb-12 text-center">
-            <span className="text-sm uppercase tracking-wider text-neutral-500">Explore</span>
-            <h2 className="text-3xl font-light mt-2">Shop by Category</h2>
+            <span className="text-sm uppercase tracking-wider text-neutral-500">Khám Phá</span>
+            <h2 className="text-3xl font-light mt-2">Mua sắm theo danh mục</h2>
           </div>
           <CategoryGrid categories={categories} />
         </section>
 
-        {/* Featured Products Section */}
+        {/* Sản phẩm nổi bật */}
         <section className="py-20 border-t border-neutral-200">
           <div className="mb-12 text-center">
-            <span className="text-sm uppercase tracking-wider text-neutral-500">Featured</span>
-            <h2 className="text-3xl font-light mt-2">New Arrivals</h2>
+            <span className="text-sm uppercase tracking-wider text-neutral-500">Nổi Bật</span>
+            <h2 className="text-3xl font-light mt-2">Sản phẩm mới</h2>
           </div>
           <ProductGrid
             products={products}
@@ -103,7 +105,7 @@ const Welcome = () => {
         </section>
       </div>
 
-      {/* Scroll to Top Button */}
+      {/* Nút cuộn lên đầu trang */}
       {showScrollTop && (
         <button
           onClick={scrollToTop}
