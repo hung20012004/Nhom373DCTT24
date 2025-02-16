@@ -23,46 +23,67 @@ export default function ResetPassword({ token, email }) {
 
     return (
         <GuestLayout>
-            <Head title="Reset Password" />
+            <Head title="Đặt lại mật khẩu" />
 
-            <form onSubmit={submit}>
+            <div className="mb-8 flex flex-col items-center justify-center">
+                <Link href="/">
+                    <img
+                        src="/logo.png"
+                        alt="Logo"
+                        className="h-20 w-auto"
+                        onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src =
+                                "https://via.placeholder.com/150x80?text=Your+Logo";
+                        }}
+                    />
+                </Link>
+
+                <h1 className="mt-4 text-3xl font-bold text-gray-800">Đặt lại mật khẩu</h1>
+                <p className="mt-2 text-sm text-gray-600">Tạo mật khẩu mới cho tài khoản của bạn</p>
+            </div>
+
+            <form onSubmit={submit} className="space-y-6">
                 <div>
-                    <InputLabel htmlFor="email" value="Email" />
+                    <InputLabel htmlFor="email" value="Email" className="text-sm font-medium text-gray-700" />
 
                     <TextInput
                         id="email"
                         type="email"
                         name="email"
                         value={data.email}
-                        className="mt-1 block w-full"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                         autoComplete="username"
                         onChange={(e) => setData('email', e.target.value)}
+                        disabled={email}
                     />
 
                     <InputError message={errors.email} className="mt-2" />
                 </div>
 
-                <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password" />
+                <div>
+                    <InputLabel htmlFor="password" value="Mật khẩu mới" className="text-sm font-medium text-gray-700" />
 
                     <TextInput
                         id="password"
                         type="password"
                         name="password"
                         value={data.password}
-                        className="mt-1 block w-full"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                         autoComplete="new-password"
                         isFocused={true}
                         onChange={(e) => setData('password', e.target.value)}
+                        placeholder="••••••••"
                     />
 
                     <InputError message={errors.password} className="mt-2" />
                 </div>
 
-                <div className="mt-4">
+                <div>
                     <InputLabel
                         htmlFor="password_confirmation"
-                        value="Confirm Password"
+                        value="Xác nhận mật khẩu mới"
+                        className="text-sm font-medium text-gray-700"
                     />
 
                     <TextInput
@@ -70,11 +91,12 @@ export default function ResetPassword({ token, email }) {
                         id="password_confirmation"
                         name="password_confirmation"
                         value={data.password_confirmation}
-                        className="mt-1 block w-full"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                         autoComplete="new-password"
                         onChange={(e) =>
                             setData('password_confirmation', e.target.value)
                         }
+                        placeholder="••••••••"
                     />
 
                     <InputError
@@ -83,9 +105,12 @@ export default function ResetPassword({ token, email }) {
                     />
                 </div>
 
-                <div className="mt-4 flex items-center justify-end">
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Reset Password
+                <div>
+                    <PrimaryButton
+                        className="w-full justify-center rounded-md bg-indigo-600 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                        disabled={processing}
+                    >
+                        {processing ? 'Đang xử lý...' : 'Đặt lại mật khẩu'}
                     </PrimaryButton>
                 </div>
             </form>

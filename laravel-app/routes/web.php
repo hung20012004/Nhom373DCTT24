@@ -1,4 +1,7 @@
 <?php
+use App\Http\Controllers\API\CartController;
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\ShippingAddressController;
 
 use App\Http\Controllers\API\CategoryController;
 use App\Http\Controllers\API\ColorController;
@@ -55,7 +58,7 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
     Route::get('/suppliers', function () {
         return Inertia::render('Admin/Suppliers/Index');
     })->name('admin.suppliers');
-
+});
     // API Routes
     Route::middleware(['auth', 'verified'])->prefix('api')->group(function () {
         // Categories
@@ -101,5 +104,20 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
         Route::post('/tags/{tagId}', [TagController::class, 'update']);
         Route::delete('/tags/{tagId}', [TagController::class, 'destroy']);
     });
-});
+    Route::middleware(['auth:sanctum', 'verified'])->group(function () {
+        Route::prefix('profile')->group(function () {
+            Route::get('/', [ProfileController::class, 'edit'])->name('profile.edit');
+        Route::prefix('shipping-addresses')->group(function () {
+            Route::get('/', [ShippingAddressController::class, 'index']);
+            Route::post('/', [ShippingAddressController::class, 'store']);
+            Route::put('/{address}', [ShippingAddressController::class, 'update']);
+            Route::delete('/{address}', [ShippingAddressController::class, 'destroy']);
+            Route::put('/{address}/set-default', [ShippingAddressController::class, 'setDefault']);
+        });
+        Route::prefix('checkout')->group(function () {
+            Route::get('/', [CheckoutController::class, 'index'])->name('checkout');
+            Route::post('/', [CheckoutController::class, 'store'])->name('checkout.store');
+        });
+    });
+
 require __DIR__.'/auth.php';

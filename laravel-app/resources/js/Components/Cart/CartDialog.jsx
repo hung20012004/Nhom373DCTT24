@@ -12,6 +12,7 @@ import { CartItem } from "@/Components/cart/CartItem";
 import { useCart } from "@/Contexts/CartContext";
 import { Link } from "@inertiajs/react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export const CartDialog = () => {
     const {
@@ -25,6 +26,8 @@ export const CartDialog = () => {
 
     const [error, setError] = useState(null);
     const [isUpdating, setIsUpdating] = useState(false);
+    const [selectedItems, setSelectedItems] = useState(new Set());
+    const [selectAll, setSelectAll] = useState(false);
 
     useEffect(() => {
         fetchCart();
@@ -33,7 +36,10 @@ export const CartDialog = () => {
     const calculateTotal = () => {
         if (!cart?.items?.length) return 0;
         return cart.items.reduce((total, item) => {
-            return total + item.variant.price * item.quantity;
+            if (selectedItems.has(item.cart_item_id)) {
+                return total + item.variant.price * item.quantity;
+            }
+            return total;
         }, 0);
     };
 
@@ -48,9 +54,9 @@ export const CartDialog = () => {
         } catch (err) {
             setError(
                 err.response?.data?.message ||
-                    "Failed to update quantity. Please try again."
+                    "Không thể cập nhật số lượng. Vui lòng thử lại."
             );
-            console.error("Update quantity error:", err);
+            console.error("Lỗi cập nhật số lượng:", err);
         } finally {
             setIsUpdating(false);
         }
@@ -61,8 +67,13 @@ export const CartDialog = () => {
             setIsUpdating(true);
             setError(null);
             await removeItem(cartItemId);
+            setSelectedItems(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(cartItemId);
+                return newSet;
+            });
         } catch (err) {
-            setError("Failed to remove item. Please try again.");
+            setError("Không thể xóa sản phẩm. Vui lòng thử lại.");
         } finally {
             setIsUpdating(false);
         }
@@ -73,11 +84,48 @@ export const CartDialog = () => {
             setIsUpdating(true);
             setError(null);
             await clearCart();
+            setSelectedItems(new Set());
+            setSelectAll(false);
         } catch (err) {
-            setError("Failed to clear cart. Please try again.");
+            setError("Không thể xóa giỏ hàng. Vui lòng thử lại.");
         } finally {
             setIsUpdating(false);
         }
+    };
+
+    const handleSelectItem = (cartItemId) => {
+        setSelectedItems(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(cartItemId)) {
+                newSet.delete(cartItemId);
+                setSelectAll(false);
+            } else {
+                newSet.add(cartItemId);
+                if (newSet.size === cart?.items?.length) {
+                    setSelectAll(true);
+                }
+            }
+            return newSet;
+        });
+    };
+
+    const handleSelectAll = () => {
+        if (selectAll) {
+            setSelectedItems(new Set());
+        } else {
+            setSelectedItems(new Set(cart?.items?.map(item => item.cart_item_id)));
+        }
+        setSelectAll(!selectAll);
+    };
+
+    const handleProceedToCheckout = () => {
+        if (selectedItems.size === 0) {
+            setError("Vui lòng chọn ít nhất một sản phẩm để thanh toán");
+            return;
+        }
+        // Chuyển đến trang thanh toán với các sản phẩm đã chọn
+        const selectedProductIds = Array.from(selectedItems);
+        window.location.href = `/checkout?items=${selectedProductIds.join(',')}`;
     };
 
     return (
@@ -92,7 +140,7 @@ export const CartDialog = () => {
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>Shopping Cart</DialogTitle>
+                    <DialogTitle>Giỏ Hàng</DialogTitle>
                 </DialogHeader>
 
                 {error && (
@@ -107,40 +155,55 @@ export const CartDialog = () => {
                     </div>
                 ) : cart?.items?.length ? (
                     <div className="flex flex-col h-full">
+                        <div className="p-2 border-b">
+                            <label className="flex items-center space-x-2">
+                                <Checkbox
+                                    checked={selectAll}
+                                    onCheckedChange={handleSelectAll}
+                                />
+                                <span>Chọn tất cả</span>
+                            </label>
+                        </div>
                         <div className="flex-grow max-h-[60vh] overflow-y-auto">
                             {cart.items.map((item) => (
-                                <CartItem
-                                    key={item.cart_item_id}
-                                    item={item}
-                                    onUpdateQuantity={handleUpdateQuantity}
-                                    onRemove={handleRemoveItem}
-                                />
+                                <div key={item.cart_item_id} className="flex items-center p-2">
+                                    <Checkbox
+                                        checked={selectedItems.has(item.cart_item_id)}
+                                        onCheckedChange={() => handleSelectItem(item.cart_item_id)}
+                                        className="mr-2"
+                                    />
+                                    <CartItem
+                                        item={item}
+                                        onUpdateQuantity={handleUpdateQuantity}
+                                        onRemove={handleRemoveItem}
+                                    />
+                                </div>
                             ))}
                         </div>
 
                         <div className="p-4 border-t mt-auto">
                             <div className="flex justify-between mb-4">
-                                <span className="font-medium">Total:</span>
+                                <span className="font-medium">Tổng tiền:</span>
                                 <span className="font-medium">
-                                    ${calculateTotal().toFixed(2)}
+                                    {calculateTotal().toLocaleString('vi-VN')}đ
                                 </span>
                             </div>
 
-                            <div className="flex gap-2">
+                            <div className="grid grid-cols-2 gap-2">
                                 <Button
                                     variant="outline"
-                                    className="flex-1"
                                     onClick={handleClearCart}
                                     disabled={isUpdating}
+                                    className="w-full"
                                 >
-                                    Clear Cart
+                                    Xóa giỏ hàng
                                 </Button>
                                 <Button
-                                    className="flex-1"
-                                    asChild
-                                    disabled={isUpdating}
+                                    onClick={handleProceedToCheckout}
+                                    disabled={isUpdating || selectedItems.size === 0}
+                                    className="w-full"
                                 >
-                                    <Link href="/checkout">Checkout</Link>
+                                    Thanh toán
                                 </Button>
                             </div>
                         </div>
@@ -148,9 +211,9 @@ export const CartDialog = () => {
                 ) : (
                     <div className="p-8 text-center text-gray-500">
                         <ShoppingCart className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                        <p className="mb-4">Your cart is empty</p>
+                        <p className="mb-4">Giỏ hàng của bạn đang trống</p>
                         <Button asChild>
-                            <Link href="/products">Continue Shopping</Link>
+                            <Link href="/products">Tiếp tục mua sắm</Link>
                         </Button>
                     </div>
                 )}

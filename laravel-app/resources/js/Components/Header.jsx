@@ -70,7 +70,7 @@ const Header = () => {
         })),
         {
             href: "/products",
-            label: "View All Categories",
+            label: "Tất cả sản phẩm",
         },
     ];
 
@@ -98,13 +98,13 @@ const Header = () => {
                         {/* Desktop Navigation */}
                         <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
                             <Link href="/" className={getLinkClasses("/")}>
-                                Home
+                                Trang chủ
                             </Link>
                             <Link
                                 href="/products"
                                 className={getLinkClasses("/products")}
                             >
-                                Products
+                                Tất cả sản phẩm
                             </Link>
 
                             {loading ? (
@@ -113,7 +113,7 @@ const Header = () => {
                                 </div>
                             ) : (
                                 <Dropdown
-                                    trigger="Categories"
+                                    trigger="Danh mục sản phẩm"
                                     items={dropdownItems}
                                 />
                             )}
@@ -122,7 +122,7 @@ const Header = () => {
                                 href="/about"
                                 className={getLinkClasses("/about")}
                             >
-                                About
+                                Về chúng tôi
                             </Link>
                         </div>
                     </div>
@@ -174,13 +174,13 @@ const Header = () => {
                                                 href="/profile"
                                                 className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                             >
-                                                Your Profile
+                                                Thông tin cá nhân
                                             </Link>
                                             <Link
                                                 href="/orders"
                                                 className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                             >
-                                                Your Orders
+                                                Lịch sử mua hàng
                                             </Link>
                                             <Link
                                                 href="/logout"
@@ -188,7 +188,7 @@ const Header = () => {
                                                 as="button"
                                                 className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                             >
-                                                Log Out
+                                                Đăng xuất
                                             </Link>
                                         </div>
                                     )}
@@ -199,13 +199,13 @@ const Header = () => {
                                         href="/login"
                                         className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-600 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                                     >
-                                        Sign in
+                                        Đăng nhập
                                     </Link>
                                     <Link
                                         href="/register"
                                         className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                                     >
-                                        Sign up
+                                        Đăng ký
                                     </Link>
                                 </div>
                             )}
@@ -233,14 +233,14 @@ const Header = () => {
                 <div className="sm:hidden bg-white border-b border-gray-200">
                     <div className="pt-2 pb-3 space-y-1">
                         <Link href="/" className={getMobileLinkClasses("/")}>
-                            Home
+                            Trang chủ
                         </Link>
 
                         <Link
                             href="/products"
                             className={getMobileLinkClasses("/products")}
                         >
-                            Products
+                            Tất cả sản phẩm
                         </Link>
 
                         {/* Mobile Categories Menu */}
@@ -253,7 +253,7 @@ const Header = () => {
                                     "/categories"
                                 )}`}
                             >
-                                <span>Categories</span>
+                                <span>Danh mục sản phẩm</span>
                                 <svg
                                     className={`w-5 h-5 transition-transform ${
                                         isCategoryMenuOpen
@@ -286,7 +286,7 @@ const Header = () => {
                                         href="/products"
                                         className="block py-2 pl-3 text-gray-500 hover:text-gray-700"
                                     >
-                                        View All Categories
+                                        Tất cả sản phẩm
                                     </Link>
                                 </div>
                             )}
@@ -296,7 +296,7 @@ const Header = () => {
                             href="/about"
                             className={getMobileLinkClasses("/about")}
                         >
-                            About
+                            Về chúng tôi
                         </Link>
                     </div>
 
@@ -324,7 +324,7 @@ const Header = () => {
                                             "/profile"
                                         )}
                                     >
-                                        Your Profile
+                                        Thông tin cá nhân
                                     </Link>
                                     <Link
                                         href="/orders"
@@ -332,7 +332,7 @@ const Header = () => {
                                             "/orders"
                                         )}
                                     >
-                                        Your Orders
+                                        Lịch sử mua hàng
                                     </Link>
                                     <Link
                                         href="/logout"
@@ -342,7 +342,7 @@ const Header = () => {
                                             "/logout"
                                         )}
                                     >
-                                        Log Out
+                                        Đăng xuất
                                     </Link>
                                 </div>
                             </>
@@ -352,13 +352,13 @@ const Header = () => {
                                     href="/login"
                                     className="flex justify-center w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
                                 >
-                                    Sign in
+                                    Đăng nhập
                                 </Link>
                                 <Link
                                     href="/register"
                                     className="flex justify-center w-full px-4 py-2 text-sm font-medium text-blue-600 bg-white border border-blue-600 rounded-md hover:bg-gray-50"
                                 >
-                                    Sign up
+                                    Đăng ký
                                 </Link>
                             </div>
                         )}
