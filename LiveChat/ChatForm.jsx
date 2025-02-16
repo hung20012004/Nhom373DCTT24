@@ -10,7 +10,7 @@ export default function ChatForm({ onMessageSent }) {
         if (!message.trim()) return;
 
         try {
-            await axios.post('/api/chat', { message, category, is_admin: false });
+            await axios.post('/api/chat', { message, category, is_admin: true });
             setMessage('');
             onMessageSent();
         } catch (error) {
