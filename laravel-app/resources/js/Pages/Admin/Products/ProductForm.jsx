@@ -155,7 +155,7 @@ export default function ProductForm({ product, onClose, onSuccess }) {
             if (error.response?.data?.errors) {
                 setErrors(error.response.data.errors);
             } else {
-                setGeneralError('An error occurred while saving the product. Please try again.');
+                setGeneralError(product.data);
             }
             console.error('Error submitting product:', error);
         } finally {
@@ -183,7 +183,7 @@ export default function ProductForm({ product, onClose, onSuccess }) {
         const newVariants = formData.variants.filter((_, i) => i !== index);
         setFormData({ ...formData, variants: newVariants });
     };
-
+    console.log('product prop in ProductForm:', product);
     return (
         <Dialog open={true} onOpenChange={onClose}>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">

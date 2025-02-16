@@ -57,45 +57,45 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
     Route::get('/suppliers', function () {
         return Inertia::render('Admin/Suppliers/Index');
     })->name('admin.suppliers');
-});
     // API Routes
-Route::middleware(['auth', 'verified'])->prefix('api')->group(function () {
-    // Categories
-    Route::get('/categories', [CategoryController::class, 'index']);
-    Route::post('/categories', [CategoryController::class, 'store']);
-    Route::post('/categories/{categoryId}', [CategoryController::class, 'update']);
-    Route::delete('/categories/{categoryId}', [CategoryController::class, 'destroy']);
-    // Colors
-    Route::get('/colors', [ColorController::class, 'index']);
-    Route::post('/colors', [ColorController::class, 'store']);
-    Route::post('/colors/{colorId}', [ColorController::class, 'update']);
-    Route::delete('/colors/{colorId}', [ColorController::class, 'destroy']);
-    // Products
-    Route::get('/products', [ProductController::class, 'index']);
-    Route::post('/products', [ProductController::class, 'store']);
-    Route::post('/products/{productId}', [ProductController::class, 'update']);
-    Route::delete('/products/{productId}', [ProductController::class, 'destroy']);
-    Route::get('/products/featured', [ProductController::class, 'featured']);
-    // Materials
-    Route::get('/materials', [MaterialController::class, 'index']);
-    Route::post('/materials', [MaterialController::class, 'store']);
-    Route::post('/materials/{materialId}', [MaterialController::class, 'update']);
-    Route::delete('/materials/{materialId}', [MaterialController::class, 'destroy']);
-    // Suppliers
-    Route::get('/suppliers', [SupplierController::class, 'index']);
-    Route::post('/suppliers', [SupplierController::class, 'store']);
-    Route::post('/suppliers/{supplierId}', [SupplierController::class, 'update']);
-    Route::delete('/suppliers/{supplierId}', [SupplierController::class, 'destroy']);
-    // Sizes
-    Route::get('/sizes', [SizeController::class, 'index']);
-    Route::post('/sizes', [SizeController::class, 'store']);
-    Route::post('/sizes/{sizeId}', [SizeController::class, 'update']);
-    Route::delete('/sizes/{sizeId}', [SizeController::class, 'destroy']);
-    // Tags
-    Route::get('/tags', [TagController::class, 'index']);
-    Route::post('/tags', [TagController::class, 'store']);
-    Route::post('/tags/{tagId}', [TagController::class, 'update']);
-    Route::delete('/tags/{tagId}', [TagController::class, 'destroy']);
+    Route::middleware(['auth', 'verified'])->prefix('api')->group(function () {
+        // Categories
+        Route::get('/categories', [CategoryController::class, 'index']);
+        Route::post('/categories', [CategoryController::class, 'store']);
+        Route::post('/categories/{categoryId}', [CategoryController::class, 'update']);
+        Route::delete('/categories/{categoryId}', [CategoryController::class, 'destroy']);
+        // Colors
+        Route::get('/colors', [ColorController::class, 'index']);
+        Route::post('/colors', [ColorController::class, 'store']);
+        Route::post('/colors/{colorId}', [ColorController::class, 'update']);
+        Route::delete('/colors/{colorId}', [ColorController::class, 'destroy']);
+        // Products
+        Route::get('/products', [ProductController::class, 'index']);
+        Route::post('/products', [ProductController::class, 'store']);
+        Route::post('/products/{productId}', [ProductController::class, 'update']);
+        Route::delete('/products/{productId}', [ProductController::class, 'destroy']);
+        Route::get('/products/featured', [ProductController::class, 'featured']);
+        // Materials
+        Route::get('/materials', [MaterialController::class, 'index']);
+        Route::post('/materials', [MaterialController::class, 'store']);
+        Route::post('/materials/{materialId}', [MaterialController::class, 'update']);
+        Route::delete('/materials/{materialId}', [MaterialController::class, 'destroy']);
+        // Suppliers
+        Route::get('/suppliers', [SupplierController::class, 'index']);
+        Route::post('/suppliers', [SupplierController::class, 'store']);
+        Route::post('/suppliers/{supplierId}', [SupplierController::class, 'update']);
+        Route::delete('/suppliers/{supplierId}', [SupplierController::class, 'destroy']);
+        // Sizes
+        Route::get('/sizes', [SizeController::class, 'index']);
+        Route::post('/sizes', [SizeController::class, 'store']);
+        Route::post('/sizes/{sizeId}', [SizeController::class, 'update']);
+        Route::delete('/sizes/{sizeId}', [SizeController::class, 'destroy']);
+        // Tags
+        Route::get('/tags', [TagController::class, 'index']);
+        Route::post('/tags', [TagController::class, 'store']);
+        Route::post('/tags/{tagId}', [TagController::class, 'update']);
+        Route::delete('/tags/{tagId}', [TagController::class, 'destroy']);
+    });
 });
 Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::prefix('profile')->group(function () {

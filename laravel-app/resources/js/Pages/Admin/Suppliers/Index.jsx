@@ -128,12 +128,31 @@ export default function SupplierIndex() {
 
     return (
         <AdminLayout>
-            <Head title="Suppliers Management" />
+            <Head title="Quản lý nhà cung cấp" />
 
             <div className="container mx-auto py-6 px-4">
                 <Breadcrumb items={breadcrumbItems} />
 
-                {/* ... existing header section ... */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                    <h1 className="text-3xl font-bold text-gray-900">Nhà cung cấp</h1>
+                    <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                        <Input
+                            type="text"
+                            placeholder="Tìm kiếm nhà cung cấp..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="w-full sm:w-64"
+                        />
+                        <Button
+                            onClick={() => {
+                                setEditSupplier(null);
+                                setShowForm(true);
+                            }}
+                        >
+                            Thêm nhà cung cấp mới
+                        </Button>
+                    </div>
+                </div>
 
                 <div className="bg-white rounded-lg shadow overflow-hidden">
                     <div className="overflow-x-auto">

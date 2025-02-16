@@ -12,13 +12,6 @@ import {
     TableHeader,
     TableRow,
 } from '@/Components/ui/table';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
 import ProductForm from './ProductForm';
 import Breadcrumb from '@/Components/Breadcrumb';
 import axios from 'axios';
@@ -38,7 +31,7 @@ export default function Index() {
     });
     const [sortField, setSortField] = useState('name');
     const [sortDirection, setSortDirection] = useState('asc');
-
+    console.log('editProduct in Index:', editProduct);
     const fetchProducts = async () => {
         try {
             setLoading(true);
@@ -243,7 +236,7 @@ export default function Index() {
                                                     <Button
                                                         variant="destructive"
                                                         className="bg-red-600 hover:bg-red-700 text-white"
-                                                        onClick={() => handleDelete(product.id)}
+                                                        onClick={() => handleDelete(product.product_id)}
                                                     >
                                                         Delete
                                                     </Button>

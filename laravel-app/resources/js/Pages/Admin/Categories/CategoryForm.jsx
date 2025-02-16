@@ -74,8 +74,8 @@ export default function CategoryForm({ category, onClose, onSuccess }) {
             );
             return response.data.secure_url;
         } catch (error) {
-            console.error('Error uploading to Cloudinary:', error);
-            throw new Error('Failed to upload image');
+            console.error('Lỗi tải ảnh lên Cloudinary:', error);
+            throw new Error('Không thể tải ảnh lên');
         }
     };
 
@@ -119,9 +119,9 @@ export default function CategoryForm({ category, onClose, onSuccess }) {
             if (error.response?.data?.errors) {
                 setErrors(error.response.data.errors);
             } else {
-                setGeneralError('An error occurred while saving the category. Please try again.');
+                setGeneralError('Đã xảy ra lỗi khi lưu loại sản phẩm. Vui lòng thử lại.');
             }
-            console.error('Error submitting category:', error);
+            console.error('Lỗi gửi loại sản phẩm:', error);
         } finally {
             setLoading(false);
         }
@@ -149,7 +149,7 @@ export default function CategoryForm({ category, onClose, onSuccess }) {
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>
-                        {category ? 'Edit Category' : 'Add New Category'}
+                        {category ? 'Chỉnh sửa loại sản phẩm' : 'Thêm loại sản phẩm mới'}
                     </DialogTitle>
                 </DialogHeader>
 
@@ -161,7 +161,7 @@ export default function CategoryForm({ category, onClose, onSuccess }) {
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="space-y-2">
-                        <Label>Category Image</Label>
+                        <Label>Hình ảnh</Label>
                         <div className="flex items-center gap-4">
                             {imagePreview && (
                                 <div className="relative">
@@ -199,7 +199,7 @@ export default function CategoryForm({ category, onClose, onSuccess }) {
                     {/* Rest of the form fields remain the same */}
                     <div className="space-y-4">
                         <div>
-                            <Label htmlFor="name">Name</Label>
+                            <Label htmlFor="name">Tên</Label>
                             <Input
                                 id="name"
                                 value={formData.name}
@@ -221,7 +221,7 @@ export default function CategoryForm({ category, onClose, onSuccess }) {
                         </div>
 
                         <div>
-                            <Label htmlFor="description">Description</Label>
+                            <Label htmlFor="description">Mô tả</Label>
                             <Textarea
                                 id="description"
                                 value={formData.description}
@@ -237,7 +237,7 @@ export default function CategoryForm({ category, onClose, onSuccess }) {
                                 checked={formData.is_active}
                                 onCheckedChange={(checked) => setFormData({...formData, is_active: checked})}
                             />
-                            <Label htmlFor="is_active">Active</Label>
+                            <Label htmlFor="is_active">Hoạt động</Label>
                         </div>
                     </div>
 
@@ -248,14 +248,14 @@ export default function CategoryForm({ category, onClose, onSuccess }) {
                             onClick={onClose}
                             disabled={loading}
                         >
-                            Cancel
+                            Hủy
                         </Button>
                         <Button
                             type="submit"
                             disabled={loading}
                             className="min-w-[100px]"
                         >
-                            {loading ? 'Saving...' : (category ? 'Update' : 'Create')}
+                            {loading ? 'Đang lưu...' : (category ? 'Cập nhật' : 'Tạo')}
                         </Button>
                     </div>
                 </form>
