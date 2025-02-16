@@ -11,13 +11,16 @@ class ProductVariantResource extends JsonResource
         return [
             'id' => $this->id,
             'product_id' => $this->product_id,
-            'size' => $this->size,
-            'color' => $this->color,
+            'size_id' => $this->size_id,
+            'color_id' => $this->color_id,
             'sku' => $this->sku,
             'price' => $this->price,
             'stock_quantity' => $this->stock_quantity,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+
+            'size' => new SizeResource($this->whenLoaded('size')),
+            'color' => new ColorResource($this->whenLoaded('color')),
         ];
     }
 }

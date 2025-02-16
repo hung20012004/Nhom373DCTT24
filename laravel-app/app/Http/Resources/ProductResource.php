@@ -32,7 +32,7 @@ class ProductResource extends JsonResource
             'material' => new MaterialResource($this->whenLoaded('material')),
             'tags' => TagResource::collection($this->whenLoaded('tags')),
             'images' => ProductImageResource::collection($this->whenLoaded('images')),
-            'variants' => ProductVariantResource::collection($this->whenLoaded('variants')),
+            'variants' => ProductVariantResource::collection($this->whenLoaded('variants'))
         ];
     }
 }

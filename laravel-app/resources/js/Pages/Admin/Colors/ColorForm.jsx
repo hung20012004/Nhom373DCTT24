@@ -40,7 +40,7 @@ export default function ColorForm({ color, onClose, onSuccess }) {
         try {
             const dataToSubmit = {
                 ...formData,
-                description: `${formData.description || ''}\nColor Code: ${formData.color || ''}`.trim(),
+                description: `${formData.description || ''}`.trim(),
             };
 
             if (color) {
@@ -51,9 +51,9 @@ export default function ColorForm({ color, onClose, onSuccess }) {
                     }
                 });
 
-                await axios.post(`/api/v1/colors/${color.id}`, changedFields);
+                await axios.post(`/admin/api/colors/${color.id}`, changedFields);
             } else {
-                await axios.post('/api/v1/colors', dataToSubmit);
+                await axios.post('/admin/api/colors', dataToSubmit);
             }
 
             onSuccess();

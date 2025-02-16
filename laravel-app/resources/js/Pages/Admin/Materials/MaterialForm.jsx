@@ -12,7 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import axios from 'axios';
 
-export default function SizeForm({ size, onClose, onSuccess }) {
+export default function MaterialForm({ material, onClose, onSuccess }) {
     const [formData, setFormData] = useState({
         name: '',
         description: ''
@@ -23,13 +23,13 @@ export default function SizeForm({ size, onClose, onSuccess }) {
     const [generalError, setGeneralError] = useState('');
 
     useEffect(() => {
-        if (size) {
+        if (material) {
             setFormData({
-                name: size.name || '',
-                description: size.description || ''
+                name: material.name || '',
+                description: material.description || ''
             });
         }
-    }, [size]);
+    }, [material]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -38,21 +38,17 @@ export default function SizeForm({ size, onClose, onSuccess }) {
         setGeneralError('');
 
         try {
-            const dataToSubmit = {
-                ...formData,
-            };
-
-            if (size) {
+            if (material) {
                 const changedFields = {};
-                Object.keys(dataToSubmit).forEach((key) => {
-                    if (dataToSubmit[key] !== size[key]) {
-                        changedFields[key] = dataToSubmit[key];
+                Object.keys(formData).forEach(key => {
+                    if (formData[key] !== material[key]) {
+                        changedFields[key] = formData[key];
                     }
                 });
 
-                await axios.post(`/admin/api/sizes/${size.id}`, changedFields);
+                await axios.post(`/admin/api/materials/${material.id}`, changedFields);
             } else {
-                await axios.post('/admin/api/sizes', dataToSubmit);
+                await axios.post('/admin/api/materials', formData);
             }
 
             onSuccess();
@@ -60,9 +56,9 @@ export default function SizeForm({ size, onClose, onSuccess }) {
             if (error.response?.data?.errors) {
                 setErrors(error.response.data.errors);
             } else {
-                setGeneralError('An error occurred while saving the size. Please try again.');
+                setGeneralError('An error occurred while saving the material. Please try again.');
             }
-            console.error('Error submitting size:', error);
+            console.error('Error submitting material:', error);
         } finally {
             setLoading(false);
         }
@@ -73,7 +69,7 @@ export default function SizeForm({ size, onClose, onSuccess }) {
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>
-                        {size ? 'Edit Size' : 'Add New Size'}
+                        {material ? 'Edit Material' : 'Add New Material'}
                     </DialogTitle>
                 </DialogHeader>
 
@@ -92,9 +88,11 @@ export default function SizeForm({ size, onClose, onSuccess }) {
                                 value={formData.name}
                                 onChange={(e) => setFormData({...formData, name: e.target.value})}
                                 required
+                                placeholder="Enter material name"
                             />
                             {errors.name && <span className="text-red-500 text-sm">{errors.name}</span>}
                         </div>
+
                         <div>
                             <Label htmlFor="description">Description</Label>
                             <Textarea
@@ -102,6 +100,7 @@ export default function SizeForm({ size, onClose, onSuccess }) {
                                 value={formData.description}
                                 onChange={(e) => setFormData({...formData, description: e.target.value})}
                                 rows={4}
+                                placeholder="Enter material description"
                             />
                             {errors.description && <span className="text-red-500 text-sm">{errors.description}</span>}
                         </div>
@@ -121,7 +120,7 @@ export default function SizeForm({ size, onClose, onSuccess }) {
                             disabled={loading}
                             className="min-w-[100px]"
                         >
-                            {loading ? 'Saving...' : (size ? 'Update' : 'Create')}
+                            {loading ? 'Saving...' : (material ? 'Update' : 'Create')}
                         </Button>
                     </div>
                 </form>

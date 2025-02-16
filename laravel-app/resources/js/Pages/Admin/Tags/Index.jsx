@@ -34,7 +34,7 @@ export default function Index() {
     const fetchTags = async () => {
         try {
             setLoading(true);
-            const response = await axios.get('/api/v1/tags', {
+            const response = await axios.get('/admin/api/tags', {
                 params: {
                     search,
                     page: pagination.current_page,
@@ -81,7 +81,7 @@ export default function Index() {
     const handleDelete = async (tagId) => {
         if (confirm('Are you sure you want to delete this tag?')) {
             try {
-                const response = await axios.delete(`/api/v1/tags/${tagId}`);
+                const response = await axios.delete(`/admin/api/tags/${tagId}`);
                 if (response.status === 200) {
                     fetchTags();
                     alert('Tag deleted successfully');
@@ -144,7 +144,6 @@ export default function Index() {
                             className="w-full sm:w-64"
                         />
                         <Button
-                            className="bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto"
                             onClick={() => {
                                 setEditTag(null);
                                 setShowForm(true);
