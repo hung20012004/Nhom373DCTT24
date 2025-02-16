@@ -24,8 +24,8 @@ export default function SupplierForm({ supplier, onClose, onSuccess }) {
         email: '',
         address: '',
         description: '',
-        is_active: true,
-        logo_url: ''
+        logo_url: '',
+        is_active: true
     });
 
     const [loading, setLoading] = useState(false);
@@ -43,8 +43,8 @@ export default function SupplierForm({ supplier, onClose, onSuccess }) {
                 email: supplier.email || '',
                 address: supplier.address || '',
                 description: supplier.description || '',
-                is_active: supplier.is_active === 1,
-                logo_url: supplier.logo_url || ''
+                logo_url: supplier.logo_url || '',
+                is_active: supplier.is_active === 1
             });
             setImagePreview(supplier.logo_url || null);
         }
@@ -147,7 +147,7 @@ export default function SupplierForm({ supplier, onClose, onSuccess }) {
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="space-y-2">
-                        <Label>Company Logo</Label>
+                        <Label>Supplier Logo</Label>
                         <div className="flex items-center gap-4">
                             {imagePreview && (
                                 <div className="relative">
@@ -184,7 +184,7 @@ export default function SupplierForm({ supplier, onClose, onSuccess }) {
 
                     <div className="space-y-4">
                         <div>
-                            <Label htmlFor="name">Company Name</Label>
+                            <Label htmlFor="name">Name</Label>
                             <Input
                                 id="name"
                                 value={formData.name}
@@ -195,7 +195,7 @@ export default function SupplierForm({ supplier, onClose, onSuccess }) {
                         </div>
 
                         <div>
-                            <Label htmlFor="contact_name">Contact Person</Label>
+                            <Label htmlFor="contact_name">Contact Name</Label>
                             <Input
                                 id="contact_name"
                                 value={formData.contact_name}
@@ -206,7 +206,7 @@ export default function SupplierForm({ supplier, onClose, onSuccess }) {
                         </div>
 
                         <div>
-                            <Label htmlFor="phone">Phone Number</Label>
+                            <Label htmlFor="phone">Phone</Label>
                             <Input
                                 id="phone"
                                 value={formData.phone}
@@ -217,7 +217,7 @@ export default function SupplierForm({ supplier, onClose, onSuccess }) {
                         </div>
 
                         <div>
-                            <Label htmlFor="email">Email Address</Label>
+                            <Label htmlFor="email">Email</Label>
                             <Input
                                 id="email"
                                 type="email"
@@ -230,11 +230,10 @@ export default function SupplierForm({ supplier, onClose, onSuccess }) {
 
                         <div>
                             <Label htmlFor="address">Address</Label>
-                            <Textarea
+                            <Input
                                 id="address"
                                 value={formData.address}
                                 onChange={(e) => setFormData({...formData, address: e.target.value})}
-                                rows={2}
                                 required
                             />
                             {errors.address && <span className="text-red-500 text-sm">{errors.address}</span>}
@@ -246,7 +245,7 @@ export default function SupplierForm({ supplier, onClose, onSuccess }) {
                                 id="description"
                                 value={formData.description}
                                 onChange={(e) => setFormData({...formData, description: e.target.value})}
-                                rows={3}
+                                rows={4}
                             />
                             {errors.description && <span className="text-red-500 text-sm">{errors.description}</span>}
                         </div>

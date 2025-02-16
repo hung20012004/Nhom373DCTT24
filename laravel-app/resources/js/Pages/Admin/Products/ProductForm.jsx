@@ -68,18 +68,20 @@ export default function ProductForm({ product, onClose, onSuccess }) {
     useEffect(() => {
         const fetchFormData = async () => {
             try {
-                const [categoriesRes, tagsRes, sizesRes, colorsRes] =
+                const [categoriesRes, materialsRes, tagsRes, sizesRes, colorsRes] =
                     await Promise.all([
                         axios.get('/admin/api/categories'),
+                        axios.get('/admin/api/materials'),
                         axios.get('/admin/api/tags'),
                         axios.get('/admin/api/sizes'),
                         axios.get('/admin/api/colors')
                     ]);
 
-                setCategories(categoriesRes.data);
-                setTags(tagsRes.data);
-                setSizes(sizesRes.data);
-                setColors(colorsRes.data);
+                setCategories(categoriesRes.data.data);
+                setMaterials(materialsRes.data.data);
+                setTags(tagsRes.data.data);
+                setSizes(sizesRes.data.data);
+                setColors(colorsRes.data.data);
             } catch (error) {
                 setGeneralError('Lỗi không load được dữ liệu');
                 console.error('Error fetching form data:', error);

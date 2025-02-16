@@ -42,7 +42,7 @@ export default function Index() {
     const fetchProducts = async () => {
         try {
             setLoading(true);
-            const response = await axios.get('/admin/products', {
+            const response = await axios.get('/admin/api/products', {
                 params: {
                     search,
                     page: pagination.current_page,
@@ -90,7 +90,7 @@ export default function Index() {
     const handleDelete = async (productId) => {
         if (confirm('Are you sure you want to delete this product?')) {
             try {
-                await axios.delete(`/admin/products/${productId}`);
+                await axios.delete(`/admin/api/products/${productId}`);
                 fetchProducts();
             } catch (error) {
                 console.error('Error deleting product:', error);
@@ -99,7 +99,7 @@ export default function Index() {
     };
 
     const breadcrumbItems = [
-        { label: 'Products', href: '/admin/products' }
+        { label: 'Products', href: '/admin/api/products' }
     ];
 
     const renderPagination = () => {

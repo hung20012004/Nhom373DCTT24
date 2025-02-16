@@ -10,10 +10,6 @@ use App\Http\Controllers\API\BannerController;
 use App\Http\Controllers\API\SizeController;
 use App\Http\Controllers\API\TagController;
 use App\Http\Controllers\API\CartController;
-use App\Http\Controllers\API\BannerController;
-use App\Http\Controllers\API\SizeController;
-use App\Http\Controllers\API\TagController;
-use App\Http\Controllers\API\CartController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {

@@ -133,44 +133,27 @@ export default function SupplierIndex() {
             <div className="container mx-auto py-6 px-4">
                 <Breadcrumb items={breadcrumbItems} />
 
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                    <h1 className="text-3xl font-bold text-gray-900">Suppliers</h1>
-                    <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                        <Input
-                            type="text"
-                            placeholder="Search suppliers..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            className="w-full sm:w-64"
-                        />
-                        <Button
-                            onClick={() => {
-                                setEditSupplier(null);
-                                setShowForm(true);
-                            }}
-                        >
-                            Add New Supplier
-                        </Button>
-                    </div>
-                </div>
+                {/* ... existing header section ... */}
 
                 <div className="bg-white rounded-lg shadow overflow-hidden">
                     <div className="overflow-x-auto">
                         <Table>
                             <TableHeader>
                                 <TableRow className="bg-gray-50">
+                                    <TableHead className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Logo</TableHead>
                                     <SortableHeader field="name">Name</SortableHeader>
                                     <SortableHeader field="contact_name">Contact Name</SortableHeader>
                                     <SortableHeader field="email">Email</SortableHeader>
                                     <SortableHeader field="phone">Phone</SortableHeader>
                                     <TableHead className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address</TableHead>
+                                    <SortableHeader field="is_active">Status</SortableHeader>
                                     <TableHead className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {loading ? (
                                     <TableRow>
-                                        <TableCell colSpan={6} className="text-center py-4">
+                                        <TableCell colSpan={8} className="text-center py-4">
                                             <div className="flex justify-center">
                                                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
                                             </div>
@@ -178,7 +161,7 @@ export default function SupplierIndex() {
                                     </TableRow>
                                 ) : !suppliers || suppliers.length === 0 ? (
                                     <TableRow>
-                                        <TableCell colSpan={6} className="text-center py-4 text-gray-500">
+                                        <TableCell colSpan={8} className="text-center py-4 text-gray-500">
                                             No suppliers found
                                         </TableCell>
                                     </TableRow>
@@ -188,6 +171,19 @@ export default function SupplierIndex() {
                                             key={supplier.id}
                                             className="hover:bg-gray-50 transition-colors"
                                         >
+                                            <TableCell className="py-4 px-6 text-sm text-gray-900">
+                                                {supplier.logo_url ? (
+                                                    <img
+                                                        src={supplier.logo_url}
+                                                        alt={`${supplier.name} logo`}
+                                                        className="w-10 h-10 object-cover rounded"
+                                                    />
+                                                ) : (
+                                                    <div className="w-10 h-10 bg-gray-200 rounded flex items-center justify-center">
+                                                        <span className="text-gray-500 text-xs">No logo</span>
+                                                    </div>
+                                                )}
+                                            </TableCell>
                                             <TableCell className="py-4 px-6 text-sm text-gray-900">{supplier.name}</TableCell>
                                             <TableCell className="py-4 px-6 text-sm text-gray-900">{supplier.contact_name}</TableCell>
                                             <TableCell className="py-4 px-6 text-sm text-gray-900">{supplier.email}</TableCell>
@@ -195,6 +191,15 @@ export default function SupplierIndex() {
                                             <TableCell className="py-4 px-6 text-sm text-gray-900">
                                                 {supplier.address?.substring(0, 50)}
                                                 {supplier.address?.length > 50 ? '...' : ''}
+                                            </TableCell>
+                                            <TableCell className="py-4 px-6 text-sm">
+                                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                                    supplier.is_active
+                                                    ? "bg-green-100 text-green-800"
+                                                    : "bg-gray-100 text-gray-800"
+                                                }`}>
+                                                    {supplier.is_active ? 'Active' : 'Inactive'}
+                                                </span>
                                             </TableCell>
                                             <TableCell className="py-4 px-6 text-sm text-gray-900">
                                                 <div className="flex gap-2">

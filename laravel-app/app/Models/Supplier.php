@@ -19,7 +19,8 @@ class Supplier extends Model
         'email',
         'address',
         'description',
-        'logo_url'
+        'logo_url',
+        'is_active'
     ];
 
     protected $casts = [
