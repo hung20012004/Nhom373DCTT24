@@ -34,7 +34,7 @@ export default function Index() {
     const fetchCategories = async () => {
         try {
             setLoading(true);
-            const response = await axios.get('/api/v1/categories', {
+            const response = await axios.get('/admin/api/categories', {
                 params: {
                     search,
                     page: pagination.current_page,
@@ -54,7 +54,7 @@ export default function Index() {
                 });
             }
         } catch (error) {
-            console.error('Error fetching categories:', error);
+            console.error('Lỗi khi tải loại sản phẩm:', error);
             setCategories([]);
         } finally {
             setLoading(false);
@@ -79,25 +79,22 @@ export default function Index() {
     };
 
     const handleDelete = async (categoryId) => {
-    if (confirm('Are you sure you want to delete this category?')) {
-        try {
-            const response = await axios.delete(`/api/v1/categories/${categoryId}`);
-            if (response.status === 200) {
-                // Reload danh sách categories
-                fetchCategories();
-                // Có thể thêm thông báo success
-                alert('Category deleted successfully');
+        if (confirm('Bạn có chắc chắn muốn xóa loại sản phẩm này không?')) {
+            try {
+                const response = await axios.delete(`/admin/api/categories/${categoryId}`);
+                if (response.status === 200) {
+                    fetchCategories();
+                    alert('Loại sản phẩm đã được xóa thành công');
+                }
+            } catch (error) {
+                console.error('Lỗi khi xóa loại sản phẩm:', error);
+                alert(error.response?.data?.message || `Lỗi khi xóa loại sản phẩm ${categoryId}`);
             }
-        } catch (error) {
-            console.error('Error deleting category:', error);
-            // Hiển thị error message từ server
-            alert(error.response?.data?.message || 'Error deleting category ${categoryId}');
         }
-    }
-};
+    };
 
     const breadcrumbItems = [
-        { label: 'Categories', href: '/admin/categories' }
+        { label: 'Loại sản phẩm', href: '/admin/categories' }
     ];
 
     const renderPagination = () => {
@@ -131,29 +128,28 @@ export default function Index() {
 
     return (
         <AdminLayout>
-            <Head title="Categories Management" />
+            <Head title="Quản lý loại sản phẩm" />
 
             <div className="container mx-auto py-6 px-4">
                 <Breadcrumb items={breadcrumbItems} />
 
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                    <h1 className="text-3xl font-bold text-gray-900">Categories</h1>
+                    <h1 className="text-3xl font-bold text-gray-900">Loại sản phẩm</h1>
                     <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
                         <Input
                             type="text"
-                            placeholder="Search categories..."
+                            placeholder="Tìm kiếm loại sản phẩm..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             className="w-full sm:w-64"
                         />
                         <Button
-                            className="bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto"
                             onClick={() => {
                                 setEditCategory(null);
                                 setShowForm(true);
                             }}
                         >
-                            Add New Category
+                            Thêm loại sản phẩm mới
                         </Button>
                     </div>
                 </div>
@@ -163,12 +159,12 @@ export default function Index() {
                         <Table>
                             <TableHeader>
                                 <TableRow className="bg-gray-50">
-                                    <TableHead className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</TableHead>
-                                    <SortableHeader field="name">Name</SortableHeader>
+                                    <TableHead className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hình ảnh</TableHead>
+                                    <SortableHeader field="name">Tên</SortableHeader>
                                     <SortableHeader field="slug">Slug</SortableHeader>
-                                    <SortableHeader field="is_active">Status</SortableHeader>
-                                    <TableHead className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</TableHead>
-                                    <TableHead className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</TableHead>
+                                    <SortableHeader field="is_active">Trạng thái</SortableHeader>
+                                    <TableHead className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mô tả</TableHead>
+                                    <TableHead className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hành động</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -183,7 +179,7 @@ export default function Index() {
                                 ) : !categories || categories.length === 0 ? (
                                     <TableRow>
                                         <TableCell colSpan={6} className="text-center py-4 text-gray-500">
-                                            No categories found
+                                            Không có loại sản phẩm nào
                                         </TableCell>
                                     </TableRow>
                                 ) : (
@@ -201,7 +197,7 @@ export default function Index() {
                                                     />
                                                 ) : (
                                                     <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
-                                                        <span className="text-gray-400">No image</span>
+                                                        <span className="text-gray-400">Không có hình ảnh</span>
                                                     </div>
                                                 )}
                                             </TableCell>
@@ -213,7 +209,7 @@ export default function Index() {
                                                         ? 'bg-green-100 text-green-800'
                                                         : 'bg-red-100 text-red-800'
                                                 }`}>
-                                                    {category.is_active ? 'Active' : 'Inactive'}
+                                                    {category.is_active ? 'Hoạt động' : 'Không hoạt động'}
                                                 </span>
                                             </TableCell>
                                             <TableCell className="py-4 px-6 text-sm text-gray-900">
@@ -230,14 +226,14 @@ export default function Index() {
                                                             setShowForm(true);
                                                         }}
                                                     >
-                                                        Edit
+                                                        Chỉnh sửa
                                                     </Button>
                                                     <Button
                                                         variant="destructive"
                                                         className="bg-red-600 hover:bg-red-700 text-white"
                                                         onClick={() => handleDelete(category.id)}
                                                     >
-                                                        Delete
+                                                        Xóa
                                                     </Button>
                                                 </div>
                                             </TableCell>
@@ -250,7 +246,7 @@ export default function Index() {
 
                     <div className="flex justify-between items-center p-4 border-t">
                         <div className="text-sm text-gray-600">
-                            Showing {categories.length} of {pagination.total} results
+                            Hiển thị {categories.length} trên {pagination.total} loại sản phẩm
                         </div>
                         <div className="flex gap-2">
                             {renderPagination()}

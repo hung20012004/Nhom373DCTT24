@@ -34,7 +34,7 @@ export default function Index() {
     const fetchColors = async () => {
         try {
             setLoading(true);
-            const response = await axios.get('/api/v1/colors', {
+            const response = await axios.get('/admin/api/colors', {
                 params: {
                     search,
                     page: pagination.current_page,
@@ -81,7 +81,7 @@ export default function Index() {
     const handleDelete = async (colorId) => {
         if (confirm('Are you sure you want to delete this color?')) {
             try {
-                const response = await axios.delete(`/api/v1/colors/${colorId}`);
+                const response = await axios.delete(`/admin/api/colors/${colorId}`);
                 if (response.status === 200) {
                     fetchColors();
                     alert('Color deleted successfully');
@@ -144,7 +144,6 @@ export default function Index() {
                             className="w-full sm:w-64"
                         />
                         <Button
-                            className="bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto"
                             onClick={() => {
                                 setEditColor(null);
                                 setShowForm(true);

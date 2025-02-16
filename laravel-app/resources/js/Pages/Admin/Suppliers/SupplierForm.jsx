@@ -13,17 +13,19 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Switch } from '@/components/ui/switch';
 import axios from 'axios';
 
-const CLOUDINARY_UPLOAD_PRESET = 'category_images';
+const CLOUDINARY_UPLOAD_PRESET = 'supplier_logos';
 const CLOUDINARY_CLOUD_NAME = 'deczn9jtq';
 
-export default function CategoryForm({ category, onClose, onSuccess }) {
+export default function SupplierForm({ supplier, onClose, onSuccess }) {
     const [formData, setFormData] = useState({
         name: '',
-        slug: '',
+        contact_name: '',
+        phone: '',
+        email: '',
+        address: '',
         description: '',
-        is_active: true,
-        display_order: 0,
-        image_url: ''
+        logo_url: '',
+        is_active: true
     });
 
     const [loading, setLoading] = useState(false);
@@ -33,24 +35,25 @@ export default function CategoryForm({ category, onClose, onSuccess }) {
     const [selectedFile, setSelectedFile] = useState(null);
 
     useEffect(() => {
-        if (category) {
+        if (supplier) {
             setFormData({
-                name: category.name || '',
-                slug: category.slug || '',
-                description: category.description || '',
-                is_active: category.is_active === 1,
-                display_order: category.display_order || 0,
-                image_url: category.image_url || ''
+                name: supplier.name || '',
+                contact_name: supplier.contact_name || '',
+                phone: supplier.phone || '',
+                email: supplier.email || '',
+                address: supplier.address || '',
+                description: supplier.description || '',
+                logo_url: supplier.logo_url || '',
+                is_active: supplier.is_active === 1
             });
-            setImagePreview(category.image_url || null);
+            setImagePreview(supplier.logo_url || null);
         }
-    }, [category]);
+    }, [supplier]);
 
     const handleImageChange = (event) => {
         const file = event.target.files[0];
         if (!file) return;
 
-        // Tạo preview cho file đã chọn
         const previewUrl = URL.createObjectURL(file);
         setImagePreview(previewUrl);
         setSelectedFile(file);
@@ -90,24 +93,24 @@ export default function CategoryForm({ category, onClose, onSuccess }) {
 
             if (selectedFile) {
                 const cloudinaryUrl = await uploadImageToCloudinary(selectedFile);
-                finalFormData.image_url = cloudinaryUrl;
+                finalFormData.logo_url = cloudinaryUrl;
             } else if (!imagePreview) {
-                finalFormData.image_url = '';
-            } else if (category) {
-                finalFormData.image_url = category.image_url;
+                finalFormData.logo_url = '';
+            } else if (supplier) {
+                finalFormData.logo_url = supplier.logo_url;
             }
 
-            if (category) {
+            if (supplier) {
                 const changedFields = {};
                 Object.keys(finalFormData).forEach(key => {
-                    if (finalFormData[key] !== category[key]) {
+                    if (finalFormData[key] !== supplier[key]) {
                         changedFields[key] = finalFormData[key];
                     }
                 });
 
-                await axios.post(`/admin/api/categories/${category.id}`, changedFields);
+                await axios.post(`/admin/api/suppliers/${supplier.id}`, changedFields);
             } else {
-                await axios.post('/admin/api/categories', finalFormData);
+                await axios.post('/admin/api/suppliers', finalFormData);
             }
 
             if (imagePreview && imagePreview.startsWith('blob:')) {
@@ -119,29 +122,12 @@ export default function CategoryForm({ category, onClose, onSuccess }) {
             if (error.response?.data?.errors) {
                 setErrors(error.response.data.errors);
             } else {
-                setGeneralError('An error occurred while saving the category. Please try again.');
+                setGeneralError('An error occurred while saving the supplier. Please try again.');
             }
-            console.error('Error submitting category:', error);
+            console.error('Error submitting supplier:', error);
         } finally {
             setLoading(false);
         }
-    };
-
-    const generateSlug = (name) => {
-        return name.toLowerCase()
-            .replace(/[^\w\s-]/g, '')
-            .replace(/\s+/g, '-')
-            .replace(/--+/g, '-')
-            .trim();
-    };
-
-    const handleNameChange = (e) => {
-        const name = e.target.value;
-        setFormData(prev => ({
-            ...prev,
-            name,
-            slug: generateSlug(name)
-        }));
     };
 
     return (
@@ -149,7 +135,7 @@ export default function CategoryForm({ category, onClose, onSuccess }) {
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>
-                        {category ? 'Edit Category' : 'Add New Category'}
+                        {supplier ? 'Edit Supplier' : 'Add New Supplier'}
                     </DialogTitle>
                 </DialogHeader>
 
@@ -161,7 +147,7 @@ export default function CategoryForm({ category, onClose, onSuccess }) {
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="space-y-2">
-                        <Label>Category Image</Label>
+                        <Label>Supplier Logo</Label>
                         <div className="flex items-center gap-4">
                             {imagePreview && (
                                 <div className="relative">
@@ -178,7 +164,7 @@ export default function CategoryForm({ category, onClose, onSuccess }) {
                                             }
                                             setImagePreview(null);
                                             setSelectedFile(null);
-                                            setFormData(prev => ({ ...prev, image_url: '' }));
+                                            setFormData(prev => ({ ...prev, logo_url: '' }));
                                         }}
                                         className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
                                     >
@@ -193,31 +179,64 @@ export default function CategoryForm({ category, onClose, onSuccess }) {
                                 disabled={loading}
                             />
                         </div>
-                        {errors.image_url && <span className="text-red-500 text-sm">{errors.image_url}</span>}
+                        {errors.logo_url && <span className="text-red-500 text-sm">{errors.logo_url}</span>}
                     </div>
 
-                    {/* Rest of the form fields remain the same */}
                     <div className="space-y-4">
                         <div>
                             <Label htmlFor="name">Name</Label>
                             <Input
                                 id="name"
                                 value={formData.name}
-                                onChange={handleNameChange}
+                                onChange={(e) => setFormData({...formData, name: e.target.value})}
                                 required
                             />
                             {errors.name && <span className="text-red-500 text-sm">{errors.name}</span>}
                         </div>
 
                         <div>
-                            <Label htmlFor="slug">Slug</Label>
+                            <Label htmlFor="contact_name">Contact Name</Label>
                             <Input
-                                id="slug"
-                                value={formData.slug}
-                                onChange={(e) => setFormData({...formData, slug: e.target.value})}
+                                id="contact_name"
+                                value={formData.contact_name}
+                                onChange={(e) => setFormData({...formData, contact_name: e.target.value})}
                                 required
                             />
-                            {errors.slug && <span className="text-red-500 text-sm">{errors.slug}</span>}
+                            {errors.contact_name && <span className="text-red-500 text-sm">{errors.contact_name}</span>}
+                        </div>
+
+                        <div>
+                            <Label htmlFor="phone">Phone</Label>
+                            <Input
+                                id="phone"
+                                value={formData.phone}
+                                onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                                required
+                            />
+                            {errors.phone && <span className="text-red-500 text-sm">{errors.phone}</span>}
+                        </div>
+
+                        <div>
+                            <Label htmlFor="email">Email</Label>
+                            <Input
+                                id="email"
+                                type="email"
+                                value={formData.email}
+                                onChange={(e) => setFormData({...formData, email: e.target.value})}
+                                required
+                            />
+                            {errors.email && <span className="text-red-500 text-sm">{errors.email}</span>}
+                        </div>
+
+                        <div>
+                            <Label htmlFor="address">Address</Label>
+                            <Input
+                                id="address"
+                                value={formData.address}
+                                onChange={(e) => setFormData({...formData, address: e.target.value})}
+                                required
+                            />
+                            {errors.address && <span className="text-red-500 text-sm">{errors.address}</span>}
                         </div>
 
                         <div>
@@ -255,7 +274,7 @@ export default function CategoryForm({ category, onClose, onSuccess }) {
                             disabled={loading}
                             className="min-w-[100px]"
                         >
-                            {loading ? 'Saving...' : (category ? 'Update' : 'Create')}
+                            {loading ? 'Saving...' : (supplier ? 'Update' : 'Create')}
                         </Button>
                     </div>
                 </form>

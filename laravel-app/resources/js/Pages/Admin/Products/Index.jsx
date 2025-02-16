@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import VariantDisplay from './VariantDisplay';
 import { Head } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { Button } from '@/Components/ui/button';
@@ -41,13 +42,14 @@ export default function Index() {
     const fetchProducts = async () => {
         try {
             setLoading(true);
-            const response = await axios.get('/api/v1/products', {
+            const response = await axios.get('/admin/api/products', {
                 params: {
                     search,
                     page: pagination.current_page,
                     per_page: pagination.per_page,
                     sort_field: sortField,
-                    sort_direction: sortDirection
+                    sort_direction: sortDirection,
+                    with: 'variants.color,variants.size,category, material, tag'
                 }
             });
 
@@ -88,7 +90,7 @@ export default function Index() {
     const handleDelete = async (productId) => {
         if (confirm('Are you sure you want to delete this product?')) {
             try {
-                await axios.delete(`/api/v1/products/${productId}`);
+                await axios.delete(`/admin/api/products/${productId}`);
                 fetchProducts();
             } catch (error) {
                 console.error('Error deleting product:', error);
@@ -97,7 +99,7 @@ export default function Index() {
     };
 
     const breadcrumbItems = [
-        { label: 'Products', href: '/admin/products' }
+        { label: 'Products', href: '/admin/api/products' }
     ];
 
     const renderPagination = () => {
@@ -147,7 +149,6 @@ export default function Index() {
                             className="w-full sm:w-64"
                         />
                         <Button
-                            className="bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto"
                             onClick={() => {
                                 setEditProduct(null);
                                 setShowForm(true);
@@ -163,9 +164,15 @@ export default function Index() {
                         <Table>
                             <TableHeader>
                                 <TableRow className="bg-gray-50">
+                                    <SortableHeader field="id">ID</SortableHeader>
                                     <SortableHeader field="brand">Brand</SortableHeader>
                                     <SortableHeader field="name">Name</SortableHeader>
                                     <SortableHeader field="category">Category</SortableHeader>
+                                    <SortableHeader field="category">Material</SortableHeader>
+                                    <SortableHeader field="category">Tag</SortableHeader>
+                                    <TableHead className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Variants
+                                    </TableHead>
                                     <SortableHeader field="price">Price</SortableHeader>
                                     <SortableHeader field="stock_quantity">Stock</SortableHeader>
                                     <TableHead className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</TableHead>
@@ -189,13 +196,23 @@ export default function Index() {
                                 ) : (
                                     products.map((product) => (
                                         <TableRow
-                                            key={product.id}
+                                            key={product.product_id}
                                             className="hover:bg-gray-50 transition-colors"
                                         >
+                                            <TableCell className="py-4 px-6 text-sm text-gray-900">{product.product_id}</TableCell>
                                             <TableCell className="py-4 px-6 text-sm text-gray-900">{product.brand}</TableCell>
                                             <TableCell className="py-4 px-6 text-sm text-gray-900">{product.name}</TableCell>
                                             <TableCell className="py-4 px-6 text-sm text-gray-900">
                                                 {product.category?.name || 'Uncategorized'}
+                                            </TableCell>
+                                            <TableCell className="py-4 px-6 text-sm text-gray-900">
+                                                {product.material?.name || 'Unknown material'}
+                                            </TableCell>
+                                            <TableCell className="py-4 px-6 text-sm text-gray-900">
+                                                {product.tag?.name || 'Unknown material'}
+                                            </TableCell>
+                                            <TableCell className="py-4 px-6">
+                                                <VariantDisplay variants={product.variants} />
                                             </TableCell>
                                             <TableCell className="py-4 px-6 text-sm text-gray-900">
                                                 ${product.price.toLocaleString()}

@@ -11,7 +11,7 @@ class Supplier extends Model
     use HasFactory;
 
     protected $table = 'suppliers';
-
+    protected $primaryKey = 'supplier_id';
     protected $fillable = [
         'name',
         'contact_name',
@@ -19,7 +19,8 @@ class Supplier extends Model
         'email',
         'address',
         'description',
-        'logo_url'
+        'logo_url',
+        'is_active'
     ];
 
     protected $casts = [
