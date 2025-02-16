@@ -1,13 +1,14 @@
 import '../css/app.css';
 import './bootstrap';
+
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-
-import Dashboard from './Pages/Profile/Dashboard';
-import AdminDashboard from './Pages/Admin/Dashboard';
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import AdminDashboard from "./Pages/Dashboard";
+import LiveChat from "./Pages/Admin/LiveChat/Index";
+import LiveChatUser from "./Pages/LiveChat/Index";
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -24,8 +25,9 @@ createInertiaApp({
         root.render(
             <Router>
                 <Routes>
-                    <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/admin" element={<AdminDashboard />} />
+                    <Route path="/admin/live-chat" element={<LiveChat />} />
+                    <Route path="/live-chat" element={<LiveChatUser />} />
                 </Routes>
                 <App {...props} />
             </Router>

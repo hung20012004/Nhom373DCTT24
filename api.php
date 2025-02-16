@@ -10,7 +10,7 @@ use App\Http\Controllers\Api\BannerController;
 use App\Http\Controllers\Api\SizeController;
 use App\Http\Controllers\Api\TagController;
 use App\Http\Controllers\Api\CartController;
-use App\Http\Controllers\Api\ChatController;
+use App\Http\Controllers\API\ChatController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -56,13 +56,8 @@ Route::prefix('v1')->group(function () {
         Route::put('/cart/{cart}', [CartController::class, 'update']);
         Route::delete('/cart/{cart}', [CartController::class, 'remove']);
     });
-    Route::prefix('v1')->group(function () {
-        Route::middleware('auth:sanctum')->group(function () {
-            Route::get('/chat', [ChatController::class, 'index']); // Get chat messages
-            Route::post('/chat', [ChatController::class, 'store']); // Send message
-            Route::post('/chat/{id}/update-status', [ChatController::class, 'updateStatus']); // Update message status
-        });
-    });
+        Route::get("/chat", [ChatController::class, "index"]);
+        Route::post("/chat", [ChatController::class, "store"]);
 });
 
 
