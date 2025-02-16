@@ -2,7 +2,6 @@
 use App\Http\Controllers\API\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ShippingAddressController;
-
 use App\Http\Controllers\API\CategoryController;
 use App\Http\Controllers\API\ColorController;
 use App\Http\Controllers\API\MaterialController;
@@ -60,64 +59,67 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
     })->name('admin.suppliers');
 });
     // API Routes
-    Route::middleware(['auth', 'verified'])->prefix('api')->group(function () {
-        // Categories
-        Route::get('/categories', [CategoryController::class, 'index']);
-        Route::post('/categories', [CategoryController::class, 'store']);
-        Route::post('/categories/{categoryId}', [CategoryController::class, 'update']);
-        Route::delete('/categories/{categoryId}', [CategoryController::class, 'destroy']);
-
-        // Colors
-        Route::get('/colors', [ColorController::class, 'index']);
-        Route::post('/colors', [ColorController::class, 'store']);
-        Route::post('/colors/{colorId}', [ColorController::class, 'update']);
-        Route::delete('/colors/{colorId}', [ColorController::class, 'destroy']);
-
-        // Products
-        Route::get('/products', [ProductController::class, 'index']);
-        Route::post('/products', [ProductController::class, 'store']);
-        Route::post('/products/{productId}', [ProductController::class, 'update']);
-        Route::delete('/products/{productId}', [ProductController::class, 'destroy']);
-        Route::get('/products/featured', [ProductController::class, 'featured']);
-
-        // Materials
-        Route::get('/materials', [MaterialController::class, 'index']);
-        Route::post('/materials', [MaterialController::class, 'store']);
-        Route::post('/materials/{materialId}', [MaterialController::class, 'update']);
-        Route::delete('/materials/{materialId}', [MaterialController::class, 'destroy']);
-
-        // Suppliers
-        Route::get('/suppliers', [SupplierController::class, 'index']);
-        Route::post('/suppliers', [SupplierController::class, 'store']);
-        Route::post('/suppliers/{supplierId}', [SupplierController::class, 'update']);
-        Route::delete('/suppliers/{supplierId}', [SupplierController::class, 'destroy']);
-
-        // Sizes
-        Route::get('/sizes', [SizeController::class, 'index']);
-        Route::post('/sizes', [SizeController::class, 'store']);
-        Route::post('/sizes/{sizeId}', [SizeController::class, 'update']);
-        Route::delete('/sizes/{sizeId}', [SizeController::class, 'destroy']);
-
-        // Tags
-        Route::get('/tags', [TagController::class, 'index']);
-        Route::post('/tags', [TagController::class, 'store']);
-        Route::post('/tags/{tagId}', [TagController::class, 'update']);
-        Route::delete('/tags/{tagId}', [TagController::class, 'destroy']);
+Route::middleware(['auth', 'verified'])->prefix('api')->group(function () {
+    // Categories
+    Route::get('/categories', [CategoryController::class, 'index']);
+    Route::post('/categories', [CategoryController::class, 'store']);
+    Route::post('/categories/{categoryId}', [CategoryController::class, 'update']);
+    Route::delete('/categories/{categoryId}', [CategoryController::class, 'destroy']);
+    // Colors
+    Route::get('/colors', [ColorController::class, 'index']);
+    Route::post('/colors', [ColorController::class, 'store']);
+    Route::post('/colors/{colorId}', [ColorController::class, 'update']);
+    Route::delete('/colors/{colorId}', [ColorController::class, 'destroy']);
+    // Products
+    Route::get('/products', [ProductController::class, 'index']);
+    Route::post('/products', [ProductController::class, 'store']);
+    Route::post('/products/{productId}', [ProductController::class, 'update']);
+    Route::delete('/products/{productId}', [ProductController::class, 'destroy']);
+    Route::get('/products/featured', [ProductController::class, 'featured']);
+    // Materials
+    Route::get('/materials', [MaterialController::class, 'index']);
+    Route::post('/materials', [MaterialController::class, 'store']);
+    Route::post('/materials/{materialId}', [MaterialController::class, 'update']);
+    Route::delete('/materials/{materialId}', [MaterialController::class, 'destroy']);
+    // Suppliers
+    Route::get('/suppliers', [SupplierController::class, 'index']);
+    Route::post('/suppliers', [SupplierController::class, 'store']);
+    Route::post('/suppliers/{supplierId}', [SupplierController::class, 'update']);
+    Route::delete('/suppliers/{supplierId}', [SupplierController::class, 'destroy']);
+    // Sizes
+    Route::get('/sizes', [SizeController::class, 'index']);
+    Route::post('/sizes', [SizeController::class, 'store']);
+    Route::post('/sizes/{sizeId}', [SizeController::class, 'update']);
+    Route::delete('/sizes/{sizeId}', [SizeController::class, 'destroy']);
+    // Tags
+    Route::get('/tags', [TagController::class, 'index']);
+    Route::post('/tags', [TagController::class, 'store']);
+    Route::post('/tags/{tagId}', [TagController::class, 'update']);
+    Route::delete('/tags/{tagId}', [TagController::class, 'destroy']);
+});
+Route::middleware(['auth:sanctum', 'verified'])->group(function () {
+    Route::prefix('profile')->group(function () {
+        Route::get('/', [ProfileController::class, 'edit'])->name('profile.edit');
+        Route::patch('/', [ProfileController::class, 'update'])->name('profile.update');
+        Route::delete('/', [ProfileController::class, 'destroy'])->name('profile.destroy');
     });
-    Route::middleware(['auth:sanctum', 'verified'])->group(function () {
-        Route::prefix('profile')->group(function () {
-            Route::get('/', [ProfileController::class, 'edit'])->name('profile.edit');
-        Route::prefix('shipping-addresses')->group(function () {
-            Route::get('/', [ShippingAddressController::class, 'index']);
-            Route::post('/', [ShippingAddressController::class, 'store']);
-            Route::put('/{address}', [ShippingAddressController::class, 'update']);
-            Route::delete('/{address}', [ShippingAddressController::class, 'destroy']);
-            Route::put('/{address}/set-default', [ShippingAddressController::class, 'setDefault']);
-        });
-        Route::prefix('checkout')->group(function () {
-            Route::get('/', [CheckoutController::class, 'index'])->name('checkout');
-            Route::post('/', [CheckoutController::class, 'store'])->name('checkout.store');
-        });
+    Route::prefix('cart')->group(function () {
+        Route::get('/', [CartController::class, 'index'])->name('cart.index');
+        Route::post('/add', [CartController::class, 'add'])->name('cart.add');
+        Route::put('/{cartItem}', [CartController::class, 'update'])->name('cart.update');
+        Route::delete('/{cartItem}', [CartController::class, 'remove'])->name('cart.remove');
+        Route::delete('/', [CartController::class, 'clear'])->name('cart.clear');
     });
-
+    Route::prefix('shipping-addresses')->group(function () {
+        Route::get('/', [ShippingAddressController::class, 'index']);
+        Route::post('/', [ShippingAddressController::class, 'store']);
+        Route::put('/{address}', [ShippingAddressController::class, 'update']);
+        Route::delete('/{address}', [ShippingAddressController::class, 'destroy']);
+        Route::put('/{address}/set-default', [ShippingAddressController::class, 'setDefault']);
+    });
+    Route::prefix('checkout')->group(function () {
+        Route::get('/', [CheckoutController::class, 'index'])->name('checkout');
+        Route::post('/', [CheckoutController::class, 'store'])->name('checkout.store');
+    });
+});
 require __DIR__.'/auth.php';
