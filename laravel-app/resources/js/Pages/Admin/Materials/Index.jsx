@@ -34,7 +34,7 @@ export default function MaterialIndex() {
     const fetchMaterials = async () => {
         try {
             setLoading(true);
-            const response = await axios.get('api/v1/materials', {
+            const response = await axios.get('/api/v1/materials', {
                 params: {
                     search,
                     page: pagination.current_page,

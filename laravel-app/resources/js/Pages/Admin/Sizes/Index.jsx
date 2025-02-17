@@ -34,7 +34,7 @@ export default function Index() {
     const fetchSizes = async () => {
         try {
             setLoading(true);
-            const response = await axios.get('api/v1/sizes', {
+            const response = await axios.get('/api/v1/sizes', {
                 params: {
                     search,
                     page: pagination.current_page,

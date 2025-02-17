@@ -34,7 +34,7 @@ export default function Index() {
     const fetchTags = async () => {
         try {
             setLoading(true);
-            const response = await axios.get('api/v1/tags', {
+            const response = await axios.get('/api/v1/tags', {
                 params: {
                     search,
                     page: pagination.current_page,

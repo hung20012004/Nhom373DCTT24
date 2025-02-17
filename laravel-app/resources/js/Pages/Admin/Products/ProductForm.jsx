@@ -70,11 +70,11 @@ export default function ProductForm({ product, onClose, onSuccess }) {
             try {
                 const [categoriesRes, materialsRes, tagsRes, sizesRes, colorsRes] =
                     await Promise.all([
-                        axios.get('/admin/api/categories'),
-                        axios.get('/admin/api/materials'),
-                        axios.get('/admin/api/tags'),
-                        axios.get('/admin/api/sizes'),
-                        axios.get('/admin/api/colors')
+                        axios.get('/api/v1/categories'),
+                        axios.get('/api/v1/materials'),
+                        axios.get('/api/v1/tags'),
+                        axios.get('/api/v1/sizes'),
+                        axios.get('/api/v1/colors')
                     ]);
 
                 setCategories(categoriesRes.data.data);

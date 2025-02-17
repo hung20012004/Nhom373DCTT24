@@ -34,7 +34,7 @@ export default function SupplierIndex() {
     const fetchSuppliers = async () => {
         try {
             setLoading(true);
-            const response = await axios.get('api/v1/suppliers', {
+            const response = await axios.get('/api/v1/suppliers', {
                 params: {
                     search,
                     page: pagination.current_page,

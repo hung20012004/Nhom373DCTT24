@@ -34,7 +34,7 @@ export default function Index() {
     const fetchColors = async () => {
         try {
             setLoading(true);
-            const response = await axios.get('api/v1/colors', {
+            const response = await axios.get('/api/v1/colors', {
                 params: {
                     search,
                     page: pagination.current_page,
