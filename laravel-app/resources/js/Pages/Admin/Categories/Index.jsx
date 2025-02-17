@@ -34,7 +34,7 @@ export default function Index() {
     const fetchCategories = async () => {
         try {
             setLoading(true);
-            const response = await axios.get('/admin/api/categories', {
+            const response = await axios.get('/api/v1/categories', {
                 params: {
                     search,
                     page: pagination.current_page,
