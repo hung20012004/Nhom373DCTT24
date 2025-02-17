@@ -35,7 +35,7 @@ export default function Index() {
     const fetchProducts = async () => {
         try {
             setLoading(true);
-            const response = await axios.get('/admin/api/products', {
+            const response = await axios.get('/api/v1/products', {
                 params: {
                     search,
                     page: pagination.current_page,

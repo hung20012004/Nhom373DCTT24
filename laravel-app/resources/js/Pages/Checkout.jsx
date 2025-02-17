@@ -41,7 +41,7 @@ const CheckoutPage = () => {
     };
 
     const selectedItems = cart?.items?.filter(item =>
-        selectedItemIds.includes(item.cart_item_id.toString())
+        item?.cart_item_id && selectedItemIds.includes(item.cart_item_id.toString())
     ) || [];
 
     const calculateSubtotal = () => {
