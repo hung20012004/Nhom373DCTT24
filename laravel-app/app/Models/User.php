@@ -7,8 +7,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-
-class User extends Authenticatable
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, Notifiable;
 
@@ -35,10 +35,10 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'username',
+        'role_id',
+        'note',
         'is_active',
         'last_login',
-        'note'
     ];
 
     /**
@@ -131,7 +131,8 @@ class User extends Authenticatable
             ->where('is_default', true);
     }
     public function role()
-{
-    return $this->belongsTo(Role::class, 'role_id');
-}
+    {
+        return $this->belongsTo(Role::class, 'role_id');
+    }
+
 }

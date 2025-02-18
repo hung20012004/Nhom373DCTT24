@@ -3,27 +3,25 @@ import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
-import { Head, useForm, Link } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 
-export default function ResetPassword({ token, email }) {
+export default function SetPassword({ userId, email }) {
     const { data, setData, post, processing, errors, reset } = useForm({
-        token: token,
-        email: email,
+        user_id: userId,
         password: '',
         password_confirmation: '',
     });
 
     const submit = (e) => {
         e.preventDefault();
-
-        post(route('password.store'), {
+        post(route('password.set'), {
             onFinish: () => reset('password', 'password_confirmation'),
         });
     };
 
     return (
         <GuestLayout>
-            <Head title="Đặt lại mật khẩu" />
+            <Head title="Đặt mật khẩu" />
 
             <div className="mb-8 flex flex-col items-center justify-center">
                 <Link href="/">
@@ -39,31 +37,26 @@ export default function ResetPassword({ token, email }) {
                     />
                 </Link>
 
-                <h1 className="mt-4 text-3xl font-bold text-gray-800">Đặt lại mật khẩu</h1>
-                <p className="mt-2 text-sm text-gray-600">Tạo mật khẩu mới cho tài khoản của bạn</p>
+                <h1 className="mt-4 text-3xl font-bold text-gray-800">Đặt mật khẩu</h1>
+                <p className="mt-2 text-sm text-gray-600">
+                    Email của bạn đã được xác thực. Vui lòng đặt mật khẩu cho tài khoản.
+                </p>
             </div>
 
             <form onSubmit={submit} className="space-y-6">
                 <div>
                     <InputLabel htmlFor="email" value="Email" className="text-sm font-medium text-gray-700" />
-
                     <TextInput
                         id="email"
                         type="email"
-                        name="email"
-                        value={data.email}
+                        value={email}
                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                        autoComplete="username"
-                        onChange={(e) => setData('email', e.target.value)}
-                        disabled={email}
+                        disabled
                     />
-
-                    <InputError message={errors.email} className="mt-2" />
                 </div>
 
                 <div>
-                    <InputLabel htmlFor="password" value="Mật khẩu mới" className="text-sm font-medium text-gray-700" />
-
+                    <InputLabel htmlFor="password" value="Mật khẩu" className="text-sm font-medium text-gray-700" />
                     <TextInput
                         id="password"
                         type="password"
@@ -71,46 +64,40 @@ export default function ResetPassword({ token, email }) {
                         value={data.password}
                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                         autoComplete="new-password"
-                        isFocused={true}
                         onChange={(e) => setData('password', e.target.value)}
                         placeholder="••••••••"
                     />
-
                     <InputError message={errors.password} className="mt-2" />
                 </div>
 
                 <div>
-                    <InputLabel
-                        htmlFor="password_confirmation"
-                        value="Xác nhận mật khẩu mới"
-                        className="text-sm font-medium text-gray-700"
-                    />
-
+                    <InputLabel htmlFor="password_confirmation" value="Xác nhận mật khẩu" className="text-sm font-medium text-gray-700" />
                     <TextInput
-                        type="password"
                         id="password_confirmation"
+                        type="password"
                         name="password_confirmation"
                         value={data.password_confirmation}
                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                         autoComplete="new-password"
-                        onChange={(e) =>
-                            setData('password_confirmation', e.target.value)
-                        }
+                        onChange={(e) => setData('password_confirmation', e.target.value)}
                         placeholder="••••••••"
                     />
-
-                    <InputError
-                        message={errors.password_confirmation}
-                        className="mt-2"
-                    />
+                    <InputError message={errors.password_confirmation} className="mt-2" />
                 </div>
 
-                <div>
+                <div className="flex items-center justify-between">
+                    <Link
+                        href={route('login')}
+                        className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
+                    >
+                        Quay lại đăng nhập
+                    </Link>
+
                     <PrimaryButton
-                        className="w-full justify-center rounded-md bg-indigo-600 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                        className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                         disabled={processing}
                     >
-                        {processing ? 'Đang xử lý...' : 'Đặt lại mật khẩu'}
+                        {processing ? 'Đang xử lý...' : 'Đặt mật khẩu'}
                     </PrimaryButton>
                 </div>
             </form>

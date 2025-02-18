@@ -1,129 +1,72 @@
 <?php
-use App\Http\Controllers\API\CartController;
-use App\Http\Controllers\CheckoutController;
-use App\Http\Controllers\ShippingAddressController;
-use App\Http\Controllers\API\CategoryController;
-use App\Http\Controllers\API\ColorController;
-use App\Http\Controllers\API\MaterialController;
-use App\Http\Controllers\API\ProductController;
-use App\Http\Controllers\API\SizeController;
-use App\Http\Controllers\API\SupplierController;
-use App\Http\Controllers\API\TagController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\API\{
+    CartController, CategoryController, ColorController, MaterialController,
+    ProductController, SizeController, SupplierController, TagController
+};
+use App\Http\Controllers\{
+    CheckoutController, ProfileController, ShippingAddressController, UserController
+};
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
-});
+// Public Routes
+Route::get('/', fn() => Inertia::render('Welcome', [
+    'canLogin' => Route::has('login'),
+    'canRegister' => Route::has('register'),
+    'laravelVersion' => Application::VERSION,
+    'phpVersion' => PHP_VERSION,
+]))->name('home');
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', fn() => Inertia::render('Dashboard'))
+    ->middleware(['auth', 'verified', 'check.role'])->name('dashboard');
 
-Route::get('/about', function () {
-    return Inertia::render('About');
-});
-Route::get('/products', function () {
-    return Inertia::render('Products');
-});
+Route::get('/about', fn() => Inertia::render('About'));
+Route::get('/products', fn() => Inertia::render('Products'));
 
-Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
-    Route::get('/customers', function () {
-        return Inertia::render('Admin/Customers/Index');
-    });
-    Route::get('/products', function () {
-        return Inertia::render('Admin/Products/Index');
-    })->name('admin.products');
-    Route::get('/materials', function () {
-        return Inertia::render('Admin/Materials/Index');
-    })->name('admin.materials');
-    Route::get('/colors', function () {
-        return Inertia::render('Admin/Colors/Index');
-    })->name('admin.colors');
-    Route::get('/categories', function () {
-        return Inertia::render('Admin/Categories/Index');
-    })->name('admin.categories');
-    Route::get('/staffs', function () {
-        return Inertia::render('Admin/Staffs/Index');
-    })->name('admin.staffs');
-    Route::get('/sizes', function () {
-        return Inertia::render('Admin/Sizes/Index');
-    })->name('admin.sizes');
-    Route::get('/tags', function () {
-        return Inertia::render('Admin/Tags/Index');
-    })->name('admin.tags');
-    Route::get('/suppliers', function () {
-        return Inertia::render('Admin/Suppliers/Index');
-    })->name('admin.suppliers');
-    // API Routes
+// Admin Routes
+Route::middleware(['auth', 'verified', 'check.role'])->prefix('admin')->group(function () {
+    foreach (['customers', 'products', 'materials', 'colors', 'categories', 'staffs', 'sizes', 'tags', 'suppliers'] as $route) {
+        Route::get("/$route", fn() => Inertia::render("Admin/".ucfirst($route)."/Index"))->name("admin.$route");
+    }
+
     Route::prefix('api')->group(function () {
-        // Categories
-        Route::post('/categories', [CategoryController::class, 'store']);
-        Route::post('/categories/{categoryId}', [CategoryController::class, 'update']);
-        Route::delete('/categories/{categoryId}', [CategoryController::class, 'destroy']);
-        // Colors
-        Route::post('/colors', [ColorController::class, 'store']);
-        Route::post('/colors/{colorId}', [ColorController::class, 'update']);
-        Route::delete('/colors/{colorId}', [ColorController::class, 'destroy']);
-        // Products
-        Route::post('/products', [ProductController::class, 'store']);
-        Route::post('/products/{productId}', [ProductController::class, 'update']);
-        Route::delete('/products/{productId}', [ProductController::class, 'destroy']);
+        foreach (['categories', 'colors', 'products', 'materials', 'suppliers', 'sizes', 'tags'] as $resource) {
+            Route::apiResource($resource, ucfirst($resource).'Controller')->except(['show', 'edit', 'create']);
+        }
+    });
 
-        // Materials
-        Route::post('/materials', [MaterialController::class, 'store']);
-        Route::post('/materials/{materialId}', [MaterialController::class, 'update']);
-        Route::delete('/materials/{materialId}', [MaterialController::class, 'destroy']);
-        // Suppliers
-        Route::post('/suppliers', [SupplierController::class, 'store']);
-        Route::post('/suppliers/{supplierId}', [SupplierController::class, 'update']);
-        Route::delete('/suppliers/{supplierId}', [SupplierController::class, 'destroy']);
-        // Sizes
-        Route::post('/sizes', [SizeController::class, 'store']);
-        Route::post('/sizes/{sizeId}', [SizeController::class, 'update']);
-        Route::delete('/sizes/{sizeId}', [SizeController::class, 'destroy']);
-        // Tags
-        Route::post('/tags', [TagController::class, 'store']);
-        Route::post('/tags/{tagId}', [TagController::class, 'update']);
-        Route::delete('/tags/{tagId}', [TagController::class, 'destroy']);
-    });
-    Route::get('/users', [UserController::class, 'index']);
-    Route::get('/users/{id}', [UserController::class, 'show']);
-    Route::post('/users', [UserController::class, 'store']);
-    Route::post('/users/{id}', [UserController::class, 'update']);
-    Route::delete('/users/{id}', [UserController::class, 'destroy']);
+    Route::apiResource('users', UserController::class)->except(['create', 'edit']);
 });
+
+// Authenticated User Routes
 Route::middleware(['auth:sanctum', 'verified'])->group(function () {
-    Route::prefix('profile')->group(function () {
-        Route::get('/', [ProfileController::class, 'edit'])->name('profile.edit');
-        Route::patch('/', [ProfileController::class, 'update'])->name('profile.update');
-        Route::delete('/', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::prefix('profile')->controller(ProfileController::class)->group(function () {
+        Route::get('/', 'edit')->name('profile.edit');
+        Route::patch('/', 'update')->name('profile.update');
+        Route::delete('/', 'destroy')->name('profile.destroy');
     });
-    Route::prefix('cart')->group(function () {
-        Route::get('/', [CartController::class, 'index'])->name('cart.index');
-        Route::post('/add', [CartController::class, 'add'])->name('cart.add');
-        Route::put('/{cartItem}', [CartController::class, 'update'])->name('cart.update');
-        Route::delete('/{cartItem}', [CartController::class, 'remove'])->name('cart.remove');
-        Route::delete('/', [CartController::class, 'clear'])->name('cart.clear');
+
+    Route::prefix('cart')->controller(CartController::class)->group(function () {
+        Route::get('/', 'index')->name('cart.index');
+        Route::post('/add', 'add')->name('cart.add');
+        Route::put('/{cartItem}', 'update')->name('cart.update');
+        Route::delete('/{cartItem}', 'remove')->name('cart.remove');
+        Route::delete('/', 'clear')->name('cart.clear');
     });
-    Route::prefix('shipping-addresses')->group(function () {
-        Route::get('/', [ShippingAddressController::class, 'index']);
-        Route::post('/', [ShippingAddressController::class, 'store']);
-        Route::put('/{address}', [ShippingAddressController::class, 'update']);
-        Route::delete('/{address}', [ShippingAddressController::class, 'destroy']);
-        Route::put('/{address}/set-default', [ShippingAddressController::class, 'setDefault']);
+
+    Route::prefix('shipping-addresses')->controller(ShippingAddressController::class)->group(function () {
+        Route::get('/', 'index');
+        Route::post('/', 'store');
+        Route::put('/{address}', 'update');
+        Route::delete('/{address}', 'destroy');
+        Route::put('/{address}/set-default', 'setDefault');
     });
-    Route::prefix('checkout')->group(function () {
-        Route::get('/', [CheckoutController::class, 'index'])->name('checkout');
-        Route::post('/', [CheckoutController::class, 'store'])->name('checkout.store');
+
+    Route::prefix('checkout')->controller(CheckoutController::class)->group(function () {
+        Route::get('/', 'index')->name('checkout');
+        Route::post('/', 'store')->name('checkout.store');
     });
 });
+
 require __DIR__.'/auth.php';
