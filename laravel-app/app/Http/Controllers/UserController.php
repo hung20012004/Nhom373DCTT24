@@ -9,6 +9,7 @@ use App\Models\Role;
 use App\Models\UserProfile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
@@ -28,8 +29,8 @@ class UserController extends Controller
             $searchTerm = $request->search;
             $query->where(function ($q) use ($searchTerm) {
                 $q->where('name', 'like', "%{$searchTerm}%")
-                    ->orWhere('email', 'like', "%{$searchTerm}%")
-                    ->orWhere('username', 'like', "%{$searchTerm}%");
+                    ->orWhere('email', 'like', "%{$searchTerm}%");
+
             });
         }
 
@@ -44,7 +45,6 @@ class UserController extends Controller
         $allowedSortFields = [
             'name' => 'name',
             'email' => 'email',
-            'username' => 'username',
             'is_active' => 'is_active',
             'created_at' => 'created_at',
             'last_login' => 'last_login',
@@ -80,7 +80,6 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'username' => 'required|string|max:255|unique:users',
             'role_id' => 'required|exists:roles,role_id',
             'is_active' => 'boolean',
             'note' => 'nullable|string',
@@ -96,7 +95,6 @@ class UserController extends Controller
             $user = User::create([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
-                'username' => $validated['username'],
                 'password' => Hash::make(Str::random(16)), // Mật khẩu tạm thời
                 'role_id' => $validated['role_id'],
                 'is_active' => $validated['is_active'] ?? true,
@@ -110,8 +108,9 @@ class UserController extends Controller
                 'phone' => $validated['profile']['phone'] ?? null,
                 'avatar_url' => $validated['profile']['avatar_url'] ?? null,
             ]);
-
-            // Gửi email xác thực
+            $user->markEmailAsVerified();
+            $token = Password::createToken($user);
+            $user->sendPasswordResetNotification($token);
             event(new Registered($user));
 
             DB::commit();
@@ -140,11 +139,6 @@ class UserController extends Controller
                 'max:255',
                 Rule::unique('users')->ignore($id),
             ],
-            'username' => [
-                'string',
-                'max:255',
-                Rule::unique('users')->ignore($id),
-            ],
             'password' => 'nullable|string|min:8',
             'role_id' => 'exists:roles,role_id',
             'is_active' => 'boolean',
@@ -165,8 +159,6 @@ class UserController extends Controller
                 $userUpdate['name'] = $validated['name'];
             if (isset($validated['email']))
                 $userUpdate['email'] = $validated['email'];
-            if (isset($validated['username']))
-                $userUpdate['username'] = $validated['username'];
             if (isset($validated['password']) && !empty($validated['password']))
                 $userUpdate['password'] = Hash::make($validated['password']);
             if (isset($validated['role_id']))

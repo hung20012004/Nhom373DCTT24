@@ -25,7 +25,7 @@ Route::get('/', function () {
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+})->middleware(['auth', 'verified','check.role'])->name('dashboard');
 
 Route::get('/about', function () {
     return Inertia::render('About');
@@ -34,7 +34,7 @@ Route::get('/products', function () {
     return Inertia::render('Products');
 });
 
-Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
+Route::middleware(['auth', 'verified','check.role'])->prefix('admin')->group(function () {
     Route::get('/customers', function () {
         return Inertia::render('Admin/Customers/Index');
     });

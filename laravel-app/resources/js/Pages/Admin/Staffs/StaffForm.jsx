@@ -116,21 +116,7 @@ const StaffForm = ({ staff, roles, onClose, onSuccess }) => {
                                 required
                             />
                         </div>
-                        <div>
-                            <label className="text-sm font-medium">
-                                Tên đăng nhập
-                            </label>
-                            <Input
-                                value={formData.username}
-                                onChange={(e) =>
-                                    setFormData({
-                                        ...formData,
-                                        username: e.target.value,
-                                    })
-                                }
-                                required
-                            />
-                        </div>
+
                         <div>
                             <label className="text-sm font-medium">
                                 Mật khẩu {staff && "(để trống nếu không đổi)"}
