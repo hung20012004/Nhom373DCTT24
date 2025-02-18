@@ -46,15 +46,14 @@ const Sidebar = () => {
             title: 'Quản lý sản phẩm',
             items: [
                 { title: 'Sản phẩm', icon: <Package size={20} />, path: '/admin/products' },
-                { title: 'Loại sản phẩm', icon: <Tags size={20} />, path: '/admin/categories' },
+                { title: 'Danh mục', icon: <Tags size={20} />, path: '/admin/categories' },
                 { title: 'Kho hàng', icon: <Database size={20} />, path: '/admin/inventory' },
                 { title: 'Nhà cung cấp', icon: <Truck size={20} />, path: '/admin/suppliers' },
                 { title: 'Kiểm kho', icon: <ClipboardList size={20} />, path: '/admin/inventory-checks' },
                 { title: 'Kích thước', icon: <Box size={20} />, path: '/admin/sizes' },
                 { title: 'Màu sắc', icon: <Palette size={20} />, path: '/admin/colors' },
-                { title: 'Hình ảnh sản phẩm', icon: <Image size={20} />, path: '/admin/product-images' },
                 { title: 'Chất liệu', icon: <Package size={20} />, path: '/admin/materials' },
-                { title: 'Danh mục', icon: <Tags size={20} />, path: '/admin/tags' },
+                { title: 'Tag', icon: <Tags size={20} />, path: '/admin/tags' },
             ]
         },
         {
@@ -69,9 +68,7 @@ const Sidebar = () => {
         {
             title: 'Quản lý khách hàng',
             items: [
-                { title: 'Khách hàng', icon: <Users size={20} />, path: '/admin/users' },
-                { title: 'Hồ sơ khách hàng', icon: <UserCog size={20} />, path: '/admin/user-profiles' },
-                { title: 'Wishlist', icon: <Heart size={20} />, path: '/admin/wishlists' },
+                { title: 'Khách hàng', icon: <Users size={20} />, path: '/admin/customers' },
                 { title: 'Đánh giá', icon: <Star size={20} />, path: '/admin/reviews' },
             ]
         },
@@ -86,8 +83,8 @@ const Sidebar = () => {
             title: 'Cài đặt hệ thống',
             items: [
                 { title: 'Cấu hình', icon: <Settings size={20} />, path: '/admin/settings' },
-                { title: 'Quản lý nhân viên', icon: <UserCog size={20} />, path: '/admin/staff' },
-                { title: 'Phân quyền', icon: <Users size={20} />, path: '/admin/roles' },
+                { title: 'Quản lý nhân viên', icon: <UserCog size={20} />, path: '/admin/staffs' },
+                { title: 'Quyền & Chức vụ', icon: <Users size={20} />, path: '/admin/roles' },
             ]
         },
     ];

@@ -9,11 +9,13 @@ use App\Http\Controllers\API\WishlistController;
 use App\Http\Controllers\API\BannerController;
 use App\Http\Controllers\API\SizeController;
 use App\Http\Controllers\API\TagController;
-use App\Http\Controllers\API\CartController;
+use App\Http\Controllers\API\CustomerController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
-    // Routes API công khai
+    Route::get('/customers', [CustomerController::class, 'index']);
+    Route::get('/customers/{id}', [CustomerController::class, 'show']);
+
     Route::get('/categories', [CategoryController::class, 'index']);
     Route::get('/categories/featured', [CategoryController::class, 'featured']);
 
