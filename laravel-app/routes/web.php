@@ -101,7 +101,7 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
     Route::get('/users', [UserController::class, 'index']);
     Route::get('/users/{id}', [UserController::class, 'show']);
     Route::post('/users', [UserController::class, 'store']);
-    Route::post('/users/{id}', [UserController::class, 'update']);
+    Route::put('/users/{id}', [UserController::class, 'update']); // Use PUT instead of POST
     Route::delete('/users/{id}', [UserController::class, 'destroy']);
 });
 Route::middleware(['auth:sanctum', 'verified'])->group(function () {

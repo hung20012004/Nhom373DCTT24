@@ -74,7 +74,6 @@ class UserController extends Controller
         ];
     }
 
-
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -94,7 +93,7 @@ class UserController extends Controller
 
         DB::beginTransaction();
         try {
-            // Create user
+
             $user = User::create([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
@@ -164,7 +163,7 @@ class UserController extends Controller
             if (isset($validated['name'])) $userUpdate['name'] = $validated['name'];
             if (isset($validated['email'])) $userUpdate['email'] = $validated['email'];
             if (isset($validated['username'])) $userUpdate['username'] = $validated['username'];
-            if (isset($validated['password'])) $userUpdate['password'] = Hash::make($validated['password']);
+            if (isset($validated['password']) && !empty($validated['password'])) $userUpdate['password'] = Hash::make($validated['password']);
             if (isset($validated['role_id'])) $userUpdate['role_id'] = $validated['role_id'];
             if (isset($validated['is_active'])) $userUpdate['is_active'] = $validated['is_active'];
             if (isset($validated['note'])) $userUpdate['note'] = $validated['note'];
@@ -213,7 +212,14 @@ class UserController extends Controller
         try {
             $user = User::findOrFail($id);
 
-            // Check if user has related data
+            // Check if user has related data in inventory_history
+            if ($user->inventoryHistory()->exists()) {
+                return response()->json([
+                    'message' => 'Không thể xóa nhân viên vì có lịch sử kho liên quan'
+                ], 400);
+            }
+
+            // Check if user has related data in orders
             if ($user->orders()->exists()) {
                 return response()->json([
                     'message' => 'Không thể xóa nhân viên vì có đơn hàng liên quan'

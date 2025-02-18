@@ -12,7 +12,7 @@ import {
     TableRow,
 } from "@/Components/ui/table";
 import Breadcrumb from "@/Components/Breadcrumb";
-import UserForm from "./StaffForm";
+import StaffForm from "./StaffForm";
 import axios from "axios";
 import { ArrowUpDown } from "lucide-react";
 import { format } from "date-fns";
@@ -203,19 +203,19 @@ export default function Index() {
                                         ID
                                     </SortableHeader>
                                     <SortableHeader field="name">
-                                        Tên hiển thị
+                                        Tên
                                     </SortableHeader>
                                     <SortableHeader field="email">
                                         Email
                                     </SortableHeader>
                                     <TableHead className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Vai trò
+                                        Chức vụ
                                     </TableHead>
                                     <SortableHeader field="is_active">
                                         Trạng thái
                                     </SortableHeader>
                                     <SortableHeader field="last_login">
-                                        Đăng nhập cuối
+                                        Đăng nhập lần cuối
                                     </SortableHeader>
                                     <TableHead className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Hành động
@@ -316,17 +316,6 @@ export default function Index() {
                                                     >
                                                         Chỉnh sửa
                                                     </Button>
-                                                    <Button
-                                                        variant="destructive"
-                                                        className="bg-red-600 hover:bg-red-700 text-white"
-                                                        onClick={() =>
-                                                            handleDelete(
-                                                                user.id
-                                                            )
-                                                        }
-                                                    >
-                                                        Xóa
-                                                    </Button>
                                                 </div>
                                             </TableCell>
                                         </TableRow>
@@ -346,8 +335,8 @@ export default function Index() {
                 </div>
 
                 {showForm && (
-                    <UserForm
-                        user={editUser}
+                    <StaffForm
+                        staff={editUser}
                         roles={roles}
                         onClose={() => {
                             setShowForm(false);
