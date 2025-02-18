@@ -9,9 +9,10 @@ use App\Models\Role;
 use App\Models\UserProfile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
-
+use Illuminate\Auth\Events\Registered;
 class UserController extends Controller
 {
     public function index(Request $request)
@@ -19,16 +20,16 @@ class UserController extends Controller
         $query = User::query()
             ->with(['profile', 'role'])
             ->select('users.*')
-            ->whereHas('role', function($query) {
+            ->whereHas('role', function ($query) {
                 $query->where('name', '!=', 'Customer');
             });
 
         if ($request->filled('search')) {
             $searchTerm = $request->search;
-            $query->where(function($q) use ($searchTerm) {
+            $query->where(function ($q) use ($searchTerm) {
                 $q->where('name', 'like', "%{$searchTerm}%")
-                  ->orWhere('email', 'like', "%{$searchTerm}%")
-                  ->orWhere('username', 'like', "%{$searchTerm}%");
+                    ->orWhere('email', 'like', "%{$searchTerm}%")
+                    ->orWhere('username', 'like', "%{$searchTerm}%");
             });
         }
 
@@ -80,7 +81,6 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'username' => 'required|string|max:255|unique:users',
-            'password' => 'required|string|min:8',
             'role_id' => 'required|exists:roles,role_id',
             'is_active' => 'boolean',
             'note' => 'nullable|string',
@@ -93,18 +93,16 @@ class UserController extends Controller
 
         DB::beginTransaction();
         try {
-
             $user = User::create([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
                 'username' => $validated['username'],
-                'password' => Hash::make($validated['password']),
+                'password' => Hash::make(Str::random(16)), // Mật khẩu tạm thời
                 'role_id' => $validated['role_id'],
                 'is_active' => $validated['is_active'] ?? true,
                 'note' => $validated['note'] ?? null,
             ]);
 
-            // Create user profile
             $user->profile()->create([
                 'full_name' => $validated['profile']['full_name'],
                 'gender' => $validated['profile']['gender'] ?? null,
@@ -112,6 +110,9 @@ class UserController extends Controller
                 'phone' => $validated['profile']['phone'] ?? null,
                 'avatar_url' => $validated['profile']['avatar_url'] ?? null,
             ]);
+
+            // Gửi email xác thực
+            event(new Registered($user));
 
             DB::commit();
             return response()->json(new UserResource($user->load('profile')), 201);
@@ -160,13 +161,20 @@ class UserController extends Controller
             // Update user fields if they exist in the request
             $userUpdate = [];
 
-            if (isset($validated['name'])) $userUpdate['name'] = $validated['name'];
-            if (isset($validated['email'])) $userUpdate['email'] = $validated['email'];
-            if (isset($validated['username'])) $userUpdate['username'] = $validated['username'];
-            if (isset($validated['password']) && !empty($validated['password'])) $userUpdate['password'] = Hash::make($validated['password']);
-            if (isset($validated['role_id'])) $userUpdate['role_id'] = $validated['role_id'];
-            if (isset($validated['is_active'])) $userUpdate['is_active'] = $validated['is_active'];
-            if (isset($validated['note'])) $userUpdate['note'] = $validated['note'];
+            if (isset($validated['name']))
+                $userUpdate['name'] = $validated['name'];
+            if (isset($validated['email']))
+                $userUpdate['email'] = $validated['email'];
+            if (isset($validated['username']))
+                $userUpdate['username'] = $validated['username'];
+            if (isset($validated['password']) && !empty($validated['password']))
+                $userUpdate['password'] = Hash::make($validated['password']);
+            if (isset($validated['role_id']))
+                $userUpdate['role_id'] = $validated['role_id'];
+            if (isset($validated['is_active']))
+                $userUpdate['is_active'] = $validated['is_active'];
+            if (isset($validated['note']))
+                $userUpdate['note'] = $validated['note'];
 
             if (!empty($userUpdate)) {
                 $user->update($userUpdate);

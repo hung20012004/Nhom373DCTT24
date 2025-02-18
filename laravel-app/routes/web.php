@@ -129,4 +129,5 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
         Route::post('/', [CheckoutController::class, 'store'])->name('checkout.store');
     });
 });
+
 require __DIR__.'/auth.php';
