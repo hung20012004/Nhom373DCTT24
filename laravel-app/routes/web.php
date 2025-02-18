@@ -10,6 +10,7 @@ use App\Http\Controllers\API\SizeController;
 use App\Http\Controllers\API\SupplierController;
 use App\Http\Controllers\API\TagController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UserController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -35,6 +36,9 @@ Route::get('/products', function () {
 });
 
 Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
+    Route::get('/customers', function () {
+        return Inertia::render('Admin/Customers/Index');
+    });
     Route::get('/products', function () {
         return Inertia::render('Admin/Products/Index');
     })->name('admin.products');
@@ -47,7 +51,9 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
     Route::get('/categories', function () {
         return Inertia::render('Admin/Categories/Index');
     })->name('admin.categories');
-
+    Route::get('/staffs', function () {
+        return Inertia::render('Admin/Staffs/Index');
+    })->name('admin.staffs');
     Route::get('/sizes', function () {
         return Inertia::render('Admin/Sizes/Index');
     })->name('admin.sizes');
@@ -58,7 +64,7 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
         return Inertia::render('Admin/Suppliers/Index');
     })->name('admin.suppliers');
     // API Routes
-    Route::middleware(['auth', 'verified'])->prefix('api')->group(function () {
+    Route::prefix('api')->group(function () {
         // Categories
         Route::post('/categories', [CategoryController::class, 'store']);
         Route::post('/categories/{categoryId}', [CategoryController::class, 'update']);
@@ -92,6 +98,11 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
         Route::post('/tags/{tagId}', [TagController::class, 'update']);
         Route::delete('/tags/{tagId}', [TagController::class, 'destroy']);
     });
+    Route::get('/users', [UserController::class, 'index']);
+    Route::get('/users/{id}', [UserController::class, 'show']);
+    Route::post('/users', [UserController::class, 'store']);
+    Route::post('/users/{id}', [UserController::class, 'update']);
+    Route::delete('/users/{id}', [UserController::class, 'destroy']);
 });
 Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::prefix('profile')->group(function () {

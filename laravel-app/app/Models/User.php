@@ -130,4 +130,8 @@ class User extends Authenticatable
         return $this->hasOne(ShippingAddress::class, 'user_id')
             ->where('is_default', true);
     }
+    public function role()
+{
+    return $this->belongsTo(Role::class, 'role_id');
+}
 }
