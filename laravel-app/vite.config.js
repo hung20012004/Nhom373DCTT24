@@ -15,5 +15,8 @@ export default defineConfig({
         outDir: 'public/build',
         // Đảm bảo manifest được tạo
         manifest: true,
-    }
+    },
+    define: {
+        'process.env.GOOGLE_MAPS_API_KEY': JSON.stringify(process.env.GOOGLE_MAPS_API_KEY),
+    },
 });
