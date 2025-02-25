@@ -32,7 +32,9 @@ class ShippingAddressController extends Controller
             'district' => 'required|string|max:255',
             'ward' => 'required|string|max:255',
             'street_address' => 'required|string|max:255',
-            'is_default' => 'boolean'
+            'is_default' => 'boolean',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
         ]);
 
         // Nếu đây là địa chỉ mặc định, bỏ mặc định của các địa chỉ khác
@@ -59,8 +61,9 @@ class ShippingAddressController extends Controller
     /**
      * Cập nhật địa chỉ
      */
-    public function update(Request $request, ShippingAddress $address)
+    public function update(Request $request, $id)
     {
+        $address = ShippingAddress::findOrFail($id);
         // Kiểm tra quyền sở hữu
         if ($address->user_id !== Auth::id()) {
             return response()->json(['message' => 'Unauthorized'], 403);
@@ -73,14 +76,16 @@ class ShippingAddressController extends Controller
             'district' => 'required|string|max:255',
             'ward' => 'required|string|max:255',
             'street_address' => 'required|string|max:255',
-            'is_default' => 'boolean'
+            'is_default' => 'boolean',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
         ]);
 
         // Nếu đặt làm địa chỉ mặc định
         if ($validated['is_default']) {
             ShippingAddress::where('user_id', Auth::id())
                 ->where('is_default', true)
-                ->where('id', '!=', $address->id)
+                ->where('address_id', '!=', $address->address_id)
                 ->update(['is_default' => false]);
         }
 
@@ -92,8 +97,9 @@ class ShippingAddressController extends Controller
     /**
      * Xóa địa chỉ
      */
-    public function destroy(ShippingAddress $address)
+    public function destroy($id)
     {
+        $address = ShippingAddress::findOrFail($id);
         // Kiểm tra quyền sở hữu
         if ($address->user_id !== Auth::id()) {
             return response()->json(['message' => 'Unauthorized'], 403);
@@ -102,7 +108,7 @@ class ShippingAddressController extends Controller
         // Nếu xóa địa chỉ mặc định và còn địa chỉ khác
         if ($address->is_default) {
             $newDefault = ShippingAddress::where('user_id', Auth::id())
-                ->where('id', '!=', $address->id)
+                ->where('address_id', '!=', $address->address_id)
                 ->first();
 
             if ($newDefault) {
@@ -115,11 +121,9 @@ class ShippingAddressController extends Controller
         return response()->json(['message' => 'Address deleted successfully']);
     }
 
-    /**
-     * Đặt địa chỉ làm mặc định
-     */
-    public function setDefault(ShippingAddress $address)
+    public function setDefault($id)
     {
+        $address = ShippingAddress::findOrFail($id);
         // Kiểm tra quyền sở hữu
         if ($address->user_id !== Auth::id()) {
             return response()->json(['message' => 'Unauthorized'], 403);

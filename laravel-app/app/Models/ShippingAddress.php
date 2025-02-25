@@ -16,11 +16,15 @@ class ShippingAddress extends Model
         'district',
         'ward',
         'street_address',
-        'is_default'
+        'is_default',
+        'latitude',
+        'longitude',
     ];
 
     protected $casts = [
-        'is_default' => 'boolean'
+        'is_default' => 'boolean',
+        'latitude' => 'decimal:8',
+        'longitude' => 'decimal:8',
     ];
 
     public function user()

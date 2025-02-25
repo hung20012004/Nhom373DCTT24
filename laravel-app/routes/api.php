@@ -11,6 +11,22 @@ use App\Http\Controllers\API\SizeController;
 use App\Http\Controllers\API\TagController;
 use App\Http\Controllers\API\CustomerController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Http;
+
+Route::get('/provinces', function () {
+    $response = Http::get('https://provinces.open-api.vn/api/p/');
+    return $response->json();
+});
+
+Route::get('/districts/{provinceCode}', function ($provinceCode) {
+    $response = Http::get("https://provinces.open-api.vn/api/p/{$provinceCode}?depth=2");
+    return $response->json();
+});
+
+Route::get('/wards/{districtCode}', function ($districtCode) {
+    $response = Http::get("https://provinces.open-api.vn/api/d/{$districtCode}?depth=2");
+    return $response->json();
+});
 
 Route::prefix('v1')->group(function () {
     Route::get('/customers', [CustomerController::class, 'index']);
