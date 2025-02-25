@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Head } from '@inertiajs/react';
 import { useForm } from '@inertiajs/react';
 import { useCart } from '@/Contexts/CartContext';
@@ -18,25 +18,103 @@ import {
     AlertDescription,
 } from '@/components/ui/alert';
 
+// Tọa độ cửa hàng: 18 Đường Tam Trinh, Hai Bà Trưng, Hà Nội
+const STORE_LOCATION = {
+    lat: 20.993988,
+    lng: 105.872376
+};
+
+const SHIPPING_RATE = 5000;
+
+// Khoảng cách miễn phí ship (15km)
+const FREE_SHIPPING_DISTANCE = 15;
+
+// Hàm tính khoảng cách giữa 2 điểm theo công thức Haversine
+const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 6371; // Bán kính trái đất tính bằng km
+    const dLat = deg2rad(lat2 - lat1);
+    const dLon = deg2rad(lon2 - lon1);
+    const a =
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+        Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const distance = R * c; // Khoảng cách tính bằng km
+    return distance;
+};
+
+const deg2rad = (deg) => {
+    return deg * (Math.PI/180);
+};
+
 const CheckoutPage = () => {
     const { cart, isLoading } = useCart();
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('cod');
     const searchParams = new URLSearchParams(window.location.search);
     const selectedItemIds = searchParams.get('items')?.split(',') || [];
+    const [shippingFee, setShippingFee] = useState(0); // Giá mặc định là 0 (miễn phí)
+    const [distance, setDistance] = useState(null);
+    const [chargableDistance, setChargableDistance] = useState(0);
 
     // Form cho thông tin đơn hàng
     const { data, setData, post, processing, errors } = useForm({
         shipping_address_id: '',
         paymentMethod: 'cod',
         items: selectedItemIds,
-        note: ''
+        note: '',
+        shipping_fee: shippingFee // Thêm phí ship vào form data
     });
 
-    const handleAddressSelect = (address) => {
+    const handleAddressSelect = async (address) => {
         if (address) {
             setData('shipping_address_id', address.id);
+
+            // Nếu có địa chỉ đã chọn, tính phí ship dựa trên khoảng cách
+            try {
+                // Giả sử bạn có thể lấy tọa độ từ địa chỉ đã chọn hoặc địa chỉ mặc định
+                if (address.latitude && address.longitude) {
+                    const customerLocation = {
+                        lat: address.latitude,
+                        lng: address.longitude
+                    };
+
+                    // Tính khoảng cách
+                    const calculatedDistance = calculateDistance(
+                        STORE_LOCATION.lat,
+                        STORE_LOCATION.lng,
+                        customerLocation.lat,
+                        customerLocation.lng
+                    );
+
+                    setDistance(calculatedDistance);
+
+                    // Tính khoảng cách cần tính phí (chỉ tính phần vượt quá 15km)
+                    const distanceToCharge = Math.max(0, calculatedDistance - FREE_SHIPPING_DISTANCE);
+                    setChargableDistance(distanceToCharge);
+
+                    // Tính phí ship dựa trên khoảng cách vượt quá (10,000đ/km)
+                    const calculatedFee = Math.ceil(distanceToCharge * SHIPPING_RATE);
+
+                    // Nếu khoảng cách <= 15km thì miễn phí ship
+                    const finalFee = calculatedDistance <= FREE_SHIPPING_DISTANCE ? 0 : calculatedFee;
+
+                    setShippingFee(finalFee);
+                    setData('shipping_fee', finalFee);
+                } else {
+                    // Nếu không có tọa độ, sử dụng phí ship mặc định (0 cho miễn phí 15km đầu)
+                    setShippingFee(0);
+                    setData('shipping_fee', 0);
+                }
+            } catch (error) {
+                console.error('Lỗi khi tính phí vận chuyển:', error);
+                // Sử dụng phí mặc định nếu có lỗi
+                setShippingFee(0);
+                setData('shipping_fee', 0);
+            }
         } else {
             setData('shipping_address_id', '');
+            setShippingFee(0);
+            setData('shipping_fee', 0);
         }
     };
 
@@ -50,7 +128,6 @@ const CheckoutPage = () => {
         );
     };
 
-    const shippingFee = 30000;
     const total = calculateSubtotal() + shippingFee;
 
     const handleSubmit = (e) => {
@@ -186,7 +263,18 @@ const CheckoutPage = () => {
                                         </div>
                                         <div className="flex justify-between">
                                             <span>Phí vận chuyển:</span>
-                                            <span>{shippingFee.toLocaleString('vi-VN')}đ</span>
+                                            <div className="text-right">
+                                                <div>{shippingFee.toLocaleString('vi-VN')}đ</div>
+                                                {distance && (
+                                                    <div className="text-sm text-gray-500">
+                                                        {distance.toFixed(1)} km
+                                                        {distance <= FREE_SHIPPING_DISTANCE ?
+                                                            " (Miễn phí)" :
+                                                            ` (Miễn phí ${FREE_SHIPPING_DISTANCE}km đầu, tính phí ${chargableDistance.toFixed(1)}km)`
+                                                        }
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                         <div className="flex justify-between font-medium text-lg pt-2 border-t">
                                             <span>Tổng cộng:</span>
