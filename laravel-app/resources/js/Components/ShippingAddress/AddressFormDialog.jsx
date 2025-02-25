@@ -14,7 +14,6 @@ import {
     DialogFooter,
 } from "@/components/ui/dialog";
 import AddressMap from './AddressMap';
-import AddressSearchBox from './AddressSearchBox';
 import LocationSelector from './LocationSelector';
 
 const AddressFormDialog = ({ open, onOpenChange, onSuccess, initialPosition }) => {
@@ -183,112 +182,6 @@ const AddressFormDialog = ({ open, onOpenChange, onSuccess, initialPosition }) =
         });
     };
 
-    const handleSearchSelect = async (result) => {
-        if (!result) return;
-
-        const newPosition = {
-            lat: result.lat,
-            lng: result.lon
-        };
-        setMapPosition(newPosition);
-
-        // Extract địa chỉ từ kết quả tìm kiếm
-        const address = result.address;
-
-        // Get location names from address result
-        const provinceName = address.city || address.state || address.province;
-        const districtName = address.district || address.county || address.suburb;
-        const wardName = address.suburb || address.ward || address.neighbourhood;
-
-        // Update form with coordinate information
-        let formData = {
-            ...addressForm.data,
-            latitude: result.lat,
-            longitude: result.lon,
-            street_address: [
-                address.house_number,
-                address.road,
-                address.street
-            ].filter(Boolean).join(' ') || result.display_name
-        };
-
-        // First, reset dropdown selections to ensure clean state
-        formData.province = '';
-        formData.province_code = '';
-        formData.district = '';
-        formData.district_code = '';
-        formData.ward = '';
-        formData.ward_code = '';
-
-        // Process province first - set initial form data
-        addressForm.setData(formData);
-
-        // Find and select province
-        if (provinceName) {
-            console.log("Looking for province:", provinceName);
-
-            // Find province by fuzzy matching
-            let provinceObj = findBestMatch(provinces, provinceName);
-
-            if (provinceObj) {
-                console.log("Found province:", provinceObj.label);
-
-                formData.province = provinceObj.label;
-                formData.province_code = provinceObj.code;
-
-                // Update form with province
-                addressForm.setData(formData);
-
-                // Fetch districts for the found province
-                await fetchDistricts(provinceObj.code);
-
-                // After districts are loaded, find and select district
-                if (districtName) {
-                    console.log("Looking for district:", districtName);
-
-                    // Wait a moment for districts to load if needed
-                    const districtObj = findBestMatch(districts, districtName);
-
-                    if (districtObj) {
-                        console.log("Found district:", districtObj.label);
-
-                        formData.district = districtObj.label;
-                        formData.district_code = districtObj.code;
-
-                        // Update form with district
-                        addressForm.setData(formData);
-
-                        // Fetch wards for the found district
-                        await fetchWards(districtObj.code);
-
-                        // After wards are loaded, find and select ward
-                        if (wardName) {
-                            console.log("Looking for ward:", wardName);
-
-                            // Wait a moment for wards to load if needed
-                            const wardObj = findBestMatch(wards, wardName);
-
-                            if (wardObj) {
-                                console.log("Found ward:", wardObj.label);
-
-                                formData.ward = wardObj.label;
-                                formData.ward_code = wardObj.code;
-
-                                // Update form with ward
-                                addressForm.setData(formData);
-                            } else {
-                                console.log("Ward not found:", wardName);
-                            }
-                        }
-                    } else {
-                        console.log("District not found:", districtName);
-                    }
-                }
-            } else {
-                console.log("Province not found:", provinceName);
-            }
-        }
-    };
 
     const handleAddAddress = async (e) => {
         e.preventDefault();
@@ -357,9 +250,6 @@ const AddressFormDialog = ({ open, onOpenChange, onSuccess, initialPosition }) =
                             )}
                         </div>
                     </div>
-
-                    {/* Search box */}
-                    <AddressSearchBox onSelectResult={handleSearchSelect} />
 
                     {/* Map with loading indicator */}
                     <div className="relative">
