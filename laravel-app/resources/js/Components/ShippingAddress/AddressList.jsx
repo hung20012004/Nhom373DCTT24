@@ -20,7 +20,7 @@ const AddressList = ({
                     }`}
                     onClick={() => onAddressSelect(address)}
                 >
-                    <div className="flex justify-between items-start">
+                    <div className="flex justify-between">
                         <div className="space-y-1">
                             <p className="font-medium">{address.recipient_name}</p>
                             <p className="text-sm text-gray-600">{address.phone}</p>
@@ -34,7 +34,7 @@ const AddressList = ({
                                 </span>
                             )}
                         </div>
-                        <div className="space-x-2">
+                        <div className="space-y-2 flex flex-col items-end">
                             {!address.is_default && (
                                 <Button
                                     variant="outline"

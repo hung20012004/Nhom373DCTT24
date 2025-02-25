@@ -136,11 +136,21 @@ const CheckoutPage = () => {
             alert('Vui lòng chọn địa chỉ giao hàng');
             return;
         }
-        post('/checkout', {
-            onSuccess: () => {
-                // Xử lý sau khi thanh toán thành công
-            },
-        });
+
+        // Nếu phương thức thanh toán là VNPAY, chuyển hướng đến cổng thanh toán
+        if (data.paymentMethod === 'vnpay') {
+            post('/payment/vnpay/create', {
+                ...data,
+                amount: total,
+            });
+        } else {
+            // Xử lý các phương thức thanh toán khác như cũ
+            post('/checkout', {
+                onSuccess: () => {
+                    // Xử lý sau khi thanh toán thành công
+                },
+            });
+        }
     };
 
     if (isLoading) {
@@ -190,23 +200,31 @@ const CheckoutPage = () => {
                                     <div className="flex items-center space-x-2">
                                         <input
                                             type="radio"
-                                            id="banking"
+                                            id="vnpay"
                                             name="paymentMethod"
-                                            value="banking"
-                                            checked={selectedPaymentMethod === 'banking'}
+                                            value="vnpay"
+                                            checked={selectedPaymentMethod === 'vnpay'}
                                             onChange={e => {
                                                 setSelectedPaymentMethod(e.target.value);
                                                 setData('paymentMethod', e.target.value);
                                             }}
                                             className="h-4 w-4"
                                         />
-                                        <Label htmlFor="banking">Chuyển khoản ngân hàng</Label>
+                                        <Label htmlFor="vnpay" className="flex items-center space-x-2">
+                                            <span>Thanh toán VNPAY</span>
+                                            <img
+                                                src="/images/vnpay-logo.png"
+                                                alt="VNPAY"
+                                                className="h-6"
+                                                onError={(e) => e.target.style.display = 'none'}
+                                            />
+                                        </Label>
                                     </div>
 
-                                    {selectedPaymentMethod === 'banking' && (
+                                    {selectedPaymentMethod === 'vnpay' && (
                                         <Alert>
                                             <AlertDescription>
-                                                Thông tin tài khoản ngân hàng sẽ được gửi qua email sau khi đặt hàng
+                                                Bạn sẽ được chuyển đến cổng thanh toán VNPAY để hoàn tất thanh toán số tiền {total.toLocaleString('vi-VN')}đ
                                             </AlertDescription>
                                         </Alert>
                                     )}
@@ -283,11 +301,11 @@ const CheckoutPage = () => {
                                     </div>
 
                                     <Button
-                                        className="w-full"
+                                        className={`w-full ${selectedPaymentMethod === 'vnpay' ? 'bg-blue-600 hover:bg-blue-700' : ''}`}
                                         onClick={handleSubmit}
                                         disabled={processing || !data.shipping_address_id}
                                     >
-                                        {processing ? 'Đang xử lý...' : 'Đặt hàng'}
+                                        {processing ? 'Đang xử lý...' : selectedPaymentMethod === 'vnpay' ? 'Thanh toán với VNPAY' : 'Đặt hàng'}
                                     </Button>
 
                                     {Object.keys(errors).length > 0 && (
