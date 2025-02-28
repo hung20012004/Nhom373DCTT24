@@ -29,11 +29,11 @@ class ShippingAddress extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
     public function orders()
     {
-        return $this->hasMany(Order::class, 'shipping_address_id');
+        return $this->hasMany(Order::class, 'shipping_address_id', 'address_id');
     }
 }

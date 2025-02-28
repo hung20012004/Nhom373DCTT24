@@ -1,6 +1,7 @@
 <?php
 use App\Http\Controllers\API\CartController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ShippingAddressController;
 use App\Http\Controllers\API\CategoryController;
 use App\Http\Controllers\API\ColorController;
@@ -126,6 +127,10 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::prefix('checkout')->group(function () {
         Route::get('/', [CheckoutController::class, 'index'])->name('checkout');
         Route::post('/', [CheckoutController::class, 'store'])->name('checkout.store');
+    });
+    Route::prefix('order')->group(function () {
+        Route::post('/', [OrderController::class, 'checkout'])->name('order.checkout');
+        Route::get('/confirmation/{order}', [OrderController::class, 'confirmation'])->name('order.confirmation');
     });
 });
 
