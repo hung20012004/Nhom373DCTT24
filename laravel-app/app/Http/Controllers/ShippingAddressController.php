@@ -32,7 +32,9 @@ class ShippingAddressController extends Controller
             'district' => 'required|string|max:255',
             'ward' => 'required|string|max:255',
             'street_address' => 'required|string|max:255',
-            'is_default' => 'boolean'
+            'is_default' => 'boolean',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
         ]);
 
         // Nếu đây là địa chỉ mặc định, bỏ mặc định của các địa chỉ khác
@@ -74,7 +76,9 @@ class ShippingAddressController extends Controller
             'district' => 'required|string|max:255',
             'ward' => 'required|string|max:255',
             'street_address' => 'required|string|max:255',
-            'is_default' => 'boolean'
+            'is_default' => 'boolean',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
         ]);
 
         // Nếu đặt làm địa chỉ mặc định

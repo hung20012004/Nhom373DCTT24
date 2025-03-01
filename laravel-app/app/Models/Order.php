@@ -34,7 +34,7 @@ class Order extends Model
 
     public function shippingAddress()
     {
-        return $this->belongsTo(ShippingAddress::class);
+        return $this->belongsTo(ShippingAddress::class, 'shipping_address_id', 'address_id');
     }
 
     public function promotion()
@@ -44,11 +44,10 @@ class Order extends Model
 
     public function details()
     {
-        return $this->hasMany(OrderDetail::class);
+        return $this->hasMany(OrderDetail::class, 'order_id', 'order_id');
     }
-
     public function history()
     {
-        return $this->hasMany(OrderHistory::class);
+        return $this->hasMany(OrderHistory::class, 'order_id', 'order_id');
     }
 }

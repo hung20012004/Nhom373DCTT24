@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { SlidersHorizontal, Search, ArrowUp } from "lucide-react";
 import Layout from "@/Layouts/Layout";
 import ProductGrid from "@/Components/Product/ProductGrid";
-import { Head } from '@inertiajs/react';
+import { Head } from "@inertiajs/react";
 const ProductsPage = () => {
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
@@ -70,6 +70,7 @@ const ProductsPage = () => {
 
     // Khởi tạo từ URL params
     useEffect(() => {
+        // console.log("Products data:", products);
         const urlParams = new URLSearchParams(window.location.search);
         const initialFilters = {
             category: urlParams.get("category") || "",
@@ -246,13 +247,17 @@ const ProductsPage = () => {
 
                             {/* Products Section */}
                             <div className="flex-1">
-                                {products.data?.length === 0 ? (
+                                {products &&
+                                products.data &&
+                                products.data.length === 0 ? (
                                     <div className="text-center py-12 bg-white border border-neutral-200 rounded-lg">
                                         <h3 className="text-lg font-medium text-gray-900">
-                                            Chúng tôi không tìm thấy sản phẩm nào
+                                            Chúng tôi không tìm thấy sản phẩm
+                                            nào
                                         </h3>
                                         <p className="mt-2 text-neutral-500">
-                                            Hãy thử tìm kiếm lại hoặc xem các sản phẩm khác
+                                            Hãy thử tìm kiếm lại hoặc xem các
+                                            sản phẩm khác
                                         </p>
                                     </div>
                                 ) : (
@@ -264,36 +269,37 @@ const ProductsPage = () => {
                                         />
 
                                         {/* Pagination */}
-                                        {products.meta && (
-                                            <div className="mt-8 flex justify-center">
-                                                <div className="flex space-x-2">
-                                                    {[
-                                                        ...Array(
-                                                            products.meta
-                                                                .last_page
-                                                        ),
-                                                    ].map((_, index) => (
-                                                        <button
-                                                            key={index}
-                                                            onClick={() =>
-                                                                handlePageChange(
+                                        {products &&
+                                            products.last_page &&
+                                            products.last_page > 1 && (
+                                                <div className="mt-8 flex justify-center">
+                                                    <div className="flex space-x-2">
+                                                        {[
+                                                            ...Array(
+                                                                products.last_page
+                                                            ),
+                                                        ].map((_, index) => (
+                                                            <button
+                                                                key={index}
+                                                                onClick={() =>
+                                                                    handlePageChange(
+                                                                        index +
+                                                                            1
+                                                                    )
+                                                                }
+                                                                className={`px-4 py-2 rounded-lg ${
+                                                                    products.current_page ===
                                                                     index + 1
-                                                                )
-                                                            }
-                                                            className={`px-4 py-2 rounded-lg ${
-                                                                products.meta
-                                                                    .current_page ===
-                                                                index + 1
-                                                                    ? "bg-blue-600 text-white"
-                                                                    : "bg-white border border-neutral-200 hover:bg-neutral-50"
-                                                            }`}
-                                                        >
-                                                            {index + 1}
-                                                        </button>
-                                                    ))}
+                                                                        ? "bg-blue-600 text-white"
+                                                                        : "bg-white border border-neutral-200 hover:bg-neutral-50"
+                                                                }`}
+                                                            >
+                                                                {index + 1}
+                                                            </button>
+                                                        ))}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        )}
+                                            )}
                                     </>
                                 )}
                             </div>
