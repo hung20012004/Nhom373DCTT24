@@ -10,6 +10,7 @@ use App\Http\Controllers\API\BannerController;
 use App\Http\Controllers\API\SizeController;
 use App\Http\Controllers\API\TagController;
 use App\Http\Controllers\API\CustomerController;
+use App\Http\Controllers\API\PurchaseOrderController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -32,11 +33,8 @@ Route::prefix('v1')->group(function () {
 
     Route::get('/tags', [TagController::class, 'index']);
 
-    Route::get('/wishlist', [WishlistController::class, 'index']);
-    Route::post('/wishlist/toggle/{productId}', [WishlistController::class, 'toggle']);
-    Route::delete('/wishlist/{productId}', [WishlistController::class, 'remove']);
-    Route::delete('/wishlist', [WishlistController::class, 'clear']);
-    Route::get('/wishlist/check/{productId}', [WishlistController::class, 'check']);
+    Route::get('/purchase-orders', [PurchaseOrderController::class, 'index']);
+    Route::get('/purchase-orders/{purchaseorderId}', [PurchaseOrderController::class, 'show']);
 
     Route::get('/banners/active', [BannerController::class, 'getActiveBanners']);
     Route::post('/banners', [BannerController::class, 'store'])->middleware('auth:sanctum');

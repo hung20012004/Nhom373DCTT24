@@ -6,11 +6,14 @@ use App\Http\Controllers\API\CategoryController;
 use App\Http\Controllers\API\ColorController;
 use App\Http\Controllers\API\MaterialController;
 use App\Http\Controllers\API\ProductController;
+use App\Http\Controllers\API\PurchaseOrderController;
 use App\Http\Controllers\API\SizeController;
 use App\Http\Controllers\API\SupplierController;
 use App\Http\Controllers\API\TagController;
+use App\Http\Controllers\API\WishlistController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
+use App\Models\PurchaseOrder;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -62,6 +65,12 @@ Route::middleware(['auth', 'verified','check.role'])->prefix('admin')->group(fun
     Route::get('/suppliers', function () {
         return Inertia::render('Admin/Suppliers/Index');
     })->name('admin.suppliers');
+    Route::get('/purchase-orders', function () {
+        return Inertia::render('Admin/PurchaseOrders/Index');
+    })->name('admin.purchase-orders');
+    Route::get('/purchase-orders/{id}', function ($id) {
+        return Inertia::render('Admin/PurchaseOrders/Show', ['poId' => $id]);
+    })->name('admin.purchase-orders.show');
     // API Routes
     Route::prefix('api')->group(function () {
         // Categories
@@ -96,12 +105,19 @@ Route::middleware(['auth', 'verified','check.role'])->prefix('admin')->group(fun
         Route::post('/tags', [TagController::class, 'store']);
         Route::post('/tags/{tagId}', [TagController::class, 'update']);
         Route::delete('/tags/{tagId}', [TagController::class, 'destroy']);
+
+
+        Route::post('/purchase-orders', [PurchaseOrderController::class, 'store']);
+        Route::put('/purchase-orders/{purchaseorderId}', [PurchaseOrderController::class, 'update']);
+        Route::put('/purchase-orders/{purchaseorderId}/status', [PurchaseOrderController::class, 'updateStatus']);
+        Route::delete('/purchase-orders/{purchaseorderId}', [PurchaseOrderController::class, 'destroy']);
     });
     Route::get('/users', [UserController::class, 'index']);
     Route::get('/users/{id}', [UserController::class, 'show']);
     Route::post('/users', [UserController::class, 'store']);
     Route::put('/users/{id}', [UserController::class, 'update']); // Use PUT instead of POST
     Route::delete('/users/{id}', [UserController::class, 'destroy']);
+
 });
 Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::prefix('profile')->group(function () {
@@ -126,6 +142,15 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::prefix('checkout')->group(function () {
         Route::get('/', [CheckoutController::class, 'index'])->name('checkout');
         Route::post('/', [CheckoutController::class, 'store'])->name('checkout.store');
+    });
+
+    Route::prefix('wishlist')->group(function () {
+        Route::get('/', [WishlistController::class, 'index']);
+        Route::get('/products', [WishlistController::class, 'products']);
+        Route::post('/toggle/{productId}', [WishlistController::class, 'toggle']);
+        Route::delete('/{productId}', [WishlistController::class, 'remove']);
+        Route::delete('/', [WishlistController::class, 'clear']);
+        Route::get('/check/{productId}', [WishlistController::class, 'check']);
     });
 });
 
