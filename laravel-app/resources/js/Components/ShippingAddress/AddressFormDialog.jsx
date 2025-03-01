@@ -35,10 +35,7 @@ const AddressFormDialog = ({ open, onOpenChange, onSuccess, initialPosition }) =
         street_address: '',
         is_default: false,
         latitude: '',
-        longitude: '',
-        province_code: '',
-        district_code: '',
-        ward_code: ''
+        longitude: ''
     });
 
     useEffect(() => {
@@ -189,22 +186,34 @@ const AddressFormDialog = ({ open, onOpenChange, onSuccess, initialPosition }) =
         setIsSubmitting(true);
 
         try {
-            // Đảm bảo latitude và longitude được gửi đi như kiểu số
             const formData = {
-                ...addressForm.data,
+                recipient_name: addressForm.data.recipient_name,
+                phone: addressForm.data.phone,
+                province: addressForm.data.province,
+                district: addressForm.data.district,
+                ward: addressForm.data.ward,
+                street_address: addressForm.data.street_address,
+                is_default: addressForm.data.is_default,
                 latitude: parseFloat(addressForm.data.latitude) || null,
                 longitude: parseFloat(addressForm.data.longitude) || null
-            };
+              };
 
             await axios.post('/shipping-addresses', formData);
             addressForm.reset();
             onOpenChange(false);
             if (onSuccess) onSuccess();
         } catch (error) {
+            if (error.response) {
+                console.error('Response error:', error.response.status, error.response.data);
+            } else if (error.request) {
+                console.error('Request error:', error.request);
+            } else {
+                console.error('Error message:', error.message);
+            }
+
             if (error.response?.data?.errors) {
                 setValidationErrors(error.response.data.errors);
             }
-            console.error('Error adding address:', error);
         } finally {
             setIsSubmitting(false);
         }

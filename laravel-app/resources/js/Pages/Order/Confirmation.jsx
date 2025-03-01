@@ -144,7 +144,7 @@ const Confirmation = ({ order }) => {
 
                     <CardFooter className="flex justify-center space-x-4">
                         <Button variant="outline" asChild>
-                            <Link href="/shop">Tiếp tục mua sắm</Link>
+                            <Link href="/products">Tiếp tục mua sắm</Link>
                         </Button>
                         <Button asChild>
                             <Link href="/orders">Xem đơn hàng của tôi</Link>
