@@ -242,12 +242,12 @@ const CheckoutPage = () => {
                                         <div key={item.cart_item_id} className="flex justify-between py-2 border-b">
                                             <div className="flex items-center space-x-4">
                                                 <img
-                                                    src={item.variant.image || '/placeholder.png'}
-                                                    alt={item.variant.name}
+                                                    src={item.variant.image_url || '/placeholder.png'}
+                                                    alt={item.variant.product.name}
                                                     className="w-16 h-16 object-cover rounded"
                                                 />
                                                 <div>
-                                                    <p className="font-medium">{item.variant.name}</p>
+                                                    <p className="font-medium">{item.variant.product.name}</p>
                                                     <p className="text-sm text-gray-500">Số lượng: {item.quantity}</p>
                                                 </div>
                                             </div>
