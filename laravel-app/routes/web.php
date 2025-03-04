@@ -119,7 +119,7 @@ Route::middleware(['auth', 'verified','check.role'])->prefix('admin')->group(fun
 Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::prefix('profile')->group(function () {
         Route::get('/', [ProfileController::class, 'edit'])->name('profile.edit');
-        Route::patch('/', [ProfileController::class, 'update'])->name('profile.update');
+        Route::post('/', [ProfileController::class, 'update'])->name('profile.update');
         Route::delete('/', [ProfileController::class, 'destroy'])->name('profile.destroy');
     });
     Route::prefix('cart')->group(function () {
