@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\API;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
@@ -21,7 +21,6 @@ class CustomerController extends Controller
                 ->select([
                     'users.id as user_id',
                     'users.email',
-                    'users.username',
                     'users.is_active',
                     'users.last_login',
                     'users.created_at'
@@ -114,7 +113,6 @@ class CustomerController extends Controller
                 ->select([
                     'users.id as user_id',
                     'users.email',
-                    'users.username',
                     'users.is_active',
                     'users.last_login'
                 ])

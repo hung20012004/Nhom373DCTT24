@@ -34,7 +34,7 @@ export default function MaterialIndex() {
     const fetchMaterials = async () => {
         try {
             setLoading(true);
-            const response = await axios.get('api/v1/materials', {
+            const response = await axios.get('/api/v1/materials', {
                 params: {
                     search,
                     page: pagination.current_page,
@@ -81,7 +81,7 @@ export default function MaterialIndex() {
     const handleDelete = async (materialId) => {
         if (confirm('Are you sure you want to delete this material?')) {
             try {
-                const response = await axios.delete(`/admin/api/materials/${materialId}`);
+                const response = await axios.delete(`/admin/materials/${materialId}`);
                 if (response.status === 200) {
                     fetchMaterials();
                     alert('Material deleted successfully');

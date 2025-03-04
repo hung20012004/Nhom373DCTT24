@@ -20,7 +20,7 @@ const Welcome = () => {
           axios.get('/api/v1/banners/active'),
           axios.get('/api/v1/categories/featured'),
           axios.get('/api/v1/products/featured'),
-          axios.get('/api/v1/wishlist')
+          axios.get('/wishlist')
         ]);
 
         setBanners(bannersResponse.data);

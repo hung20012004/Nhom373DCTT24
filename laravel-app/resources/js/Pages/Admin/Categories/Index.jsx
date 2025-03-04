@@ -81,7 +81,7 @@ export default function Index() {
     const handleDelete = async (categoryId) => {
         if (confirm('Bạn có chắc chắn muốn xóa loại sản phẩm này không?')) {
             try {
-                const response = await axios.delete(`/admin/api/categories/${categoryId}`);
+                const response = await axios.delete(`/admin/categories/${categoryId}`);
                 if (response.status === 200) {
                     fetchCategories();
                     alert('Loại sản phẩm đã được xóa thành công');

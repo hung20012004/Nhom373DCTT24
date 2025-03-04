@@ -34,7 +34,7 @@ export default function Index() {
     const fetchColors = async () => {
         try {
             setLoading(true);
-            const response = await axios.get('api/v1/colors', {
+            const response = await axios.get('/api/v1/colors', {
                 params: {
                     search,
                     page: pagination.current_page,
@@ -81,7 +81,7 @@ export default function Index() {
     const handleDelete = async (colorId) => {
         if (confirm('Are you sure you want to delete this color?')) {
             try {
-                const response = await axios.delete(`/admin/api/colors/${colorId}`);
+                const response = await axios.delete(`/admin/colors/${colorId}`);
                 if (response.status === 200) {
                     fetchColors();
                     alert('Color deleted successfully');

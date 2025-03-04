@@ -17,8 +17,6 @@ const formatCurrency = (value) => {
 };
 
 const Confirmation = ({ order }) => {
-    console.log('Order data:', order);
-
     return (
         <Layout>
             <Head title="Đặt hàng thành công" />

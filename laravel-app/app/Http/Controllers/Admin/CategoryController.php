@@ -12,65 +12,13 @@ use Illuminate\Support\Facades\Storage;
 
 class CategoryController extends Controller
 {
-    public function index(Request $request)
-    {
-        try {
-            $query = Category::with(['products']);
-
-            // Handle search
-            if ($request->filled('search')) {
-                $searchTerm = $request->search;
-                $query->where('name', 'like', "%{$searchTerm}%");
-            }
-
-            // Handle sorting
-            $sortField = $request->input('sort_field', 'display_order');
-            $sortDirection = $request->input('sort_direction', 'asc');
-
-            $allowedSortFields = [
-                'name' => 'name',
-                'display_order' => 'display_order',
-                'created_at' => 'created_at'
-            ];
-
-            if (array_key_exists($sortField, $allowedSortFields)) {
-                $dbField = $allowedSortFields[$sortField];
-                $query->orderBy($dbField, $sortDirection);
-            }
-
-            // Handle pagination
-            $perPage = $request->input('per_page', 10);
-            $perPage = in_array($perPage, [10, 25, 50, 100]) ? $perPage : 10;
-
-            $categories = $query->paginate($perPage);
-
-            return [
-                'data' => CategoryResource::collection($categories),
-                'current_page' => $categories->currentPage(),
-                'per_page' => $categories->perPage(),
-                'last_page' => $categories->lastPage(),
-                'total' => $categories->total(),
-                'sort' => [
-                    'field' => $sortField,
-                    'direction' => $sortDirection
-                ]
-            ];
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Error fetching categories',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
-
     public function store(Request $request)
     {
         $validated = $request->validate([
             'parent_id' => 'nullable|exists:categories,category_id',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'image_url' => 'nullable|string', // Thay đổi validation cho image_url
             'is_active' => 'required|boolean',
             'display_order' => 'required|integer|min:0'
         ]);
@@ -79,9 +27,9 @@ class CategoryController extends Controller
         try {
             $validated['slug'] = Str::slug($validated['name'] . ' ' . uniqid());
 
-            // Handle image upload
-            if ($request->hasFile('image')) {
-                $validated['image_url'] = $request->file('image')->store('categories', 'public');
+            // Nếu có image_url từ Cloudinary, sử dụng nó trực tiếp
+            if ($request->has('image_url')) {
+                $validated['image_url'] = $request->image_url;
             }
 
             $category = Category::create($validated);
@@ -94,56 +42,109 @@ class CategoryController extends Controller
         }
     }
 
-    public function update(Request $request, Category $category)
+    public function update(Request $request, $categoryId)
     {
-        $validated = $request->validate([
+        // Validate tất cả các trường có thể được gửi từ form
+        $rules = [
             'parent_id' => 'nullable|exists:categories,category_id',
-            'name' => 'sometimes|string|max:255',
+            'name' => 'string|max:255',
+            'slug' => 'string|max:255',
             'description' => 'nullable|string',
-            'image' => 'sometimes|image|mimes:jpeg,png,jpg|max:2048',
-            'is_active' => 'sometimes|boolean',
-            'display_order' => 'sometimes|integer|min:0'
-        ]);
+            'image_url' => 'nullable|string',
+            'is_active' => 'boolean',
+            'display_order' => 'integer|min:0'
+        ];
+
+        // Validate dữ liệu
+        $validated = $request->validate($rules);
 
         DB::beginTransaction();
         try {
-            if (isset($validated['name'])) {
-                $validated['slug'] = Str::slug($validated['name'] . ' ' . uniqid());
+            // Tìm category theo ID
+            $category = Category::findOrFail($categoryId);
+            // Tạo mảng chứa dữ liệu cần update
+            $updateData = [];
+
+            // Kiểm tra và thêm từng trường vào mảng update nếu có trong request
+            if ($request->has('name')) {
+                $updateData['name'] = $validated['name'];
+                $updateData['slug'] = Str::slug($validated['name']);
             }
 
-            // Handle image upload
-            if ($request->hasFile('image')) {
-                if ($category->image_url) {
-                    Storage::disk('public')->delete($category->image_url);
+            if ($request->has('description')) {
+                $updateData['description'] = $validated['description'];
+            }
+
+            if ($request->has('image_url')) {
+                // Nếu image_url là rỗng (đã xóa ảnh)
+                if (empty($request->image_url)) {
+                    $updateData['image_url'] = null;
+                    // Thêm logic xóa ảnh cũ từ Cloudinary nếu cần
+                    if ($category->image_url) {
+                        // Xóa ảnh cũ từ Cloudinary
+                        // $this->deleteFromCloudinary($category->image_url);
+                    }
+                } else {
+                    $updateData['image_url'] = $validated['image_url'];
                 }
-                $validated['image_url'] = $request->file('image')->store('categories', 'public');
             }
 
-            $category->update($validated);
+            if ($request->has('is_active')) {
+                $updateData['is_active'] = $validated['is_active'];
+            }
+
+            if ($request->has('display_order')) {
+                $updateData['display_order'] = $validated['display_order'];
+            }
+
+            if ($request->has('parent_id')) {
+                $updateData['parent_id'] = $validated['parent_id'];
+            }
+
+            // Chỉ update nếu có dữ liệu thay đổi
+            if (!empty($updateData)) {
+                $category->update($updateData);
+            }
 
             DB::commit();
+
+            // Trả về category đã được cập nhật
             return response()->json(new CategoryResource($category));
+
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['message' => 'Error updating category'], 500);
+            return response()->json([
+                'message' => 'Error updating category',
+                'error' => $e->getMessage(),
+                'data' => $request->all() // Thêm dữ liệu request để debug
+            ], 500);
         }
     }
-
-    public function destroy(Category $category)
+    public function destroy($categoryId)
     {
         DB::beginTransaction();
+
         try {
-            if ($category->image_url) {
-                Storage::disk('public')->delete($category->image_url);
+            // Tìm category theo ID
+            $category = Category::findOrFail($categoryId);
+            // Kiểm tra xem category có products không
+            if ($category->products()->exists()) {
+                return response()->json([
+                    'message' => 'Cannot delete category because it has associated products'
+                ], 400);
             }
 
+            // Xóa category
             $category->delete();
 
             DB::commit();
-            return response()->json(null, 204);
+            return response()->json([
+                'message' => 'Category deleted successfully'
+            ], 200);
+
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['message' => 'Error deleting category'], 500);
+            return response()->json(['message' => 'Không thể xóa danh mục: '], 500);
         }
     }
 }

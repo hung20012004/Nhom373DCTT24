@@ -94,7 +94,7 @@ export default function CustomerManagement() {
     const fetchCustomers = async () => {
         try {
             setLoading(true);
-            const response = await axios.get('/api/v1/customers', {
+            const response = await axios.get('customers/index', {
                 params: {
                     search,
                     page: pagination.current_page,

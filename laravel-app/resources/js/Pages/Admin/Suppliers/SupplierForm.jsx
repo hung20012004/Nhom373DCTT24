@@ -108,9 +108,9 @@ export default function SupplierForm({ supplier, onClose, onSuccess }) {
                     }
                 });
 
-                await axios.post(`/admin/api/suppliers/${supplier.id}`, changedFields);
+                await axios.post(`/admin/suppliers/${supplier.id}`, changedFields);
             } else {
-                await axios.post('/admin/api/suppliers', finalFormData);
+                await axios.post('/admin/suppliers', finalFormData);
             }
 
             if (imagePreview && imagePreview.startsWith('blob:')) {

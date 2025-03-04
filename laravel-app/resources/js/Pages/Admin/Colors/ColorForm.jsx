@@ -51,9 +51,9 @@ export default function ColorForm({ color, onClose, onSuccess }) {
                     }
                 });
 
-                await axios.post(`/admin/api/colors/${color.id}`, changedFields);
+                await axios.post(`/admin/colors/${color.id}`, changedFields);
             } else {
-                await axios.post('/admin/api/colors', dataToSubmit);
+                await axios.post('/admin/colors', dataToSubmit);
             }
 
             onSuccess();
