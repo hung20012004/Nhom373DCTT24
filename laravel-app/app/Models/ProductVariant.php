@@ -12,6 +12,7 @@ class ProductVariant extends Model
         'product_id',
         'color_id',
         'size_id',
+        'image_url',
         'stock_quantity',
         'price'
     ];
