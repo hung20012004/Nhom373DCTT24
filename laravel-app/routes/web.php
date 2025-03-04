@@ -129,6 +129,9 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
         Route::post('/', [CheckoutController::class, 'store'])->name('checkout.store');
     });
     Route::prefix('order')->group(function () {
+        Route::get('/', [OrderController::class, 'index'])->name('orders.index');
+        Route::get('/{order}', [OrderController::class, 'show'])->name('orders.show');
+        Route::get('/confirmation/{order}', [OrderController::class, 'confirmation'])->name('order.confirmation');
         Route::post('/', [OrderController::class, 'checkout'])->name('order.checkout');
         Route::get('/confirmation/{order}', [OrderController::class, 'confirmation'])->name('order.confirmation');
     });

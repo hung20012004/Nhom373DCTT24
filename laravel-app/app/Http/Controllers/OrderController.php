@@ -13,9 +13,34 @@ use Inertia\Inertia;
 
 class OrderController extends Controller
 {
-    /**
-     * Xử lý trang thanh toán và tạo đơn hàng
-     */
+    public function index()
+    {
+        $orders = Order::with([
+            'details.variant',  // Eager load chi tiết đơn hàng và variant
+            'shippingAddress',  // Eager load địa chỉ giao hàng
+        ])
+        ->where('user_id', Auth::id())
+        ->orderBy('order_date', 'desc')  // Sắp xếp đơn hàng mới nhất lên đầu
+        ->get();
+
+        return Inertia::render('Order/Index', [
+            'orders' => $orders,
+        ]);
+    }
+    public function show($orderId)
+    {
+        $order = Order::with([
+            'details.variant',  // Eager load chi tiết đơn hàng và variant
+            'shippingAddress',  // Eager load địa chỉ giao hàng
+        ])
+        ->where('order_id', $orderId)
+        ->where('user_id', Auth::id())
+        ->firstOrFail();
+
+        return Inertia::render('Order/Show', [
+            'order' => $order,
+        ]);
+    }
     public function checkout(Request $request)
     {
         try {

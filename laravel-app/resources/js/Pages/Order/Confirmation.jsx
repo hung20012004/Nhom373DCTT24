@@ -147,7 +147,7 @@ const Confirmation = ({ order }) => {
                             <Link href="/products">Tiếp tục mua sắm</Link>
                         </Button>
                         <Button asChild>
-                            <Link href="/orders">Xem đơn hàng của tôi</Link>
+                            <Link href="/order">Xem đơn hàng của tôi</Link>
                         </Button>
                     </CardFooter>
                 </Card>

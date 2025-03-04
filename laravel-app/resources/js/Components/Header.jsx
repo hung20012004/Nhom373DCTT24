@@ -177,7 +177,7 @@ const Header = () => {
                                                 Thông tin cá nhân
                                             </Link>
                                             <Link
-                                                href="/orders"
+                                                href="/order"
                                                 className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                             >
                                                 Lịch sử mua hàng
