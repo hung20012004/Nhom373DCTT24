@@ -11,6 +11,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Search, ShoppingBag } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+const formatCurrency = (value) => {
+    if (value == null || isNaN(value)) return '0 ₫';
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+};
 
 const OrderIndex = ({ orders }) => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -127,7 +131,7 @@ const OrderIndex = ({ orders }) => {
                                                 </p>
                                             </div>
                                             <div className="mt-2 md:mt-0 text-right">
-                                                <p className="text-lg font-medium">{order.total_amount.toLocaleString('vi-VN')}đ</p>
+                                                <p className="text-lg font-medium">{formatCurrency(order.total_amount)}</p>
                                                 <Badge className={getPaymentBadge(order.payment_status).color + " text-white mt-1"}>
                                                     {getPaymentBadge(order.payment_status).label}
                                                 </Badge>
@@ -140,14 +144,17 @@ const OrderIndex = ({ orders }) => {
                                                     order.details.slice(0, 2).map((detail) => (
                                                         <div key={detail.order_detail_id} className="flex items-center space-x-3">
                                                             <img
-                                                                src={detail.variant && detail.variant.image ? detail.variant.image : '/placeholder.png'}
+                                                                src={detail.variant && detail.variant.image_url ? detail.variant.image_url : '/placeholder.png'}
                                                                 alt={detail.variant ? detail.variant.name : 'Sản phẩm'}
                                                                 className="w-16 h-16 object-cover rounded"
                                                             />
                                                             <div className="flex-1">
-                                                                <p className="font-medium">{detail.variant ? detail.variant.name : 'Sản phẩm'}</p>
+                                                                <p className="font-medium">{detail.variant ? detail.variant.product.name : 'Sản phẩm'}</p>
+                                                                <p className="text-xs text-gray-500 mb-2">
+                                                                    {detail.variant.color.name} - {detail.variant.size.name}
+                                                                </p>
                                                                 <p className="text-sm text-gray-500">
-                                                                    {detail.unit_price.toLocaleString('vi-VN')}đ x {detail.quantity}
+                                                                    {formatCurrency(detail.unit_price)} x {detail.quantity}
                                                                 </p>
                                                             </div>
                                                         </div>
@@ -173,7 +180,7 @@ const OrderIndex = ({ orders }) => {
                                                     </p>
                                                 </div>
                                                 <Button asChild variant="outline">
-                                                    <Link href={`/order /${order.order_id}`}>Chi tiết</Link>
+                                                    <Link href={`/order/${order.order_id}`}>Chi tiết</Link>
                                                 </Button>
                                             </div>
                                         </div>

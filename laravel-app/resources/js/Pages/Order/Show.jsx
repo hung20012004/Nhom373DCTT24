@@ -12,7 +12,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Package, Truck, ShoppingBag, MapPin, Calendar, CreditCard, ClipboardList } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
-
+const formatCurrency = (value) => {
+    if (value == null || isNaN(value)) return '0 ₫';
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+};
 const OrderShow = ({ order }) => {
     // Get status badge properties
     const getStatusBadge = (status) => {
@@ -57,7 +60,6 @@ const OrderShow = ({ order }) => {
         });
     };
 
-    // Get status icon based on order status
     const getStatusIcon = (status) => {
         switch(status) {
             case 'new':
@@ -73,7 +75,6 @@ const OrderShow = ({ order }) => {
         }
     };
 
-    // Render order history
     const renderOrderHistory = () => {
         if (!order.history || order.history.length === 0) {
             return (
@@ -148,12 +149,15 @@ const OrderShow = ({ order }) => {
                                         order.details.map((detail) => (
                                             <div key={detail.order_detail_id} className="flex items-center space-x-4 py-3 border-b last:border-0">
                                                 <img
-                                                    src={detail.variant && detail.variant.image ? detail.variant.image : '/placeholder.png'}
+                                                    src={detail.variant && detail.variant.image_url ? detail.variant.image_url : '/placeholder.png'}
                                                     alt={detail.variant ? detail.variant.name : 'Sản phẩm'}
-                                                    className="w-20 h-20 object-cover rounded"
+                                                    className="w-20 h-24 object-cover rounded"
                                                 />
                                                 <div className="flex-1">
-                                                    <h3 className="font-medium">{detail.variant ? detail.variant.name : 'Sản phẩm'}</h3>
+                                                    <h3 className="font-medium">{detail.variant ? detail.variant.product.name : 'Sản phẩm'}</h3>
+                                                    <p className="text-xs text-gray-500 mb-2">
+                                                        {detail.variant.color.name} - {detail.variant.size.name}
+                                                    </p>
                                                     {detail.variant && detail.variant.attributes && (
                                                         <p className="text-sm text-gray-500 mt-1">
                                                             {Object.entries(detail.variant.attributes).map(([key, value]) =>
@@ -162,8 +166,9 @@ const OrderShow = ({ order }) => {
                                                         </p>
                                                     )}
                                                     <div className="flex justify-between items-center mt-2">
-                                                        <p className="text-gray-600">{detail.unit_price.toLocaleString('vi-VN')}đ x {detail.quantity}</p>
-                                                        <p className="font-medium">{detail.subtotal.toLocaleString('vi-VN')}đ</p>
+                                                        <p className="text-gray-600">
+                                                        {formatCurrency(detail.unit_price)} x {detail.quantity}</p>
+                                                        <p className="font-medium"> {formatCurrency(detail.subtotal)}</p>
                                                     </div>
                                                 </div>
                                             </div>
@@ -197,22 +202,22 @@ const OrderShow = ({ order }) => {
                                 <div className="space-y-3">
                                     <div className="flex justify-between">
                                         <span className="text-gray-600">Tạm tính:</span>
-                                        <span>{order.subtotal.toLocaleString('vi-VN')}đ</span>
+                                        <span> {formatCurrency(order.subtotal)}</span>
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-gray-600">Phí vận chuyển:</span>
-                                        <span>{order.shipping_fee.toLocaleString('vi-VN')}đ</span>
+                                        <span> {formatCurrency(order.shipping_fee)}</span>
                                     </div>
                                     {order.discount_amount > 0 && (
                                         <div className="flex justify-between">
                                             <span className="text-gray-600">Giảm giá:</span>
-                                            <span>-{order.discount_amount.toLocaleString('vi-VN')}đ</span>
+                                            <span>- {formatCurrency(order.discount_amount)}</span>
                                         </div>
                                     )}
                                     <Separator />
                                     <div className="flex justify-between font-medium">
                                         <span>Tổng cộng:</span>
-                                        <span className="text-lg">{order.total_amount.toLocaleString('vi-VN')}đ</span>
+                                        <span className="text-lg"> {formatCurrency(order.total_amount)}</span>
                                     </div>
 
                                     <div className="mt-3 pt-3 border-t">

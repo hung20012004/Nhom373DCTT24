@@ -62,7 +62,7 @@ const CheckoutPage = () => {
                         ...prevData,
                         shipping_address_id: defaultAddress.address_id,
                     }));
-                    handleAddressSelect(defaultAddress); // Gọi ngay sau khi setData
+                    handleAddressSelect(defaultAddress);
                 }
             } catch (error) {
                 console.error('Lỗi khi lấy địa chỉ:', error);
@@ -72,7 +72,7 @@ const CheckoutPage = () => {
         };
 
         fetchAddresses();
-    }, []); // Không cần phụ thuộc vào setData
+    }, []);
 
     const handleAddressSelect = (address) => {
         if (!address) {
@@ -100,7 +100,10 @@ const CheckoutPage = () => {
                 address.longitude
             );
             const distanceToCharge = Math.max(0, calculatedDistance - FREE_SHIPPING_DISTANCE);
-            const finalFee = calculatedDistance <= FREE_SHIPPING_DISTANCE ? 0 : Math.ceil(distanceToCharge * SHIPPING_RATE);
+            // Làm tròn xuống theo 1000 đồng
+            const finalFee = calculatedDistance <= FREE_SHIPPING_DISTANCE
+                ? 0
+                : Math.floor(Math.ceil(distanceToCharge * SHIPPING_RATE) / 1000) * 1000;
 
             setDistance(calculatedDistance);
             setChargableDistance(distanceToCharge);
@@ -117,7 +120,6 @@ const CheckoutPage = () => {
             }));
         }
     };
-
     const selectedItems = cart?.items?.filter((item) =>
         item?.cart_item_id && selectedItemIds.includes(item.cart_item_id.toString())
     ) || [];
@@ -248,6 +250,9 @@ const CheckoutPage = () => {
                                                 />
                                                 <div>
                                                     <p className="font-medium">{item.variant.product.name}</p>
+                                                    <p className="text-xs text-gray-500 mb-2">
+                                                        {item.variant.color.name} - {item.variant.size.name}
+                                                    </p>
                                                     <p className="text-sm text-gray-500">Số lượng: {item.quantity}</p>
                                                 </div>
                                             </div>

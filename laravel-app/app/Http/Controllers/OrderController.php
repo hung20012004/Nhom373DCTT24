@@ -16,26 +16,31 @@ class OrderController extends Controller
     public function index()
     {
         $orders = Order::with([
-            'details.variant',  // Eager load chi tiết đơn hàng và variant
-            'shippingAddress',  // Eager load địa chỉ giao hàng
+            'details' => function ($query) {
+                $query->with('variant.product', 'variant.color', 'variant.size');
+            },
+            'shippingAddress'
         ])
-        ->where('user_id', Auth::id())
-        ->orderBy('order_date', 'desc')  // Sắp xếp đơn hàng mới nhất lên đầu
-        ->get();
+            ->where('user_id', Auth::id())
+            ->orderBy('order_date', 'desc')
+            ->get();
 
         return Inertia::render('Order/Index', [
             'orders' => $orders,
         ]);
     }
+
     public function show($orderId)
     {
         $order = Order::with([
-            'details.variant',  // Eager load chi tiết đơn hàng và variant
-            'shippingAddress',  // Eager load địa chỉ giao hàng
+            'details' => function ($query) {
+                $query->with('variant.product', 'variant.color', 'variant.size');
+            },
+            'shippingAddress'
         ])
-        ->where('order_id', $orderId)
-        ->where('user_id', Auth::id())
-        ->firstOrFail();
+            ->where('order_id', $orderId)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
 
         return Inertia::render('Order/Show', [
             'order' => $order,
@@ -54,8 +59,6 @@ class OrderController extends Controller
             ]);
 
             $user = Auth::user();
-
-            // Lấy các mục trong giỏ hàng của người dùng
             $cartItems = CartItem::whereIn('cart_item_id', $validated['items'])
                 ->whereHas('cart', function ($query) use ($user) {
                     $query->where('user_id', $user->id);
@@ -71,7 +74,6 @@ class OrderController extends Controller
 
             DB::beginTransaction();
 
-            // Tính tổng tiền tạm tính
             $subtotal = 0;
             foreach ($cartItems as $item) {
                 $subtotal += $item->variant->price * $item->quantity;
@@ -79,7 +81,6 @@ class OrderController extends Controller
 
             $total = $subtotal + $validated['shipping_fee'];
 
-            // Tạo đơn hàng
             $order = Order::create([
                 'user_id' => $user->id,
                 'shipping_address_id' => $validated['shipping_address_id'],
@@ -94,7 +95,6 @@ class OrderController extends Controller
                 'note' => $validated['note'],
             ]);
 
-            // Tạo chi tiết đơn hàng
             foreach ($cartItems as $item) {
                 OrderDetail::create([
                     'order_id' => $order->order_id,
@@ -105,7 +105,6 @@ class OrderController extends Controller
                 ]);
             }
 
-            // Xóa các mục trong giỏ hàng
             CartItem::whereIn('cart_item_id', $validated['items'])->delete();
 
             DB::commit();
@@ -133,8 +132,6 @@ class OrderController extends Controller
      */
     private function processVnpayPayment(Order $order, $amount)
     {
-        // Giả sử bạn đã cài đặt package VNPAY (ví dụ: laravel-vnpay)
-        // Cấu hình thông tin VNPAY (cần thay đổi theo môi trường thực tế)
         $vnpayConfig = [
             'vnp_TmnCode' => env('VNPAY_TMN_CODE'), // Mã terminal từ VNPAY
             'vnp_HashSecret' => env('VNPAY_HASH_SECRET'), // Key bí mật từ VNPAY
@@ -170,7 +167,6 @@ class OrderController extends Controller
             "vnp_TxnRef" => $vnp_TxnRef,
         ];
 
-        // Sắp xếp dữ liệu theo thứ tự bảng chữ cái
         ksort($inputData);
         $query = http_build_query($inputData);
         $hash = hash_hmac('sha512', $query, $vnp_HashSecret);
@@ -179,9 +175,7 @@ class OrderController extends Controller
         return $vnp_Url;
     }
 
-    /**
-     * Xử lý callback từ VNPAY sau khi thanh toán
-     */
+
     public function vnpayCallback(Request $request)
     {
         $vnp_HashSecret = env('VNPAY_HASH_SECRET');
@@ -227,35 +221,29 @@ class OrderController extends Controller
         ], 400);
     }
 
-    /**
-     * Hiển thị trang xác nhận đơn hàng
-     */
     public function confirmation($orderId)
     {
-        // Lấy đơn hàng nhưng tải thêm dữ liệu từ ShippingAddress
         $order = Order::with([
-            'details.variant',  // Eager load chi tiết đơn hàng và variant
-            'shippingAddress',  // Eager load địa chỉ giao hàng
+            'details' => function ($query) {
+                $query->with('variant.product');
+            },
+            'shippingAddress'
         ])
-        ->where('order_id', $orderId)
-        ->where('user_id', Auth::id())
-        ->firstOrFail();
+            ->where('order_id', $orderId)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
 
-        // Lấy địa chỉ giao hàng nếu không có trong eager load
         if (!$order->shippingAddress && $order->shipping_address_id) {
             $shippingAddress = ShippingAddress::find($order->shipping_address_id);
             $order->setRelation('shippingAddress', $shippingAddress);
         }
 
-        // Lấy chi tiết đơn hàng nếu details là rỗng
         if ($order->details->isEmpty()) {
             $details = OrderDetail::with('variant')
                 ->where('order_id', $order->order_id)
                 ->get();
             $order->setRelation('details', $details);
         }
-
-        // dd($order->toArray()); // Uncomment để debug
 
         return Inertia::render('Order/Confirmation', [
             'order' => $order,
