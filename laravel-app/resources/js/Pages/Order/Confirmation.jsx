@@ -11,9 +11,12 @@ import {
 import { Button } from '@/components/ui/button';
 import { CheckCircle } from 'lucide-react';
 
-const Confirmation = ({ order }) => {
-    console.log('Order data:', order);
+const formatCurrency = (value) => {
+    if (value == null || isNaN(value)) return '0 ₫';
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+};
 
+const Confirmation = ({ order }) => {
     return (
         <Layout>
             <Head title="Đặt hàng thành công" />
@@ -98,17 +101,20 @@ const Confirmation = ({ order }) => {
                                         <div key={detail.order_detail_id} className="flex justify-between py-2 border-b last:border-0">
                                             <div className="flex items-center space-x-2">
                                                 <img
-                                                    src={detail.variant && detail.variant.image ? detail.variant.image : '/placeholder.png'}
-                                                    alt={detail.variant ? detail.variant.name : 'Sản phẩm'}
-                                                    className="w-12 h-12 object-cover rounded"
+                                                    src={detail.variant && detail.variant.image_url ? detail.variant.image_url : '/placeholder.png'}
+                                                    alt={detail.variant ? detail.variant.product.name : 'Sản phẩm'}
+                                                    className="w-12 h-14 object-cover rounded"
                                                 />
                                                 <div>
-                                                    <p className="font-medium">{detail.variant ? detail.variant.name : 'Sản phẩm'}</p>
+                                                    <p className="font-medium">{detail.variant.product.name ?? 'Sản phẩm'}</p>
+                                                    <p className="text-xs text-gray-500 mb-2">
+                                                        {detail.variant.color.name} - {detail.variant.size.name}
+                                                    </p>
                                                     <p className="text-sm text-gray-500">Số lượng: {detail.quantity}</p>
                                                 </div>
                                             </div>
                                             <div className="text-right">
-                                                <p>{detail.subtotal ? detail.subtotal.toLocaleString('vi-VN') : 0}đ</p>
+                                                <p>{formatCurrency(detail.subtotal)}</p>
                                             </div>
                                         </div>
                                     ))
@@ -121,21 +127,21 @@ const Confirmation = ({ order }) => {
                                 <div className="mt-4 space-y-2">
                                     <div className="flex justify-between">
                                         <span>Tạm tính:</span>
-                                        <span>{order.subtotal.toLocaleString('vi-VN')}đ</span>
+                                        <span>{formatCurrency(order.subtotal)}</span>
                                     </div>
                                     <div className="flex justify-between">
                                         <span>Phí vận chuyển:</span>
-                                        <span>{order.shipping_fee.toLocaleString('vi-VN')}đ</span>
+                                        <span>{formatCurrency(order.shipping_fee)}</span>
                                     </div>
                                     {parseFloat(order.discount_amount) > 0 && (
                                         <div className="flex justify-between">
                                             <span>Giảm giá:</span>
-                                            <span>-{parseFloat(order.discount_amount).toLocaleString('vi-VN')}đ</span>
+                                            <span>-{formatCurrency(parseFloat(order.discount_amount))}</span>
                                         </div>
                                     )}
                                     <div className="flex justify-between font-medium text-lg pt-2 border-t">
                                         <span>Tổng cộng:</span>
-                                        <span>{order.total_amount.toLocaleString('vi-VN')}đ</span>
+                                        <span>{formatCurrency(order.total_amount)}</span>
                                     </div>
                                 </div>
                             </div>
@@ -147,7 +153,7 @@ const Confirmation = ({ order }) => {
                             <Link href="/products">Tiếp tục mua sắm</Link>
                         </Button>
                         <Button asChild>
-                            <Link href="/orders">Xem đơn hàng của tôi</Link>
+                            <Link href="/order">Xem đơn hàng của tôi</Link>
                         </Button>
                     </CardFooter>
                 </Card>

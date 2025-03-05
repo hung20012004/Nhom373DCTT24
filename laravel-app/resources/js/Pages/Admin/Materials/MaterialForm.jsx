@@ -46,9 +46,9 @@ export default function MaterialForm({ material, onClose, onSuccess }) {
                     }
                 });
 
-                await axios.post(`/admin/api/materials/${material.id}`, changedFields);
+                await axios.post(`/admin/materials/${material.id}`, changedFields);
             } else {
-                await axios.post('/admin/api/materials', formData);
+                await axios.post('/admin/materials', formData);
             }
 
             onSuccess();

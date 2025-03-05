@@ -81,7 +81,7 @@ export default function Index() {
     const handleDelete = async (sizeId) => {
         if (confirm('Are you sure you want to delete this size?')) {
             try {
-                const response = await axios.delete(`/admin/api/sizes/${sizeId}`);
+                const response = await axios.delete(`/admin/sizes/${sizeId}`);
                 if (response.status === 200) {
                     fetchSizes();
                     alert('Size deleted successfully');

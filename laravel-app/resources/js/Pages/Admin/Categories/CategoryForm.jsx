@@ -105,9 +105,9 @@ export default function CategoryForm({ category, onClose, onSuccess }) {
                     }
                 });
 
-                await axios.post(`/admin/api/categories/${category.id}`, changedFields);
+                await axios.post(`/admin/categories/${category.id}`, changedFields);
             } else {
-                await axios.post('/admin/api/categories', finalFormData);
+                await axios.post('/admin/categories', finalFormData);
             }
 
             if (imagePreview && imagePreview.startsWith('blob:')) {

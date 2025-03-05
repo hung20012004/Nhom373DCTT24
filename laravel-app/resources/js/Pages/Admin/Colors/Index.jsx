@@ -81,7 +81,7 @@ export default function Index() {
     const handleDelete = async (colorId) => {
         if (confirm('Are you sure you want to delete this color?')) {
             try {
-                const response = await axios.delete(`/admin/api/colors/${colorId}`);
+                const response = await axios.delete(`/admin/colors/${colorId}`);
                 if (response.status === 200) {
                     fetchColors();
                     alert('Color deleted successfully');

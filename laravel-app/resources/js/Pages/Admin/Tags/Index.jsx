@@ -81,7 +81,7 @@ export default function Index() {
     const handleDelete = async (tagId) => {
         if (confirm('Are you sure you want to delete this tag?')) {
             try {
-                const response = await axios.delete(`/admin/api/tags/${tagId}`);
+                const response = await axios.delete(`/admin/tags/${tagId}`);
                 if (response.status === 200) {
                     fetchTags();
                     alert('Tag deleted successfully');

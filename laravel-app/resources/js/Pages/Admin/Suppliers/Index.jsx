@@ -81,7 +81,7 @@ export default function SupplierIndex() {
     const handleDelete = async (supplierId) => {
         if (confirm('Are you sure you want to delete this supplier?')) {
             try {
-                const response = await axios.delete(`/admin/api/suppliers/${supplierId}`);
+                const response = await axios.delete(`/admin/suppliers/${supplierId}`);
                 if (response.status === 200) {
                     fetchSuppliers();
                     alert('Supplier deleted successfully');

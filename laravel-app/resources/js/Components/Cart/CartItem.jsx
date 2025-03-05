@@ -1,51 +1,67 @@
 import React from 'react';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Minus, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export const CartItem = ({ item, onUpdateQuantity, onRemove }) => {
-    console.log('CartItem data:', item);
-
-    const handleQuantityChange = (e) => {
-        const newQuantity = parseInt(e.target.value);
-        // Thêm kiểm tra cart_item_id
-        if (!item.cart_item_id) {
-            console.error('Missing cart_item_id:', item);
-            return;
-        }
-
-        if (newQuantity > 0 && newQuantity <= item.variant.stock_quantity) {
-            onUpdateQuantity(item.cart_item_id, newQuantity);
+    const handleIncrement = () => {
+        if (item.quantity < item.variant.stock_quantity) {
+            onUpdateQuantity(item.cart_item_id, item.quantity + 1);
         }
     };
 
+    const handleDecrement = () => {
+        if (item.quantity > 1) {
+            onUpdateQuantity(item.cart_item_id, item.quantity - 1);
+        }
+    };
+
+    // Format price in Vietnamese currency
+    const formatPrice = (price) => {
+        return price.toLocaleString('vi-VN') + 'đ';
+    };
+
     return (
-        <div className="flex items-center gap-4 p-4 border-b">
-            <div className="w-20 h-20 flex-shrink-0">
-                {/* <img
-                    src={item.variant.product.images[0]?.image_url}
+        <div className="flex items-start gap-3 py-3 w-full">
+            <div className="w-16 h-16 flex-shrink-0 rounded-md overflow-hidden border bg-gray-50">
+                <img
+                    src={item.variant.image_url}
                     alt={item.variant.product.name}
-                    className="w-full h-full object-cover rounded"
-                /> */}
+                    className="w-full h-full object-cover"
+                />
             </div>
-            <div className="flex-grow">
-                <h3 className="font-medium">{item.variant.product.name}</h3>
-                <p className="text-sm text-gray-500">
+            <div className="flex-grow min-w-0">
+                <h3 className="font-medium text-sm truncate">{item.variant.product.name}</h3>
+                <p className="text-xs text-gray-500 mb-2">
                     {item.variant.color.name} - {item.variant.size.name}
                 </p>
-                <div className="flex items-center gap-4 mt-2">
-                    <select
-                        value={item.quantity}
-                        onChange={handleQuantityChange}
-                        className="w-20 rounded border-gray-300 focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                    >
-                        {[...Array(item.variant.stock_quantity)].map((_, i) => (
-                            <option key={i + 1} value={i + 1}>
-                                {i + 1}
-                            </option>
-                        ))}
-                    </select>
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center border rounded-md">
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 rounded-r-none p-0"
+                            onClick={handleDecrement}
+                            disabled={item.quantity <= 1}
+                        >
+                            <Minus className="h-3 w-3" />
+                        </Button>
+                        <span className="w-8 text-center text-sm">
+                            {item.quantity}
+                        </span>
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 rounded-l-none p-0"
+                            onClick={handleIncrement}
+                            disabled={item.quantity >= item.variant.stock_quantity}
+                        >
+                            <Plus className="h-3 w-3" />
+                        </Button>
+                    </div>
                     <span className="text-sm font-medium">
-                        ${(item.variant.price * item.quantity).toFixed(2)}
+                        {formatPrice(item.variant.price * item.quantity)}
                     </span>
                 </div>
             </div>
@@ -53,9 +69,9 @@ export const CartItem = ({ item, onUpdateQuantity, onRemove }) => {
                 variant="ghost"
                 size="icon"
                 onClick={() => onRemove(item.cart_item_id)}
-                className="text-gray-500 hover:text-red-500"
+                className="text-gray-400 hover:text-red-500 hover:bg-red-50 h-8 w-8 flex-shrink-0"
             >
-                <Trash2 className="h-5 w-5" />
+                <Trash2 className="h-4 w-4" />
             </Button>
         </div>
     );

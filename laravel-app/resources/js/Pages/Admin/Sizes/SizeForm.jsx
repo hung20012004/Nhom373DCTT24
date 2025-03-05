@@ -50,9 +50,9 @@ export default function SizeForm({ size, onClose, onSuccess }) {
                     }
                 });
 
-                await axios.post(`/admin/api/sizes/${size.id}`, changedFields);
+                await axios.post(`/admin/sizes/${size.id}`, changedFields);
             } else {
-                await axios.post('/admin/api/sizes', dataToSubmit);
+                await axios.post('/admin/sizes', dataToSubmit);
             }
 
             onSuccess();

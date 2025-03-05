@@ -123,12 +123,6 @@ class TagController extends Controller
         try {
             $tag = Tag::findOrFail($tagId);
 
-            // if ($tag->products()->exists()) {
-            //     return response()->json([
-            //         'message' => 'Cannot delete tag because it has associated products'
-            //     ], 400);
-            // }
-
             $tag->delete();
 
             DB::commit();

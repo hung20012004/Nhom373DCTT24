@@ -141,9 +141,9 @@ export default function ProductForm({ product, onClose, onSuccess }) {
             }
 
             if (product) {
-                await axios.post(`/admin/api/products/${product.product_id}`, finalFormData);
+                await axios.post(`/admin/products/${product.product_id}`, finalFormData);
             } else {
-                await axios.post('/admin/api/products', finalFormData);
+                await axios.post('/admin/products', finalFormData);
             }
 
             if (imagePreview && imagePreview.startsWith('blob:')) {

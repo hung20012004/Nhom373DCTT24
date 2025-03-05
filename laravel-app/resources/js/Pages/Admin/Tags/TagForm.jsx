@@ -47,9 +47,9 @@ export default function TagForm({ tag, onClose, onSuccess }) {
                     }
                 });
 
-                await axios.post(`/admin/api/tags/${tag.id}`, changedFields);
+                await axios.post(`/admin/tags/${tag.id}`, changedFields);
             } else {
-                await axios.post('/admin/api/tags', finalFormData);
+                await axios.post('/admin/tags', finalFormData);
             }
 
             onSuccess();
