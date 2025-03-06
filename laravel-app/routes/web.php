@@ -1,35 +1,21 @@
 <?php
-use App\Http\Controllers\API\CartController;
-use App\Http\Controllers\CheckoutController;
-use App\Http\Controllers\OrderController;
-use App\Http\Controllers\ShippingAddressController;
-use App\Http\Controllers\API\CategoryController;
-use App\Http\Controllers\API\ColorController;
-use App\Http\Controllers\API\MaterialController;
-use App\Http\Controllers\API\ProductController;
-use App\Http\Controllers\API\PurchaseOrderController;
-use App\Http\Controllers\API\SizeController;
-use App\Http\Controllers\API\SupplierController;
-use App\Http\Controllers\API\TagController;
-use App\Http\Controllers\API\WishlistController;
 use App\Http\Controllers\Customer\CartController;
 use App\Http\Controllers\Customer\CheckoutController;
 use App\Http\Controllers\Customer\OrderController;
 use App\Http\Controllers\Customer\WishlistController;
 use App\Http\Controllers\Customer\ShippingAddressController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\UserController;
-use App\Models\PurchaseOrder;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ColorController;
+use App\Http\Controllers\Admin\InventoryCheckController;
 use App\Http\Controllers\Admin\MaterialController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\SizeController;
 use App\Http\Controllers\Admin\SupplierController;
 use App\Http\Controllers\Admin\TagController;
 use App\Http\Controllers\Admin\UserController;
-
+use App\Http\Controllers\Admin\PurchaseOrderController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -87,12 +73,24 @@ Route::middleware(['auth', 'verified','check.role'])->prefix('admin')->group(fun
     Route::get('/purchase-orders/{id}', function ($id) {
         return Inertia::render('Admin/PurchaseOrders/Show', ['poId' => $id]);
     })->name('admin.purchase-orders.show');
+    Route::get('/inventory-checks', function () {
+        return Inertia::render('Admin/InventoryChecks/Index');
+    })->name('admin.inventory-checks');
+    Route::get('/inventory-checks/{id}', function ($id) {
+        return Inertia::render('Admin/InventoryChecks/Show', ['checkId' => $id]);
+    })->name('admin.inventory-checks.show');
     // API Routes
     Route::prefix('purchase-orders')->group(function () {
         Route::post('/', [PurchaseOrderController::class, 'store']);
         Route::put('/{purchaseorderId}', [PurchaseOrderController::class, 'update']);
         Route::put('/{purchaseorderId}/status', [PurchaseOrderController::class, 'updateStatus']);
         Route::delete('/{purchaseorderId}', [PurchaseOrderController::class, 'destroy']);
+    });
+    Route::prefix('inventory-checks')->group(function () {
+        Route::post('/', [InventoryCheckController::class, 'store']);
+        Route::put('/{checkId}', [InventoryCheckController::class, 'update']);
+        Route::put('/{checkId}/status', [InventoryCheckController::class, 'updateStatus']);
+        Route::delete('/{checkId}', [InventoryCheckController::class, 'destroy']);
     });
     Route::prefix('categories')->group(function () {
         Route::post('/', [CategoryController::class, 'store']);

@@ -114,4 +114,32 @@ class ProductController extends Controller
         });
         return response()->json($products);
     }
+    public function all()
+    {
+        $products = Product::with([
+            'category',
+            'material',
+            'images',
+            'variants.color',
+            'variants.size'
+        ])
+        ->orderBy('product_id', 'asc')
+        ->get();
+
+        // Transform the products data
+        $products->transform(function ($product) {
+            $variantsGrouped = $product->variants->groupBy(function ($variant) {
+                return $variant->color->name;
+            })->map(function ($colorGroup) {
+                return $colorGroup->pluck('size.name')->unique()->values();
+            });
+
+            $product->available_colors = $product->variants->pluck('color')->unique('color_id')->values();
+            $product->available_sizes = $product->variants->pluck('size')->unique('size_id')->values();
+            $product->variants_matrix = $variantsGrouped;
+
+            return $product;
+        });
+        return response()->json($products);
+    }
 }

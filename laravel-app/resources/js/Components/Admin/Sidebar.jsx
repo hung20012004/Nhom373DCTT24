@@ -47,7 +47,6 @@ const Sidebar = () => {
             items: [
                 { title: 'Sản phẩm', icon: <Package size={20} />, path: '/admin/products' },
                 { title: 'Danh mục', icon: <Tags size={20} />, path: '/admin/categories' },
-                { title: 'Kho hàng', icon: <Database size={20} />, path: '/admin/inventory' },
                 { title: 'Nhà cung cấp', icon: <Truck size={20} />, path: '/admin/suppliers' },
                 { title: 'Kiểm kho', icon: <ClipboardList size={20} />, path: '/admin/inventory-checks' },
                 { title: 'Kích thước', icon: <Box size={20} />, path: '/admin/sizes' },

@@ -45,11 +45,7 @@ class PurchaseOrder extends Model
         return $this->hasMany(PurchaseOrderDetail::class, 'po_id', 'po_id');
     }
 
-    // Relationship with Inventory Receipts
-    public function inventoryReceipts()
-    {
-        return $this->hasMany(InventoryReceipt::class, 'po_id', 'po_id');
-    }
+
 
     // Helper method to calculate total quantity
     public function getTotalQuantityAttribute()
@@ -68,19 +64,19 @@ class PurchaseOrder extends Model
     }
 
     // Status helpers
-    public function isDraft()
+    public function isPending()
     {
-        return $this->status === 'draft';
+        return $this->status === 'pending';
     }
 
-    public function isOrdered()
+    public function isProcessing()
     {
-        return $this->status === 'ordered';
+        return $this->status === 'processing';
     }
 
-    public function isReceived()
+    public function isCompleted()
     {
-        return $this->status === 'received';
+        return $this->status === 'completed';
     }
 
     public function isCancelled()
@@ -89,17 +85,17 @@ class PurchaseOrder extends Model
     }
 
     // Status update methods
-    public function markAsOrdered()
+    public function markAsProcessing()
     {
-        $this->status = 'ordered';
+        $this->status = 'processing';
         $this->save();
 
         return $this;
     }
 
-    public function markAsReceived()
+    public function markAsCompleted()
     {
-        $this->status = 'received';
+        $this->status = 'completed';
         $this->save();
 
         return $this;

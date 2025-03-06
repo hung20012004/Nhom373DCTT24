@@ -19,57 +19,53 @@ import {
     SelectValue,
 } from '@/Components/ui/select';
 import Breadcrumb from '@/Components/Breadcrumb';
-import PurchaseOrderForm from './PurchaseOrderForm.jsx';
+import InventoryCheckForm from './InventoryCheckForm.jsx';
 import axios from 'axios';
 import { ArrowUpDown, Eye, Edit, Trash2, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function Index() {
-    const [purchaseOrders, setPurchaseOrders] = useState([]);
+    const [inventoryChecks, setInventoryChecks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
-    const [supplierFilter, setSupplierFilter] = useState('all');
-    const [suppliers, setSuppliers] = useState([]);
+    const [creatorFilter, setCreatorFilter] = useState('all');
+    const [creators, setCreators] = useState([]);
     const [fromDate, setFromDate] = useState('');
     const [toDate, setToDate] = useState('');
     const [showForm, setShowForm] = useState(false);
-    const [editPurchaseOrder, setEditPurchaseOrder] = useState(null);
+    const [editInventoryCheck, setEditInventoryCheck] = useState(null);
     const [pagination, setPagination] = useState({
         current_page: 1,
         per_page: 10,
         total: 0,
         last_page: 1
     });
-    const [sortField, setSortField] = useState('order_date');
+    const [sortField, setSortField] = useState('check_date');
     const [sortDirection, setSortDirection] = useState('desc');
 
     const statusLabels = {
-        'pending': 'Nháp',
-        'processing': 'Đã đặt hàng',
-        'completed': 'Đã nhận hàng',
-        'cancelled': 'Đã hủy'
+        'draft': 'Nháp',
+        'completed': 'Hoàn thành'
     };
 
     const statusClasses = {
-        'pending': 'bg-gray-100 text-gray-800',
-        'processing': 'bg-blue-100 text-blue-800',
-        'completed': 'bg-green-100 text-green-800',
-        'cancelled': 'bg-red-100 text-red-800'
+        'draft': 'bg-gray-100 text-gray-800',
+        'completed': 'bg-green-100 text-green-800'
     };
 
-    const fetchSuppliers = async () => {
+    const fetchCreators = async () => {
         try {
-            const response = await axios.get('/api/v1/suppliers');
+            const response = await axios.get('/admin/users');
             if (response.data && response.data.data) {
-                setSuppliers(response.data.data);
+                setCreators(response.data.data);
             }
         } catch (error) {
-            console.error('Lỗi khi tải nhà cung cấp:', error);
+            console.error('Lỗi khi tải danh sách người tạo:', error);
         }
     };
 
-    const fetchPurchaseOrders = async () => {
+    const fetchInventoryChecks = async () => {
         try {
             setLoading(true);
             // Tạo đối tượng params và chỉ thêm các tham số có giá trị
@@ -85,9 +81,9 @@ export default function Index() {
                 params.status = statusFilter;
             }
 
-            // Chỉ thêm supplier_id nếu không phải 'all'
-            if (supplierFilter !== 'all') {
-                params.supplier_id = supplierFilter;
+            // Chỉ thêm create_by nếu không phải 'all'
+            if (creatorFilter !== 'all') {
+                params.create_by = creatorFilter;
             }
 
             // Chỉ thêm from_date nếu có giá trị
@@ -106,36 +102,36 @@ export default function Index() {
             params.sort_field = sortField;
             params.sort_direction = sortDirection;
 
-            const response = await axios.get('/api/v1/purchase-orders', { params });
+            const response = await axios.get('/api/v1/inventory-checks', { params });
 
             if (response.data && response.data.data) {
-                setPurchaseOrders(response.data.data.data);
+                setInventoryChecks(response.data.data.data);
                 setPagination({
                     current_page: response.data.data.current_page,
                     per_page: response.data.data.per_page,
                     total: response.data.data.total,
                     last_page: response.data.data.last_page
                 });
-            }
+            } console.log('Danh sách kiểm kê kho:', inventoryChecks);
         } catch (error) {
-            console.error('Lỗi khi tải đơn đặt hàng:', error);
-            setPurchaseOrders([]);
+            console.error('Lỗi khi tải kiểm kê kho:', error);
+            setInventoryChecks([]);
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchSuppliers();
+        fetchCreators();
     }, []);
 
     useEffect(() => {
         const timeoutId = setTimeout(() => {
-            fetchPurchaseOrders();
+            fetchInventoryChecks();
         }, 300);
 
         return () => clearTimeout(timeoutId);
-    }, [search, statusFilter, supplierFilter, fromDate, toDate, pagination.current_page, sortField, sortDirection]);
+    }, [search, statusFilter, creatorFilter, fromDate, toDate, pagination.current_page, sortField, sortDirection]);
 
     const handleSort = (field) => {
         if (sortField === field) {
@@ -146,39 +142,39 @@ export default function Index() {
         }
     };
 
-    const handleDelete = async (poId) => {
-        if (confirm('Bạn có chắc chắn muốn xóa đơn đặt hàng này không?')) {
+    const handleDelete = async (checkId) => {
+        if (confirm('Bạn có chắc chắn muốn xóa phiếu kiểm kê này không?')) {
             try {
-                const response = await axios.delete(`/admin/purchase-orders/${poId}`);
+                const response = await axios.delete(`/admin/inventory-checks/${checkId}`);
                 if (response.data.status === 'success') {
-                    fetchPurchaseOrders();
-                    alert('Đơn đặt hàng đã được xóa thành công');
+                    fetchInventoryChecks();
+                    alert('Phiếu kiểm kê đã được xóa thành công');
                 }
             } catch (error) {
-                console.error('Lỗi khi xóa đơn đặt hàng:', error);
-                alert(error.response?.data?.message || `Lỗi khi xóa đơn đặt hàng ${poId}`);
+                console.error('Lỗi khi xóa phiếu kiểm kê:', error);
+                alert(error.response?.data?.message || `Lỗi khi xóa phiếu kiểm kê ${checkId}`);
             }
         }
     };
 
-    const handleStatusChange = async (poId, newStatus) => {
+    const handleStatusChange = async (checkId, newStatus) => {
         try {
-            const response = await axios.put(`/admin/purchase-orders/${poId}/status`, {
+            const response = await axios.put(`/admin/inventory-checks/${checkId}/status`, {
                 status: newStatus
             });
 
             if (response.data.status === 'success') {
-                fetchPurchaseOrders();
-                alert('Trạng thái đơn đặt hàng đã được cập nhật thành công');
+                fetchInventoryChecks();
+                alert('Trạng thái phiếu kiểm kê đã được cập nhật thành công');
             }
         } catch (error) {
-            console.error('Lỗi khi cập nhật trạng thái đơn đặt hàng:', error);
-            alert(error.response?.data?.message || 'Lỗi khi cập nhật trạng thái đơn đặt hàng');
+            console.error('Lỗi khi cập nhật trạng thái phiếu kiểm kê:', error);
+            alert(error.response?.data?.message || 'Lỗi khi cập nhật trạng thái phiếu kiểm kê');
         }
     };
 
     const breadcrumbItems = [
-        { label: 'Đơn đặt hàng', href: '/admin/purchase-orders' }
+        { label: 'Kiểm kê kho', href: '/admin/inventory-checks' }
     ];
 
     const renderPagination = () => {
@@ -210,47 +206,46 @@ export default function Index() {
         </TableHead>
     );
 
-    const formatCurrency = (amount) => {
-        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
-    };
-
     const formatDate = (dateString) => {
         if (!dateString) return '';
         return format(new Date(dateString), 'dd/MM/yyyy');
     };
-    console.log("purchaseOrders typeof: ", typeof purchaseOrders.supplier_id);
+
+    const calculateDifferenceCount = (check) => {
+        if (!check.details || check.details.length === 0) return 0;
+        return check.details.filter(detail => detail.difference !== 0).length;
+    };
+
     return (
         <AdminLayout>
-            <Head title="Quản lý đơn đặt hàng" />
+            <Head title="Quản lý kiểm kê kho" />
 
             <div className="container mx-auto py-6 px-4">
                 <Breadcrumb items={breadcrumbItems} />
 
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                    <h1 className="text-3xl font-bold text-gray-900">Đơn đặt hàng</h1>
+                    <h1 className="text-3xl font-bold text-gray-900">Kiểm kê kho</h1>
                     <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                            <Input
+                                type="text"
+                                placeholder="Tìm kiếm phiếu kiểm kê..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                className="w-full sm:w-64"
+                            />
                         <Button
                             onClick={() => {
-                                setEditPurchaseOrder(null);
+                                setEditInventoryCheck(null);
                                 setShowForm(true);
                             }}
                         >
-                            Thêm đơn đặt hàng mới
+                            Thêm phiếu kiểm kê mới
                         </Button>
                     </div>
                 </div>
 
                 <div className="bg-white rounded-lg shadow overflow-hidden mb-6">
-                    <div className="p-4 grid grid-cols-1 md:grid-cols-5 gap-4">
-                        <div>
-                            <Input
-                                type="text"
-                                placeholder="Tìm kiếm đơn đặt hàng..."
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                className="w-full"
-                            />
-                        </div>
+                    <div className="p-4 grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div>
                             <Select value={statusFilter} onValueChange={setStatusFilter}>
                                 <SelectTrigger>
@@ -258,24 +253,20 @@ export default function Index() {
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="all">Tất cả trạng thái</SelectItem>
-                                    <SelectItem value="pending">Nháp</SelectItem>
-                                    <SelectItem value="processing">Đã đặt hàng</SelectItem>
-                                    <SelectItem value="completed">Đã nhận hàng</SelectItem>
-                                    <SelectItem value="cancelled">Đã hủy</SelectItem>
+                                    <SelectItem value="draft">Nháp</SelectItem>
+                                    <SelectItem value="completed">Hoàn thành</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
                         <div>
-                            <Select value={supplierFilter} onValueChange={setSupplierFilter}>
+                            <Select value={creatorFilter} onValueChange={setCreatorFilter}>
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Lọc theo nhà cung cấp" />
+                                    <SelectValue placeholder="Lọc theo người tạo" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="all">Tất cả nhà cung cấp</SelectItem>
-                                    {suppliers.map(supplier => (
-                                        <SelectItem key={supplier.id} value={supplier.id}>
-                                            {supplier.name}
-                                        </SelectItem>
+                                    <SelectItem value="all">Tất cả người tạo</SelectItem>
+                                    {creators.map(creator => (
+                                        <SelectItem key={creator.id} value={creator.id}>{creator.name}</SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
@@ -312,11 +303,11 @@ export default function Index() {
                         <Table>
                             <TableHeader>
                                 <TableRow className="bg-gray-50">
-                                    <SortableHeader field="po_id">Mã đơn</SortableHeader>
-                                    <SortableHeader field="supplier_id">Nhà cung cấp</SortableHeader>
-                                    <SortableHeader field="order_date">Ngày đặt</SortableHeader>
-                                    <SortableHeader field="expected_date">Ngày dự kiến</SortableHeader>
-                                    <SortableHeader field="total_amount">Tổng tiền</SortableHeader>
+                                    <SortableHeader field="check_id">Mã phiếu</SortableHeader>
+                                    <SortableHeader field="create_by">Người tạo</SortableHeader>
+                                    <SortableHeader field="check_date">Ngày kiểm kê</SortableHeader>
+                                    <TableHead className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Số sản phẩm</TableHead>
+                                    <TableHead className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Số sp chênh lệch</TableHead>
                                     <SortableHeader field="status">Trạng thái</SortableHeader>
                                     <TableHead className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hành động</TableHead>
                                 </TableRow>
@@ -324,42 +315,42 @@ export default function Index() {
                             <TableBody>
                                 {loading ? (
                                     <TableRow>
-                                        <TableCell colSpan={8} className="text-center py-4">
+                                        <TableCell colSpan={7} className="text-center py-4">
                                             <div className="flex justify-center">
                                                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
                                             </div>
                                         </TableCell>
                                     </TableRow>
-                                ) : !purchaseOrders || purchaseOrders.length === 0 ? (
+                                ) : !inventoryChecks || inventoryChecks.length === 0 ? (
                                     <TableRow>
-                                        <TableCell colSpan={8} className="text-center py-4 text-gray-500">
-                                            Không có đơn đặt hàng nào
+                                        <TableCell colSpan={7} className="text-center py-4 text-gray-500">
+                                            Không có phiếu kiểm kê nào
                                         </TableCell>
                                     </TableRow>
                                 ) : (
-                                    purchaseOrders.map((po) => (
+                                    inventoryChecks.map((check) => (
                                         <TableRow
-                                            key={po.po_id}
+                                            key={check.check_id}
                                             className="hover:bg-gray-50 transition-colors"
                                         >
                                             <TableCell className="py-4 px-6 text-sm text-gray-900 font-medium">
-                                                #{po.po_id}
+                                                #{check.check_id}
                                             </TableCell>
                                             <TableCell className="py-4 px-6 text-sm text-gray-900">
-                                                {po.supplier?.name || 'N/A'}
+                                                {check.created_by_user?.name   || 'Không xác định'}
                                             </TableCell>
                                             <TableCell className="py-4 px-6 text-sm text-gray-900">
-                                                {formatDate(po.order_date)}
+                                                {formatDate(check.check_date)}
                                             </TableCell>
                                             <TableCell className="py-4 px-6 text-sm text-gray-900">
-                                                {formatDate(po.expected_date)}
+                                                {check.details?.length || 0}
                                             </TableCell>
-                                            <TableCell className="py-4 px-6 text-sm text-gray-900 font-medium">
-                                                {formatCurrency(po.total_amount)}
+                                            <TableCell className="py-4 px-6 text-sm text-gray-900">
+                                                {calculateDifferenceCount(check)}
                                             </TableCell>
                                             <TableCell className="py-4 px-6 text-sm">
-                                                <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClasses[po.status]}`}>
-                                                    {statusLabels[po.status] || po.status}
+                                                <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClasses[check.status]}`}>
+                                                    {statusLabels[check.status] || check.status}
                                                 </span>
                                             </TableCell>
                                             <TableCell className="py-4 px-6 text-sm text-gray-900">
@@ -368,20 +359,19 @@ export default function Index() {
                                                         variant="outline"
                                                         size="sm"
                                                         className="text-blue-600 hover:text-blue-700"
-                                                        onClick={() => window.location.href = `/admin/purchase-orders/${po.po_id}`}
+                                                        onClick={() => window.location.href = `/admin/inventory-checks/${check.check_id}`}
                                                     >
                                                         <Eye className="h-4 w-4" />
                                                     </Button>
 
-                                                    {po.status === 'pending' && (
+                                                    {check.status === 'draft' && (
                                                         <>
                                                             <Button
                                                                 variant="outline"
                                                                 size="sm"
                                                                 className="text-amber-600 hover:text-amber-700"
                                                                 onClick={() => {
-                                                                    console.log("Setting edit purchase order:", po);
-                                                                    setEditPurchaseOrder(po);
+                                                                    setEditInventoryCheck(check);
                                                                     setShowForm(true);
                                                                 }}
                                                             >
@@ -391,40 +381,21 @@ export default function Index() {
                                                                 variant="destructive"
                                                                 size="sm"
                                                                 className="bg-red-600 hover:bg-red-700 text-white"
-                                                                onClick={() => handleDelete(po.po_id)}
+                                                                onClick={() => handleDelete(check.check_id)}
                                                             >
                                                                 <Trash2 className="h-4 w-4" />
                                                             </Button>
                                                         </>
                                                     )}
 
-                                                    {po.status === 'pending' && (
+                                                    {check.status === 'draft' && (
                                                         <Button
                                                             size="sm"
-                                                            className="bg-blue-600 hover:bg-blue-700 text-white"
-                                                            onClick={() => handleStatusChange(po.po_id, 'processing')}
+                                                            className="bg-green-600 hover:bg-green-700 text-white"
+                                                            onClick={() => handleStatusChange(check.check_id, 'completed')}
                                                         >
-                                                            Đặt hàng
+                                                            Hoàn thành
                                                         </Button>
-                                                    )}
-
-                                                    {po.status === 'processing' && (
-                                                        <>
-                                                            <Button
-                                                                size="sm"
-                                                                className="bg-green-600 hover:bg-green-700 text-white"
-                                                                onClick={() => handleStatusChange(po.po_id, 'completed')}
-                                                            >
-                                                                Nhận hàng
-                                                            </Button>
-                                                            <Button
-                                                                size="sm"
-                                                                variant="destructive"
-                                                                onClick={() => handleStatusChange(po.po_id, 'cancelled')}
-                                                            >
-                                                                Hủy
-                                                            </Button>
-                                                        </>
                                                     )}
                                                 </div>
                                             </TableCell>
@@ -437,7 +408,7 @@ export default function Index() {
 
                     <div className="flex justify-between items-center p-4 border-t">
                         <div className="text-sm text-gray-600">
-                            Hiển thị {purchaseOrders.length} trên {pagination.total} đơn đặt hàng
+                            Hiển thị {inventoryChecks.length} trên {pagination.total} phiếu kiểm kê
                         </div>
                         <div className="flex gap-2">
                             {renderPagination()}
@@ -446,16 +417,16 @@ export default function Index() {
                 </div>
 
                 {showForm && (
-                    <PurchaseOrderForm
-                        purchaseOrder={editPurchaseOrder}
+                    <InventoryCheckForm
+                        inventoryCheck={editInventoryCheck}
                         onClose={() => {
                             setShowForm(false);
-                            setEditPurchaseOrder(null);
+                            setEditInventoryCheck(null);
                         }}
                         onSuccess={() => {
                             setShowForm(false);
-                            setEditPurchaseOrder(null);
-                            fetchPurchaseOrders();
+                            setEditInventoryCheck(null);
+                            fetchInventoryChecks();
                         }}
                     />
                 )}

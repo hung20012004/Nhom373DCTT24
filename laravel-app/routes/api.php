@@ -6,6 +6,7 @@ use App\Http\Controllers\API\MaterialController;
 use App\Http\Controllers\API\SupplierController;
 use App\Http\Controllers\API\ColorController;
 use App\Http\Controllers\API\BannerController;
+use App\Http\Controllers\API\InventoryCheckController;
 use App\Http\Controllers\API\SizeController;
 use App\Http\Controllers\API\TagController;
 use App\Http\Controllers\API\PurchaseOrderController;
@@ -37,6 +38,7 @@ Route::prefix('v1')->group(function () {
 
     Route::get('/products', [ProductController::class, 'index']);
     Route::get('/products/featured', [ProductController::class, 'featured']);
+    Route::get('/products/all', [ProductController::class, 'all']);
 
     Route::get('/materials', [MaterialController::class, 'index']);
 
@@ -48,6 +50,9 @@ Route::prefix('v1')->group(function () {
 
     Route::get('/purchase-orders', [PurchaseOrderController::class, 'index']);
     Route::get('/purchase-orders/{purchaseorderId}', [PurchaseOrderController::class, 'show']);
+
+    Route::get('/inventory-checks', [InventoryCheckController::class, 'index']);
+    Route::get('/inventory-checks/{checkId}', [InventoryCheckController::class, 'show']);
 
     Route::get('/banners/active', [BannerController::class, 'getActiveBanners']);
     Route::post('/banners', [BannerController::class, 'store'])->middleware('auth:sanctum');

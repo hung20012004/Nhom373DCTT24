@@ -33,38 +33,38 @@ import { cn } from '@/lib/utils';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 
-export default function PurchaseOrderForm({ purchaseOrder, onClose, onSuccess }) {
+export default function BieuMauDonDatHang({ purchaseOrder, onClose, onSuccess }) {
     const [loading, setLoading] = useState(false);
-    const [suppliers, setSuppliers] = useState([]);
-    const [products, setProducts] = useState([]);
+    const [nhaCungCap, setNhaCungCap] = useState([]);
+    const [sanPham, setSanPham] = useState([]);
     const [formData, setFormData] = useState({
         supplier_id: '',
         order_date: '',
         expected_date: '',
-        status: 'draft',
+        status: 'pending',
         note: '',
         details: [],
-        isDraft: true
+        isPending: true
     });
     const [errors, setErrors] = useState({});
-    const [selectedProduct, setSelectedProduct] = useState('');
-    const [quantity, setQuantity] = useState('');
-    const [unitPrice, setUnitPrice] = useState('');
+    const [sanPhamDaChon, setSanPhamDaChon] = useState('');
+    const [soLuong, setSoLuong] = useState('');
+    const [donGia, setDonGia] = useState('');
     const [isEdit, setIsEdit] = useState(false);
-    const [totalAmount, setTotalAmount] = useState(0);
-    const [generalError, setGeneralError] = useState('');
+    const [tongTien, setTongTien] = useState(0);
+    const [loiChung, setLoiChung] = useState('');
 
     useEffect(() => {
-        // Only run this effect when purchaseOrder changes and is not null/undefined
+        // Chỉ chạy effect này khi purchaseOrder thay đổi và không phải null/undefined
         if (purchaseOrder) {
             setIsEdit(true);
 
-            // Create a clean transformed data object
+            // Tạo một đối tượng dữ liệu đã được chuyển đổi
             const formattedData = {
                 supplier_id: purchaseOrder.supplier_id.toString(),
                 order_date: format(new Date(purchaseOrder.order_date), 'yyyy-MM-dd'),
                 expected_date: format(new Date(purchaseOrder.expected_date), 'yyyy-MM-dd'),
-                status: purchaseOrder.status || 'draft',
+                status: purchaseOrder.status || 'pending',
                 note: purchaseOrder.note || '',
                 details: purchaseOrder.details.map(detail => ({
                     product_id: detail.product_id,
@@ -73,57 +73,57 @@ export default function PurchaseOrderForm({ purchaseOrder, onClose, onSuccess })
                     unit_price: detail.unit_price,
                     subtotal: Number(detail.quantity) * Number(detail.unit_price)
                 })),
-                isDraft: (purchaseOrder.status || 'draft') === 'draft'
+                isPending: (purchaseOrder.status || 'pending') === 'pending'
             };
 
-            // Update state in a single operation
+            // Cập nhật trạng thái trong một thao tác
             setFormData(formattedData);
         }
 
     }, [purchaseOrder]);
 
-    // Separate useEffect for initial data loading - doesn't depend on purchaseOrder
+    // useEffect riêng biệt cho việc tải dữ liệu ban đầu - không phụ thuộc vào purchaseOrder
     useEffect(() => {
-        fetchSuppliers();
-        fetchProducts();
+        layDanhSachNhaCungCap();
+        layDanhSachSanPham();
     }, []);
 
     useEffect(() => {
         if (formData.status) {
             setFormData(prev => ({
                 ...prev,
-                isDraft: prev.status === 'draft'
+                isPending: prev.status === 'pending'
             }));
         }
     }, [formData.status]);
 
     useEffect(() => {
-        // Calculate total amount when details change
+        // Tính tổng số tiền khi chi tiết thay đổi
         const total = formData.details.reduce((sum, item) => sum + Number(item.subtotal), 0);
-        setTotalAmount(total);
+        setTongTien(total);
     }, [formData.details]);
 
-    const fetchSuppliers = async () => {
+    const layDanhSachNhaCungCap = async () => {
         try {
             const response = await axios.get('/api/v1/suppliers');
             if (response.data && response.data.data) {
-                setSuppliers(response.data.data);
+                setNhaCungCap(response.data.data);
             }
         } catch (error) {
-            console.error('Error loading suppliers list:', error);
-            setGeneralError('Failed to load suppliers. Please try again.');
+            console.error('Lỗi khi tải danh sách nhà cung cấp:', error);
+            setLoiChung('Không thể tải danh sách nhà cung cấp. Vui lòng thử lại.');
         }
     };
 
-    const fetchProducts = async () => {
+    const layDanhSachSanPham = async () => {
         try {
             const response = await axios.get('/api/v1/products');
             if (response.data && response.data.data) {
-                setProducts(response.data.data);
+                setSanPham(response.data.data);
             }
         } catch (error) {
-            console.error('Error loading products list:', error);
-            setGeneralError('Failed to load products. Please try again.');
+            console.error('Lỗi khi tải danh sách sản phẩm:', error);
+            setLoiChung('Không thể tải danh sách sản phẩm. Vui lòng thử lại.');
         }
     };
 
@@ -136,9 +136,9 @@ export default function PurchaseOrderForm({ purchaseOrder, onClose, onSuccess })
         setFormData(prev => ({
             ...prev,
             [name]: value,
-            ...(name === 'status' ? { isDraft: value === 'draft' } : {})
+            ...(name === 'status' ? { isPending: value === 'pending' } : {})
           }));
-        // Clear related errors
+        // Xóa lỗi liên quan
         if (errors[name]) {
             setErrors(prev => {
                 const newErrors = { ...prev };
@@ -152,7 +152,7 @@ export default function PurchaseOrderForm({ purchaseOrder, onClose, onSuccess })
         const value = e.target.value;
         if (value) {
             setFormData(prev => ({ ...prev, [field]: value }));
-            // Clear related errors
+            // Xóa lỗi liên quan
             if (errors[field]) {
                 setErrors(prev => {
                     const newErrors = { ...prev };
@@ -163,63 +163,63 @@ export default function PurchaseOrderForm({ purchaseOrder, onClose, onSuccess })
         }
     };
 
-    const addProductToOrder = () => {
-        if (!selectedProduct || !quantity || !unitPrice) {
+    const themSanPhamVaoDonHang = () => {
+        if (!sanPhamDaChon || !soLuong || !donGia) {
             setErrors({
                 ...errors,
-                product_details: 'Please select a product, quantity, and unit price'
+                product_details: 'Vui lòng chọn sản phẩm, số lượng và đơn giá'
             });
             return;
         }
 
-        const product = products.find(p => p.product_id.toString() === selectedProduct);
+        const product = sanPham.find(p => p.product_id.toString() === sanPhamDaChon);
         if (!product) return;
 
-        const subtotal = Number(quantity) * Number(unitPrice);
+        const subtotal = Number(soLuong) * Number(donGia);
 
-        // Check if product already exists in order
+        // Kiểm tra xem sản phẩm đã tồn tại trong đơn hàng chưa
         const existingProductIndex = formData.details.findIndex(
-            d => d.product_id.toString() === selectedProduct
+            d => d.product_id.toString() === sanPhamDaChon
         );
 
         if (existingProductIndex >= 0) {
-            // Update existing product
+            // Cập nhật sản phẩm đã tồn tại
             const updatedDetails = [...formData.details];
             const existingItem = updatedDetails[existingProductIndex];
 
             updatedDetails[existingProductIndex] = {
                 ...existingItem,
-                quantity: Number(existingItem.quantity) + Number(quantity),
-                unit_price: Number(unitPrice),
+                quantity: Number(existingItem.quantity) + Number(soLuong),
+                unit_price: Number(donGia),
                 subtotal: Number(existingItem.subtotal) + subtotal
             };
 
             setFormData(prev => ({ ...prev, details: updatedDetails }));
         } else {
-            // Add new product
+            // Thêm sản phẩm mới
             setFormData(prev => ({
                 ...prev,
                 details: [
                     ...prev.details,
                     {
-                        product_id: selectedProduct,
+                        product_id: sanPhamDaChon,
                         product: product,
-                        quantity: Number(quantity),
-                        unit_price: Number(unitPrice),
+                        quantity: Number(soLuong),
+                        unit_price: Number(donGia),
                         subtotal: subtotal
                     }
                 ]
             }));
         }
 
-        // Reset form
-        setSelectedProduct('');
-        setQuantity('');
-        setUnitPrice('');
+        // Đặt lại biểu mẫu
+        setSanPhamDaChon('');
+        setSoLuong('');
+        setDonGia('');
         setErrors({...errors, product_details: ''});
     };
 
-    const removeProductFromOrder = (productId) => {
+    const xoaSanPhamKhoiDonHang = (productId) => {
         setFormData(prev => ({
             ...prev,
             details: prev.details.filter(d => d.product_id.toString() !== productId.toString())
@@ -230,22 +230,22 @@ export default function PurchaseOrderForm({ purchaseOrder, onClose, onSuccess })
         e.preventDefault();
         setLoading(true);
         setErrors({});
-        setGeneralError('');
+        setLoiChung('');
 
         if (!formData.supplier_id) {
-            setErrors({...errors, supplier_id: 'Please select a supplier'});
+            setErrors({...errors, supplier_id: 'Vui lòng chọn nhà cung cấp'});
             setLoading(false);
             return;
         }
 
         if (formData.details.length === 0) {
-            setErrors({...errors, details: 'Please add at least one product to the order'});
+            setErrors({...errors, details: 'Vui lòng thêm ít nhất một sản phẩm vào đơn hàng'});
             setLoading(false);
             return;
         }
 
         try {
-            // Prepare data to send
+            // Chuẩn bị dữ liệu để gửi
             const dataToSend = {
                 ...formData,
                 details: formData.details.map(detail => ({
@@ -255,25 +255,25 @@ export default function PurchaseOrderForm({ purchaseOrder, onClose, onSuccess })
                 }))
             };
 
-            delete dataToSend.isDraft;
+            delete dataToSend.isPending;
 
             let response;
             if (isEdit) {
-                response = await axios.put(`/admin/api/purchase-orders/${purchaseOrder.po_id}`, dataToSend);
+                response = await axios.put(`/admin/purchase-orders/${purchaseOrder.po_id}`, dataToSend);
             } else {
-                response = await axios.post('/admin/api/purchase-orders', dataToSend);
+                response = await axios.post('/admin/purchase-orders', dataToSend);
             }
 
             if (response.data.status === 'success') {
-                toast.success(isEdit ? 'Purchase order updated successfully' : 'Purchase order created successfully');
+                toast.success(isEdit ? 'Cập nhật đơn đặt hàng thành công' : 'Tạo đơn đặt hàng mới thành công');
                 onSuccess();
             }
         } catch (error) {
-            console.error('Error saving purchase order:', error);
+            console.error('Lỗi khi lưu đơn đặt hàng:', error);
             if (error.response && error.response.data && error.response.data.errors) {
                 setErrors(error.response.data.errors);
             } else {
-                setGeneralError(error.response?.data?.message || 'An error occurred while saving the purchase order');
+                setLoiChung(error.response?.data?.message || 'Đã xảy ra lỗi khi lưu đơn đặt hàng');
             }
         } finally {
             setLoading(false);
@@ -285,7 +285,7 @@ export default function PurchaseOrderForm({ purchaseOrder, onClose, onSuccess })
     };
 
     const getMinExpectedDate = () => {
-        // Expected date cannot be earlier than the order date
+        // Ngày dự kiến không thể sớm hơn ngày đặt hàng
         return formData.order_date || format(new Date(), 'yyyy-MM-dd');
     };
 
@@ -294,31 +294,31 @@ export default function PurchaseOrderForm({ purchaseOrder, onClose, onSuccess })
             <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>
-                        {isEdit ? 'Edit Purchase Order' : 'Create New Purchase Order'}
+                        {isEdit ? 'Chỉnh Sửa Đơn Đặt Hàng' : 'Tạo Đơn Đặt Hàng Mới'}
                     </DialogTitle>
                 </DialogHeader>
 
-                {generalError && (
+                {loiChung && (
                     <Alert variant="destructive">
-                        <AlertDescription>{generalError}</AlertDescription>
+                        <AlertDescription>{loiChung}</AlertDescription>
                     </Alert>
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {/* Supplier selection */}
+                        {/* Lựa chọn nhà cung cấp */}
                         <div className="space-y-2">
-                            <Label>Supplier</Label>
+                            <Label>Nhà Cung Cấp</Label>
                             <Select
                                 value = {formData.supplier_id}
                                 onValueChange={(value) => handleSelectChange('supplier_id', value)}
-                                disabled={loading || (isEdit && !formData.isDraft)}
+                                disabled={loading || (isEdit && !formData.isPending)}
                             >
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select a supplier" />
+                                    <SelectValue placeholder="Chọn nhà cung cấp" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {suppliers.map((supplier) => (
+                                    {nhaCungCap.map((supplier) => (
                                         <SelectItem
                                             key={supplier.id}
                                             value={supplier.id.toString()}
@@ -331,30 +331,30 @@ export default function PurchaseOrderForm({ purchaseOrder, onClose, onSuccess })
                             {errors.supplier_id && <span className="text-red-500 text-sm">{errors.supplier_id}</span>}
                         </div>
 
-                        {/* Status selection */}
+                        {/* Lựa chọn trạng thái */}
                         <div className="space-y-2">
-                            <Label>Status</Label>
+                            <Label>Trạng Thái</Label>
                             <Select
                                 value={formData.status}
                                 onValueChange={(value) => handleSelectChange('status', value)}
                                 disabled={loading || isEdit}
                             >
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select status" />
+                                    <SelectValue placeholder="Chọn trạng thái" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="draft">Draft</SelectItem>
-                                    <SelectItem value="ordered">Ordered</SelectItem>
-                                    <SelectItem value="received">Received</SelectItem>
-                                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                                    <SelectItem value="pending">Chờ xử lý</SelectItem>
+                                    <SelectItem value="processing">Đã đặt hàng</SelectItem>
+                                    <SelectItem value="completed">Đã nhận hàng</SelectItem>
+                                    <SelectItem value="cancelled">Đã hủy</SelectItem>
                                 </SelectContent>
                             </Select>
                             {errors.status && <span className="text-red-500 text-sm">{errors.status}</span>}
                         </div>
 
-                        {/* Order date */}
+                        {/* Ngày đặt hàng */}
                         <div className="space-y-2">
-                            <Label htmlFor="order_date">Order Date</Label>
+                            <Label htmlFor="order_date">Ngày Đặt Hàng</Label>
                             <div className="relative">
                                 <div className="flex">
                                     <Input
@@ -364,7 +364,7 @@ export default function PurchaseOrderForm({ purchaseOrder, onClose, onSuccess })
                                         value={formData.order_date}
                                         onChange={(e) => handleDateChange('order_date', e)}
                                         className="w-full pr-10"
-                                        disabled={loading || (isEdit && !formData.isDraft)}
+                                        disabled={loading || (isEdit && !formData.isPending)}
                                     />
                                     <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                                         <CalendarIcon className="h-4 w-4 text-gray-400" />
@@ -374,9 +374,9 @@ export default function PurchaseOrderForm({ purchaseOrder, onClose, onSuccess })
                             {errors.order_date && <span className="text-red-500 text-sm">{errors.order_date}</span>}
                         </div>
 
-                        {/* Expected date */}
+                        {/* Ngày dự kiến */}
                         <div className="space-y-2">
-                            <Label htmlFor="expected_date">Expected Delivery Date</Label>
+                            <Label htmlFor="expected_date">Ngày Dự Kiến Nhận Hàng</Label>
                             <div className="relative">
                                 <div className="flex">
                                     <Input
@@ -387,7 +387,7 @@ export default function PurchaseOrderForm({ purchaseOrder, onClose, onSuccess })
                                         onChange={(e) => handleDateChange('expected_date', e)}
                                         min={getMinExpectedDate()}
                                         className="w-full pr-10"
-                                        disabled={loading || (isEdit && !formData.isDraft)}
+                                        disabled={loading || (isEdit && !formData.isPending)}
                                     />
                                     <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                                         <CalendarIcon className="h-4 w-4 text-gray-400" />
@@ -398,37 +398,37 @@ export default function PurchaseOrderForm({ purchaseOrder, onClose, onSuccess })
                         </div>
                     </div>
 
-                    {/* Note */}
+                    {/* Ghi chú */}
                     <div className="space-y-2">
-                        <Label htmlFor="note">Note</Label>
+                        <Label htmlFor="note">Ghi Chú</Label>
                         <Textarea
                             id="note"
                             name="note"
                             value={formData.note}
                             onChange={handleInputChange}
                             rows={3}
-                            disabled={loading || (isEdit && !formData.isDraft)}
+                            disabled={loading || (isEdit && !formData.isPending)}
                         />
                         {errors.note && <span className="text-red-500 text-sm">{errors.note}</span>}
                     </div>
 
-                    {/* Product selection area */}
-                    {(!isEdit || formData.status === 'draft') && (
+                    {/* Khu vực lựa chọn sản phẩm */}
+                    {(!isEdit || formData.status === 'pending') && (
                         <div className="space-y-4 p-4 border rounded-lg bg-gray-50">
-                            <h3 className="font-medium">Add Products</h3>
+                            <h3 className="font-medium">Thêm Sản Phẩm</h3>
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                                 <div>
-                                    <Label>Product</Label>
+                                    <Label>Sản Phẩm</Label>
                                     <Select
-                                        value={selectedProduct}
-                                        onValueChange={setSelectedProduct}
+                                        value={sanPhamDaChon}
+                                        onValueChange={setSanPhamDaChon}
                                         disabled={loading}
                                     >
                                         <SelectTrigger>
-                                            <SelectValue placeholder="Select a product" />
+                                            <SelectValue placeholder="Chọn sản phẩm" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {products.map((product) => (
+                                            {sanPham.map((product) => (
                                                 <SelectItem
                                                     key={product.product_id}
                                                     value={product.product_id.toString()}
@@ -440,34 +440,34 @@ export default function PurchaseOrderForm({ purchaseOrder, onClose, onSuccess })
                                     </Select>
                                 </div>
                                 <div>
-                                    <Label>Quantity</Label>
+                                    <Label>Số Lượng</Label>
                                     <Input
                                         type="number"
                                         min="1"
-                                        value={quantity}
-                                        onChange={(e) => setQuantity(e.target.value)}
+                                        value={soLuong}
+                                        onChange={(e) => setSoLuong(e.target.value)}
                                         disabled={loading}
                                     />
                                 </div>
                                 <div>
-                                    <Label>Unit Price</Label>
+                                    <Label>Đơn Giá</Label>
                                     <Input
                                         type="number"
                                         min="0"
                                         step="0.01"
-                                        value={unitPrice}
-                                        onChange={(e) => setUnitPrice(e.target.value)}
+                                        value={donGia}
+                                        onChange={(e) => setDonGia(e.target.value)}
                                         disabled={loading}
                                     />
                                 </div>
                                 <div className="flex items-end">
                                     <Button
                                         type="button"
-                                        onClick={addProductToOrder}
+                                        onClick={themSanPhamVaoDonHang}
                                         disabled={loading}
                                         className="w-full"
                                     >
-                                        <Plus className="h-4 w-4 mr-2" /> Add
+                                        <Plus className="h-4 w-4 mr-2" /> Thêm
                                     </Button>
                                 </div>
                             </div>
@@ -477,20 +477,20 @@ export default function PurchaseOrderForm({ purchaseOrder, onClose, onSuccess })
                         </div>
                     )}
 
-                    {/* Products table */}
+                    {/* Bảng sản phẩm */}
                     <div className="space-y-2">
-                        <Label>Order Details</Label>
+                        <Label>Chi Tiết Đơn Hàng</Label>
                         {errors.details && <span className="text-red-500 text-sm block">{errors.details}</span>}
 
                         {formData.details.length > 0 ? (
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead>Product</TableHead>
-                                        <TableHead className="text-right">Quantity</TableHead>
-                                        <TableHead className="text-right">Unit Price</TableHead>
-                                        <TableHead className="text-right">Subtotal</TableHead>
-                                        {(!isEdit || formData.status === 'draft') && (
+                                        <TableHead>Sản Phẩm</TableHead>
+                                        <TableHead className="text-right">Số Lượng</TableHead>
+                                        <TableHead className="text-right">Đơn Giá</TableHead>
+                                        <TableHead className="text-right">Thành Tiền</TableHead>
+                                        {(!isEdit || formData.status === 'pending') && (
                                             <TableHead className="w-[50px]"></TableHead>
                                         )}
                                     </TableRow>
@@ -498,17 +498,17 @@ export default function PurchaseOrderForm({ purchaseOrder, onClose, onSuccess })
                                 <TableBody>
                                     {formData.details.map((detail) => (
                                         <TableRow key={detail.product_id}>
-                                            <TableCell>{detail.product?.name || `Product #${detail.product_id}`}</TableCell>
+                                            <TableCell>{detail.product?.name || `Sản phẩm #${detail.product_id}`}</TableCell>
                                             <TableCell className="text-right">{detail.quantity}</TableCell>
                                             <TableCell className="text-right">{formatCurrency(detail.unit_price)}</TableCell>
                                             <TableCell className="text-right">{formatCurrency(detail.subtotal)}</TableCell>
-                                            {(!isEdit || formData.status === 'draft') && (
+                                            {(!isEdit || formData.status === 'pending') && (
                                                 <TableCell>
                                                     <Button
                                                         type="button"
                                                         variant="ghost"
                                                         size="icon"
-                                                        onClick={() => removeProductFromOrder(detail.product_id)}
+                                                        onClick={() => xoaSanPhamKhoiDonHang(detail.product_id)}
                                                     >
                                                         <Trash2 className="h-4 w-4 text-red-500" />
                                                     </Button>
@@ -517,15 +517,15 @@ export default function PurchaseOrderForm({ purchaseOrder, onClose, onSuccess })
                                         </TableRow>
                                     ))}
                                     <TableRow>
-                                        <TableCell colSpan={(!isEdit || formData.status === 'draft') ? 3 : 2} className="font-medium text-right">Total:</TableCell>
-                                        <TableCell className="font-bold text-right">{formatCurrency(totalAmount)}</TableCell>
-                                        {(!isEdit || formData.status === 'draft') && <TableCell></TableCell>}
+                                        <TableCell colSpan={(!isEdit || formData.status === 'pending') ? 3 : 2} className="font-medium text-right">Tổng cộng:</TableCell>
+                                        <TableCell className="font-bold text-right">{formatCurrency(tongTien)}</TableCell>
+                                        {(!isEdit || formData.status === 'pending') && <TableCell></TableCell>}
                                     </TableRow>
                                 </TableBody>
                             </Table>
                         ) : (
                             <div className="text-center py-4 border rounded-md bg-gray-50">
-                                No products added to the order yet
+                                Chưa có sản phẩm nào được thêm vào đơn hàng
                             </div>
                         )}
                     </div>
@@ -538,14 +538,14 @@ export default function PurchaseOrderForm({ purchaseOrder, onClose, onSuccess })
                                 onClick={onClose}
                                 disabled={loading}
                             >
-                                Cancel
+                                Hủy
                             </Button>
                             <Button
                                 type="submit"
-                                disabled={loading || (isEdit && formData.status !== 'draft')}
+                                disabled={loading || (isEdit && formData.status !== 'pending')}
                                 className="min-w-[100px]"
                             >
-                                {loading ? 'Saving...' : (isEdit ? 'Update' : 'Create')}
+                                {loading ? 'Đang lưu...' : (isEdit ? 'Cập nhật' : 'Tạo mới')}
                             </Button>
                         </div>
                     </DialogFooter>
