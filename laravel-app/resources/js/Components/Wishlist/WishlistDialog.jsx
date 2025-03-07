@@ -45,7 +45,7 @@ export const WishlistDialog = () => {
     const fetchWishlist = async () => {
         try {
             setIsLoading(true);
-            const response = await fetch('/api/wishlist');
+            const response = await fetch('/wishlist');
             const data = await response.json();
             if (data.status === 'success') {
                 setWishlistItems(data.data);
@@ -66,7 +66,7 @@ export const WishlistDialog = () => {
         try {
             setIsUpdating(true);
             setError(null);
-            const response = await fetch(`/api/wishlist/${wishlistId}`, {
+            const response = await fetch(`/wishlist/${wishlistId}`, {
                 method: 'DELETE',
             });
             const data = await response.json();
@@ -86,7 +86,7 @@ export const WishlistDialog = () => {
         try {
             setIsUpdating(true);
             setError(null);
-            const response = await fetch('/api/wishlist/clear', {
+            const response = await fetch('/wishlist/clear', {
                 method: 'POST',
             });
             const data = await response.json();

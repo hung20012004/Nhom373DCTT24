@@ -5,6 +5,7 @@ import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
 import { CartProvider } from '@/Contexts/CartContext';
+import { WishlistProvider} from '@/Contexts/WishlistContext';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -20,8 +21,11 @@ createInertiaApp({
 
         root.render(
             <CartProvider>
-                <App {...props} />
+                <WishlistProvider>
+                    <App {...props} />
+                </WishlistProvider>
             </CartProvider>
+
         );
     },
     progress: {

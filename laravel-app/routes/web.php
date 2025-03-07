@@ -8,13 +8,14 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ColorController;
+use App\Http\Controllers\Admin\InventoryCheckController;
 use App\Http\Controllers\Admin\MaterialController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\SizeController;
 use App\Http\Controllers\Admin\SupplierController;
 use App\Http\Controllers\Admin\TagController;
 use App\Http\Controllers\Admin\UserController;
-
+use App\Http\Controllers\Admin\PurchaseOrderController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -66,7 +67,31 @@ Route::middleware(['auth', 'verified','check.role'])->prefix('admin')->group(fun
     Route::get('/suppliers', function () {
         return Inertia::render('Admin/Suppliers/Index');
     })->name('admin.suppliers');
+    Route::get('/purchase-orders', function () {
+        return Inertia::render('Admin/PurchaseOrders/Index');
+    })->name('admin.purchase-orders');
+    Route::get('/purchase-orders/{id}', function ($id) {
+        return Inertia::render('Admin/PurchaseOrders/Show', ['poId' => $id]);
+    })->name('admin.purchase-orders.show');
+    Route::get('/inventory-checks', function () {
+        return Inertia::render('Admin/InventoryChecks/Index');
+    })->name('admin.inventory-checks');
+    Route::get('/inventory-checks/{id}', function ($id) {
+        return Inertia::render('Admin/InventoryChecks/Show', ['checkId' => $id]);
+    })->name('admin.inventory-checks.show');
     // API Routes
+    Route::prefix('purchase-orders')->group(function () {
+        Route::post('/', [PurchaseOrderController::class, 'store']);
+        Route::put('/{purchaseorderId}', [PurchaseOrderController::class, 'update']);
+        Route::put('/{purchaseorderId}/status', [PurchaseOrderController::class, 'updateStatus']);
+        Route::delete('/{purchaseorderId}', [PurchaseOrderController::class, 'destroy']);
+    });
+    Route::prefix('inventory-checks')->group(function () {
+        Route::post('/', [InventoryCheckController::class, 'store']);
+        Route::put('/{checkId}', [InventoryCheckController::class, 'update']);
+        Route::put('/{checkId}/status', [InventoryCheckController::class, 'updateStatus']);
+        Route::delete('/{checkId}', [InventoryCheckController::class, 'destroy']);
+    });
     Route::prefix('categories')->group(function () {
         Route::post('/', [CategoryController::class, 'store']);
         Route::post('/{categoryId}', [CategoryController::class, 'update']);
@@ -140,6 +165,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
         Route::get('/', [CheckoutController::class, 'index'])->name('checkout');
         Route::post('/', [CheckoutController::class, 'store'])->name('checkout.store');
     });
+
     Route::prefix('order')->group(function () {
         Route::get('/', [OrderController::class, 'index'])->name('orders.index');
         Route::get('/{order}', [OrderController::class, 'show'])->name('orders.show');

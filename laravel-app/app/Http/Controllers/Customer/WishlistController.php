@@ -3,38 +3,28 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\WishlistResource;
 use App\Models\Wishlist;
 use App\Models\Product;
 use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 
 class WishlistController extends Controller
 {
-    /**
-     * Lấy danh sách wishlist của user hiện tại
-     *
-     * @return JsonResponse
-     */
-    public function index(): JsonResponse
+    public function index()
     {
         try {
-            $wishlistItems = Wishlist::where('user_id', Auth::id())
-                ->with(['product' => function ($query) {
-                    $query->select('product_id', 'name', 'slug', 'price', 'sale_price', 'stock_quantity')
-                        ->with(['images' => function ($query) {
-                            $query->select('product_id', 'image_url')->first();
-                        }]);
-                }])
-                ->get();
+            $wishlists = Wishlist::query()
+            ->where('user_id', Auth::id())
+            ->with(['product' => function($query) {
+                $query->with(['images', 'category', 'material']);
+            }])
+            ->get();
 
-            // Chỉ trả về product IDs nếu frontend chỉ cần IDs
-            $productIds = $wishlistItems->pluck('product_id')->toArray();
-
-            return response()->json($productIds);
-
-            // Hoặc trả về full data nếu frontend cần
-            // return response()->json($wishlistItems);
+            return response()->json([
+                'status' => 'success',
+                'data' => $wishlists
+            ]);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Error fetching wishlist',
@@ -43,14 +33,26 @@ class WishlistController extends Controller
         }
     }
 
-    /**
-     * Toggle sản phẩm trong wishlist (thêm nếu chưa có, xóa nếu đã có)
-     *
-     * @param Request $request
-     * @param int $productId
-     * @return JsonResponse
-     */
-    public function toggle(Request $request, int $productId): JsonResponse
+    // public function products()
+    // {
+    //     try {
+    //         $wishlistProducts = Wishlist::query()
+
+
+    //             $user = Auth::user();
+    //         return response()->json([
+    //             'status' => 'success',
+    //             'data' => $wishlistProducts
+    //         ]);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'message' => 'Error fetching wishlist',
+    //             'error' => $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
+
+    public function toggle(Request $request, int $productId)
     {
         try {
             // Kiểm tra sản phẩm có tồn tại
@@ -91,14 +93,7 @@ class WishlistController extends Controller
             ], 500);
         }
     }
-
-    /**
-     * Xóa sản phẩm khỏi wishlist
-     *
-     * @param int $productId
-     * @return JsonResponse
-     */
-    public function remove(int $productId): JsonResponse
+    public function remove(int $productId)
     {
         try {
             $deleted = Wishlist::where('user_id', Auth::id())
@@ -121,13 +116,7 @@ class WishlistController extends Controller
             ], 500);
         }
     }
-
-    /**
-     * Xóa toàn bộ wishlist của user
-     *
-     * @return JsonResponse
-     */
-    public function clear(): JsonResponse
+    public function clear()
     {
         try {
             Wishlist::where('user_id', Auth::id())->delete();
@@ -142,14 +131,7 @@ class WishlistController extends Controller
             ], 500);
         }
     }
-
-    /**
-     * Kiểm tra sản phẩm có trong wishlist không
-     *
-     * @param int $productId
-     * @return JsonResponse
-     */
-    public function check(int $productId): JsonResponse
+    public function check(int $productId)
     {
         try {
             $exists = Wishlist::where('user_id', Auth::id())
