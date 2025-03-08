@@ -146,7 +146,7 @@ const ProductDialog = ({
 
     const handleAddToCart = async () => {
         if (!auth.user) {
-            setError("Please login to add items to cart.");
+            setError("Vui lòng đăng nhập để mua hàng!");
             return;
         }
 

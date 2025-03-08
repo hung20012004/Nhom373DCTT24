@@ -22,7 +22,7 @@ class BannerController extends Controller
             ])
             ->get();
 
-        return response()->json($banners); // Trả về array trực tiếp
+        return response()->json($banners);
     }
     public function store(Request $request)
     {

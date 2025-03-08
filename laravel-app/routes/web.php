@@ -5,6 +5,7 @@ use App\Http\Controllers\Customer\OrderController;
 use App\Http\Controllers\Customer\WishlistController;
 use App\Http\Controllers\Customer\ShippingAddressController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ColorController;
@@ -79,7 +80,7 @@ Route::middleware(['auth', 'verified','check.role'])->prefix('admin')->group(fun
     Route::get('/inventory-checks/{id}', function ($id) {
         return Inertia::render('Admin/InventoryChecks/Show', ['checkId' => $id]);
     })->name('admin.inventory-checks.show');
-    // API Routes
+
     Route::prefix('purchase-orders')->group(function () {
         Route::post('/', [PurchaseOrderController::class, 'store']);
         Route::put('/{purchaseorderId}', [PurchaseOrderController::class, 'update']);
@@ -173,14 +174,12 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
         Route::post('/', [OrderController::class, 'checkout'])->name('order.checkout');
         Route::get('/confirmation/{order}', [OrderController::class, 'confirmation'])->name('order.confirmation');
     });
-    Route::prefix('wishlist')->group(function () {
-        Route::get('/', [WishlistController::class, 'index']);
-        Route::post('/toggle/{productId}', [WishlistController::class, 'toggle']);
-        Route::delete('/{productId}', [WishlistController::class, 'remove']);
-        Route::delete('/', [WishlistController::class, 'clear']);
-        Route::get('/check/{productId}', [WishlistController::class, 'check']);
-    });
-
 });
-
+Route::prefix('wishlist')->group(function () {
+    Route::get('/', [WishlistController::class, 'index']);
+    Route::post('/toggle/{productId}', [WishlistController::class, 'toggle']);
+    Route::delete('/{productId}', [WishlistController::class, 'remove']);
+    Route::delete('/', [WishlistController::class, 'clear']);
+    Route::get('/check/{productId}', [WishlistController::class, 'check']);
+});
 require __DIR__.'/auth.php';
