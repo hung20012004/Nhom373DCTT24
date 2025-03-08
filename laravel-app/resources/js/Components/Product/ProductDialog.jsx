@@ -19,7 +19,7 @@ import {
     Info
 } from "lucide-react";
 import { ProductPrice } from "./ProductPrice";
-
+import ProductReviewComponent from "./ProductReviewComponent";
 const ProductDialog = ({
     product,
     isOpen,
@@ -468,6 +468,10 @@ const ProductDialog = ({
                                 )}
                             </div>
                         </div>
+                        <ProductReviewComponent
+                            productId={product.product_id}
+                            variant={currentVariant}
+                        />
                     </div>
                 </div>
 
@@ -489,7 +493,7 @@ const ProductDialog = ({
                         >
                             <ShoppingCart className="w-5 h-5" />
                             {isLoading
-                                ? "Adding..."
+                                ? "Đang thêm vào giỏ hàng..."
                                 : !currentVariant
                                 ? "Chọn sản phẩm"
                                 : currentVariant.stock_quantity <= 0

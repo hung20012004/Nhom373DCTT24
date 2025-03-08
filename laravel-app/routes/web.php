@@ -4,6 +4,7 @@ use App\Http\Controllers\Customer\CheckoutController;
 use App\Http\Controllers\Customer\OrderController;
 use App\Http\Controllers\Customer\WishlistController;
 use App\Http\Controllers\Customer\ShippingAddressController;
+use App\Http\Controllers\Customer\ProductReviewController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\CustomerController;
@@ -166,7 +167,6 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
         Route::get('/', [CheckoutController::class, 'index'])->name('checkout');
         Route::post('/', [CheckoutController::class, 'store'])->name('checkout.store');
     });
-
     Route::prefix('order')->group(function () {
         Route::get('/', [OrderController::class, 'index'])->name('orders.index');
         Route::get('/{order}', [OrderController::class, 'show'])->name('orders.show');
@@ -174,7 +174,13 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
         Route::post('/', [OrderController::class, 'checkout'])->name('order.checkout');
         Route::get('/confirmation/{order}', [OrderController::class, 'confirmation'])->name('order.confirmation');
     });
+
 });
+Route::get('/products/{productId}/reviews', [ProductReviewController::class, 'getProductReviews']);
+Route::get('/products/{productId}/reviews/user', [ProductReviewController::class, 'getUserReview']);
+Route::post('/products/{productId}/reviews', [ProductReviewController::class, 'store']);
+Route::put('/products/{productId}/reviews/{reviewId}', [ProductReviewController::class, 'update']);
+Route::delete('/products/{productId}/reviews/{reviewId}', [ProductReviewController::class, 'destroy']);
 Route::prefix('wishlist')->group(function () {
     Route::get('/', [WishlistController::class, 'index']);
     Route::post('/toggle/{productId}', [WishlistController::class, 'toggle']);
