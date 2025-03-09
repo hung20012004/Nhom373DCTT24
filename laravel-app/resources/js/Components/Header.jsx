@@ -131,9 +131,9 @@ const Header = () => {
                     <div className="flex items-center">
                         {/* Wishlist */}
                         <Link
-                            href="/wishlist"
+                            href="/"
                             className={`p-2 relative ${getLinkClasses(
-                                "/wishlist"
+                                "/"
                             )}`}
                         >
                             <Heart className="h-6 w-6" />

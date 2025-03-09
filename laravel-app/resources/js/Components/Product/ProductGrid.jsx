@@ -18,6 +18,21 @@ const ProductGrid = ({
     });
     return initializedIndexes;
   };
+  const isProductInWishlist = (productId) => {
+    if (!Array.isArray(wishlist)) return false;
+
+    // Nếu wishlist là mảng các ID đơn giản
+    if (typeof wishlist[0] === 'number' || typeof wishlist[0] === 'string') {
+      return wishlist.includes(productId);
+    }
+
+    // Nếu wishlist là mảng các đối tượng có chứa product_id
+    return wishlist.some(item =>
+      (item.product_id === productId) ||
+      (item.id === productId) ||
+      (item === productId)
+    );
+  };
 
   const updatedImageIndexes = initializeIndexes(products, currentImageIndexes);
 
@@ -35,7 +50,7 @@ const ProductGrid = ({
             onPrevImage={() => onPrevImage(product.product_id)}
             onNextImage={() => onNextImage(product.product_id)}
             onToggleWishlist={() => onToggleWishlist(product.product_id)}
-            isInWishlist={safeWishlist.includes(product.product_id)}
+            isInWishlist={isProductInWishlist(product.product_id)}
           />
         ))}
     </div>

@@ -10,9 +10,10 @@ export const WishlistProvider = ({ children }) => {
     const fetchWishlist = useCallback(async () => {
         try {
             const response = await axios.get('/wishlist');
-            setWishlist(response.data.data);
+            setWishlist(response.data?.data || []);
         } catch (error) {
             console.error('Error fetching wishlist:', error);
+            setWishlist([]); // Set a default empty array on error
         } finally {
             setIsLoading(false);
         }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { usePage } from "@inertiajs/react";
 import { useCart } from "@/Contexts/CartContext";
+import { useWishlist } from '@/Contexts/WishlistContext';
 import {
     Dialog,
     DialogContent,
@@ -24,8 +25,7 @@ const ProductDialog = ({
     product,
     isOpen,
     onClose,
-    onToggleWishlist,
-    isInWishlist,
+    isInWishlist: initialIsInWishlist = false
 }) => {
     const { auth } = usePage().props;
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -35,7 +35,30 @@ const ProductDialog = ({
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const { addToCart } = useCart();
+    const [isInWishlist, setIsInWishlist] = useState(initialIsInWishlist);
+    const { addToWishlist, removeItem } = useWishlist();
+    const handleToggleWishlist = async () => {
+        if (!auth.user) {
+            setError("Please log in to manage your wishlist");
+            return;
+        }
 
+        try {
+            if (isInWishlist) {
+                await removeItem(product.product_id);
+                setIsInWishlist(false);
+            } else {
+                const result = await addToWishlist(product.product_id);
+                if (result.success) {
+                    setIsInWishlist(true);
+                } else {
+                    setError(result.message);
+                }
+            }
+        } catch (error) {
+            setError("An error occurred while updating your wishlist");
+        }
+    };
     useEffect(() => {
         if (isOpen) {
             setSelectedColor(null);
@@ -502,7 +525,7 @@ const ProductDialog = ({
                         </button>
                         <button
                             type="button"
-                            onClick={() => onToggleWishlist(product.product_id)}
+                            onClick={handleToggleWishlist}
                             className="p-3 rounded-lg border hover:bg-gray-50 transition-colors group"
                         >
                             <Heart

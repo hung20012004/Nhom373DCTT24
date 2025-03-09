@@ -98,10 +98,10 @@ const Welcome = () => {
             <h2 className="text-3xl font-light mt-2">Sản phẩm mới</h2>
           </div>
           <ProductGrid
-            products={products}
-            onToggleWishlist={toggleWishlist}
-            wishlist={wishlist}
-          />
+                products={products}
+                onToggleWishlist={toggleWishlist}
+                wishlist={wishlist.data || wishlist} // Make sure this contains product IDs
+                />
         </section>
       </div>
 
