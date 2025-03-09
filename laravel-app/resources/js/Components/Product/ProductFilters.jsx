@@ -1,7 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Heart } from "lucide-react";
+import { useWishlist } from "@/Contexts/WishlistContext";
+const ProductFilters = ({ categories, filters, onFilterChange, wishlistCount: propWishlistCount }) => {
+    const { wishlist } = useWishlist();
+    const contextWishlistCount = wishlist?.length || 0;
+    const displayWishlistCount = contextWishlistCount || propWishlistCount || 0;
 
-const ProductFilters = ({ categories, filters, onFilterChange, wishlistCount }) => {
     return (
         <div className="lg:w-1/4">
             <div className="bg-white border border-neutral-200 rounded-lg p-6 space-y-8">
@@ -48,9 +52,9 @@ const ProductFilters = ({ categories, filters, onFilterChange, wishlistCount }) 
                         >
                             <Heart className="w-4 h-4 mr-2" />
                             Sản phẩm yêu thích
-                            {wishlistCount > 0 && (
+                            {displayWishlistCount > 0 && (
                                 <span className="ml-auto bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
-                                    {wishlistCount}
+                                    {displayWishlistCount}
                                 </span>
                             )}
                         </button>

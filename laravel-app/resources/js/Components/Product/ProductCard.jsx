@@ -46,6 +46,13 @@ const ProductCard = ({
         );
     };
 
+    const handleCartClick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        // Open the dialog when cart icon is clicked
+        setIsDialogOpen(true);
+    };
+
     return (
         <>
             <div
@@ -108,10 +115,7 @@ const ProductCard = ({
                         </div>
 
                         <button
-                            onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                            }}
+                            onClick={handleCartClick}
                             className="flex-shrink-0 bg-white/20 hover:bg-white/30 p-2 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             disabled={product.stock_quantity <= 0}
                         >

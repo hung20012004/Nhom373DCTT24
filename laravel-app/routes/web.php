@@ -177,13 +177,14 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::post('/products/{productId}/reviews', [ProductReviewController::class, 'store']);
     Route::put('/products/{productId}/reviews/{reviewId}', [ProductReviewController::class, 'update']);
     Route::delete('/products/{productId}/reviews/{reviewId}', [ProductReviewController::class, 'destroy']);
-    Route::prefix('wishlist')->group(function () {
-        Route::get('/', [WishlistController::class, 'index']);
-        Route::post('/add', [WishlistController::class, 'add']);
-        Route::delete('/{id}', [WishlistController::class, 'remove']);
-        Route::delete('/', [WishlistController::class, 'clear']);
-        Route::get('/check/{productId}', [WishlistController::class, 'check']);
-    });
+
+});
+Route::prefix('wishlist')->group(function () {
+    Route::get('/', [WishlistController::class, 'index']);
+    Route::post('/add', [WishlistController::class, 'add']);
+    Route::delete('/{id}', [WishlistController::class, 'remove']);
+    Route::delete('/', [WishlistController::class, 'clear']);
+    Route::get('/check/{productId}', [WishlistController::class, 'check']);
 });
 Route::get('/products/{productId}/reviews', [ProductReviewController::class, 'getProductReviews']);
 Route::get('/products/{productId}/reviews/user', [ProductReviewController::class, 'getUserReview']);

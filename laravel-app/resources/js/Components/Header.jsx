@@ -5,6 +5,7 @@ import Dropdown from "@/Components/Dropdown";
 import { CartDialog } from "@/Components/cart/CartDialog";
 import axios from "axios";
 import ApplicationLogo from "@/Components/ApplicationLogo";
+import { useWishlist } from "@/Contexts/WishlistContext";
 
 const Header = () => {
     const { url } = usePage();
@@ -15,7 +16,12 @@ const Header = () => {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isScrolled, setIsScrolled] = useState(false);
-    const [wishlistCount, setWishlistCount] = useState(0);
+
+    // Sử dụng context thay vì state riêng
+    const { wishlist } = useWishlist();
+
+    // Tính toán số lượng sản phẩm yêu thích từ context
+    const wishlistCount = wishlist ? wishlist.length : 0;
 
     // Function to check if a link is active
     const isActive = (path) => {
@@ -55,32 +61,14 @@ const Header = () => {
             }
         };
 
-        const fetchWishlistCount = async () => {
-            if (auth.user) {
-                try {
-                    // Fixed to use the same wishlist endpoint as in ProductsPage
-                    const response = await axios.get("/wishlist");
-
-                    // Process the response to match the expected format
-                    const wishlistData = response.data?.data || response.data || [];
-                    const count = Array.isArray(wishlistData) ? wishlistData.length : 0;
-
-                    setWishlistCount(count);
-                } catch (error) {
-                    console.error("Error fetching wishlist count:", error);
-                }
-            }
-        };
-
         fetchCategories();
-        fetchWishlistCount();
 
         const handleScroll = () => {
             setIsScrolled(window.scrollY > 0);
         };
         window.addEventListener("scroll", handleScroll);
         return () => window.removeEventListener("scroll", handleScroll);
-    }, [auth.user]);
+    }, []);
 
     const dropdownItems = [
         ...(categories || []).map(({ slug, name, products_count }) => ({
