@@ -46,7 +46,7 @@ const Welcome = () => {
 
   const toggleWishlist = async (productId) => {
     try {
-      const response = await axios.post(`/api/v1/wishlist/toggle/${productId}`);
+      const response = await axios.post(`/wishlist/toggle/${productId}`);
       if (response.data.added) {
         setWishlist([...wishlist, productId]);
       } else {

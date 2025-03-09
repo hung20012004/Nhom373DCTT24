@@ -54,12 +54,21 @@ const ProductsPage = () => {
                 [
                     axios.get(`/api/v1/products?${params.toString()}`),
                     axios.get("/api/v1/categories/featured"),
+                    axios.get("/wishlist")
                 ]
             );
 
             setProducts(productsRes.data);
             setCategories(categoriesRes.data || []);
-            setWishlist(wishlistRes.data || []);
+
+            // Make sure wishlist is always an array of product IDs
+            const wishlistData = wishlistRes.data?.data || wishlistRes.data || [];
+            const formattedWishlist = Array.isArray(wishlistData)
+                ? wishlistData.map(item => typeof item === 'object' ? item.product_id : item)
+                : [];
+
+            setWishlist(formattedWishlist);
+            console.log("Formatted wishlist:", formattedWishlist);
         } catch (error) {
             console.error("Error fetching data:", error);
         } finally {
@@ -110,14 +119,26 @@ const ProductsPage = () => {
 
     const toggleWishlist = async (productId) => {
         try {
-            const response = await axios.post(
-                `/api/v1/wishlist/toggle/${productId}`
-            );
+            const response = await axios.post(`/wishlist/toggle/${productId}`);
+
+            // Log để kiểm tra dữ liệu
+            console.log("Toggle wishlist response:", response.data);
+
             if (response.data.added) {
-                setWishlist([...wishlist, productId]);
+                setWishlist(prev => [...prev, productId]);
             } else {
-                setWishlist(wishlist.filter((id) => id !== productId));
+                setWishlist(prev => prev.filter(id => id !== productId));
             }
+
+            // Refresh danh sách wishlist sau khi thay đổi
+            const refreshWishlist = await axios.get("/wishlist");
+            const wishlistData = refreshWishlist.data?.data || refreshWishlist.data || [];
+            const formattedWishlist = Array.isArray(wishlistData)
+                ? wishlistData.map(item => typeof item === 'object' ? item.product_id : item)
+                : [];
+
+            setWishlist(formattedWishlist);
+            console.log("Refreshed wishlist:", formattedWishlist);
         } catch (error) {
             console.error("Error toggling wishlist:", error);
         }
