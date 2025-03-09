@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { SlidersHorizontal, Search, ArrowUp } from "lucide-react";
+import { ArrowUp } from "lucide-react";
 import Layout from "@/Layouts/Layout";
 import ProductGrid from "@/Components/Product/ProductGrid";
 import { Head } from "@inertiajs/react";
+import ProductFilters from "@/Components/Product/ProductFilters";
+
 const ProductsPage = () => {
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
@@ -12,14 +14,13 @@ const ProductsPage = () => {
         category: "",
         sort: "newest",
         page: 1,
+        filter_type: "", // Thêm filter_type để xác định đang lọc theo loại nào
     });
     const [showScrollTop, setShowScrollTop] = useState(false);
 
-    // Hàm cập nhật URL
     const updateURL = (newFilters) => {
         const params = new URLSearchParams(window.location.search);
 
-        // Cập nhật hoặc xóa params
         Object.entries(newFilters).forEach(([key, value]) => {
             if (value) {
                 params.set(key, value);
@@ -28,7 +29,6 @@ const ProductsPage = () => {
             }
         });
 
-        // Thay đổi URL mà không reload trang
         window.history.pushState(
             {},
             "",
@@ -43,32 +43,58 @@ const ProductsPage = () => {
             setLoading(true);
             const params = new URLSearchParams();
 
-            // Chỉ thêm các filter có giá trị
+            // Add all filter values except filter_type to params
             Object.entries(currentFilters).forEach(([key, value]) => {
-                if (value) {
+                if (value && key !== 'filter_type') {
                     params.append(key, value);
                 }
             });
 
-            const [productsRes, categoriesRes, wishlistRes] = await Promise.all(
-                [
-                    axios.get(`/api/v1/products?${params.toString()}`),
-                    axios.get("/api/v1/categories/featured"),
-                    axios.get("/wishlist")
-                ]
-            );
+            // First get categories and wishlist data
+            const [categoriesRes, wishlistRes] = await Promise.all([
+                axios.get("/api/v1/categories/featured"),
+                axios.get("/wishlist")
+            ]);
+
+            let productsRes;
+
+            // Handle wishlist filter
+            if (currentFilters.filter_type === 'wishlist') {
+                // Format wishlist data
+                const wishlistData = wishlistRes.data?.data || wishlistRes.data || [];
+                const wishlistProductIds = Array.isArray(wishlistData)
+                    ? wishlistData.map(item => typeof item === 'object' ? item.product_id : item)
+                    : [];
+
+                if (wishlistProductIds.length > 0) {
+                    // If there are wishlist items, get them from the API
+                    params.append('ids', wishlistProductIds.join(','));
+                    productsRes = await axios.get(`/api/v1/products?${params.toString()}`);
+                } else {
+                    // Return empty data if wishlist is empty
+                    productsRes = {
+                        data: {
+                            data: [],
+                            current_page: 1,
+                            last_page: 1
+                        }
+                    };
+                }
+            } else {
+                // Normal product filtering
+                productsRes = await axios.get(`/api/v1/products?${params.toString()}`);
+            }
 
             setProducts(productsRes.data);
             setCategories(categoriesRes.data || []);
 
-            // Make sure wishlist is always an array of product IDs
+            // Format wishlist data for state
             const wishlistData = wishlistRes.data?.data || wishlistRes.data || [];
             const formattedWishlist = Array.isArray(wishlistData)
                 ? wishlistData.map(item => typeof item === 'object' ? item.product_id : item)
                 : [];
 
             setWishlist(formattedWishlist);
-            console.log("Formatted wishlist:", formattedWishlist);
         } catch (error) {
             console.error("Error fetching data:", error);
         } finally {
@@ -76,20 +102,18 @@ const ProductsPage = () => {
         }
     };
 
-    // Khởi tạo từ URL params
     useEffect(() => {
-        // console.log("Products data:", products);
         const urlParams = new URLSearchParams(window.location.search);
         const initialFilters = {
             category: urlParams.get("category") || "",
             sort: urlParams.get("sort") || "newest",
             page: parseInt(urlParams.get("page")) || 1,
+            filter_type: urlParams.get("filter_type") || "",
         };
 
         setFilters(initialFilters);
         fetchProducts(initialFilters);
 
-        // Xử lý scroll
         const handleScroll = () => {
             setShowScrollTop(window.scrollY > 300);
         };
@@ -98,18 +122,22 @@ const ProductsPage = () => {
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
-    // Xử lý thay đổi filter
     const handleFilterChange = (name, value) => {
-        // Reset các filter khác về default khi chọn category
-        const newFilters = {
+        let newFilters = {
             ...filters,
             [name]: value,
             page: 1,
         };
 
-        // Nếu đang thay đổi category, reset sort về default
+        // Nếu đang chọn category thông thường hoặc toàn bộ sản phẩm, reset filter_type
         if (name === "category") {
+            newFilters.filter_type = "";
             newFilters.sort = "newest";
+        }
+
+        // Nếu đang chọn filter_type là wishlist, reset category
+        if (name === "filter_type" && value === "wishlist") {
+            newFilters.category = "";
         }
 
         setFilters(newFilters);
@@ -121,16 +149,18 @@ const ProductsPage = () => {
         try {
             const response = await axios.post(`/wishlist/toggle/${productId}`);
 
-            // Log để kiểm tra dữ liệu
-            console.log("Toggle wishlist response:", response.data);
-
             if (response.data.added) {
                 setWishlist(prev => [...prev, productId]);
             } else {
                 setWishlist(prev => prev.filter(id => id !== productId));
+
+                // Nếu đang xem danh sách yêu thích, cần refresh lại danh sách sản phẩm
+                if (filters.filter_type === 'wishlist') {
+                    fetchProducts(filters);
+                }
             }
 
-            // Refresh danh sách wishlist sau khi thay đổi
+            // Refresh danh sách wishlist
             const refreshWishlist = await axios.get("/wishlist");
             const wishlistData = refreshWishlist.data?.data || refreshWishlist.data || [];
             const formattedWishlist = Array.isArray(wishlistData)
@@ -138,7 +168,6 @@ const ProductsPage = () => {
                 : [];
 
             setWishlist(formattedWishlist);
-            console.log("Refreshed wishlist:", formattedWishlist);
         } catch (error) {
             console.error("Error toggling wishlist:", error);
         }
@@ -156,7 +185,6 @@ const ProductsPage = () => {
         scrollToTop();
     };
 
-    // Loading state
     if (loading) {
         return (
             <Layout>
@@ -178,106 +206,39 @@ const ProductsPage = () => {
                                 Bộ sưu tập
                             </span>
                             <h2 className="text-3xl font-light mt-2">
-                                Sản phẩm của chúng tôi
+                                {filters.filter_type === 'wishlist'
+                                    ? 'Sản phẩm yêu thích của bạn'
+                                    : 'Sản phẩm của chúng tôi'}
                             </h2>
                             <p className="mt-2 text-neutral-500">
-                                Tìm kiếm sản phẩm phù hợp với nhu cầu của bạn
+                                {filters.filter_type === 'wishlist'
+                                    ? 'Danh sách những sản phẩm bạn đã thêm vào yêu thích'
+                                    : 'Tìm kiếm sản phẩm phù hợp với nhu cầu của bạn'}
                             </p>
                         </div>
 
                         <div className="flex flex-col lg:flex-row gap-12">
-                            {/* Filters Section */}
-                            <div className="lg:w-1/4">
-                                <div className="bg-white border border-neutral-200 rounded-lg p-6 space-y-8">
-                                    <div className="space-y-4">
-                                        <h3 className="text-lg font-medium text-gray-900">
-                                            Tìm kiếm theo
-                                        </h3>
-                                        <select
-                                            value={filters.sort}
-                                            onChange={(e) =>
-                                                handleFilterChange(
-                                                    "sort",
-                                                    e.target.value
-                                                )
-                                            }
-                                            className="w-full border-neutral-200 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                                        >
-                                            <option value="newest">
-                                                Sản phẩm mới
-                                            </option>
-                                            <option value="price_asc">
-                                                Giá: Thấp đến cao
-                                            </option>
-                                            <option value="price_desc">
-                                                Giá: Cao đến thấp
-                                            </option>
-                                            <option value="name_asc">
-                                                Tên: A to Z
-                                            </option>
-                                            <option value="name_desc">
-                                                Tên: Z to A
-                                            </option>
-                                        </select>
-                                    </div>
+                            <ProductFilters
+                                categories={categories}
+                                filters={filters}
+                                onFilterChange={handleFilterChange}
+                                wishlistCount={wishlist.length}
+                            />
 
-                                    <div className="space-y-4">
-                                        <h3 className="text-lg font-medium text-gray-900">
-                                            Danh mục sản phẩm
-                                        </h3>
-                                        <div className="space-y-2">
-                                            <button
-                                                onClick={() =>
-                                                    handleFilterChange(
-                                                        "category",
-                                                        ""
-                                                    )
-                                                }
-                                                className={`block w-full text-left px-3 py-2 rounded-lg transition-colors ${
-                                                    !filters.category
-                                                        ? "bg-blue-50 text-blue-700"
-                                                        : "hover:bg-neutral-50"
-                                                }`}
-                                            >
-                                                Toàn bộ sản phẩm
-                                            </button>
-                                            {categories.map((category) => (
-                                                <button
-                                                    key={category.id}
-                                                    onClick={() =>
-                                                        handleFilterChange(
-                                                            "category",
-                                                            category.slug
-                                                        )
-                                                    } // Dùng slug thay vì id
-                                                    className={`block w-full text-left px-3 py-2 rounded-lg transition-colors ${
-                                                        filters.category ===
-                                                        category.slug
-                                                            ? "bg-blue-50 text-blue-700"
-                                                            : "hover:bg-neutral-50"
-                                                    }`}
-                                                >
-                                                    {category.name}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Products Section */}
                             <div className="flex-1">
                                 {products &&
                                 products.data &&
                                 products.data.length === 0 ? (
                                     <div className="text-center py-12 bg-white border border-neutral-200 rounded-lg">
                                         <h3 className="text-lg font-medium text-gray-900">
-                                            Chúng tôi không tìm thấy sản phẩm
-                                            nào
+                                            {filters.filter_type === 'wishlist'
+                                                ? 'Bạn chưa có sản phẩm yêu thích nào'
+                                                : 'Chúng tôi không tìm thấy sản phẩm nào'}
                                         </h3>
                                         <p className="mt-2 text-neutral-500">
-                                            Hãy thử tìm kiếm lại hoặc xem các
-                                            sản phẩm khác
+                                            {filters.filter_type === 'wishlist'
+                                                ? 'Hãy thêm sản phẩm vào danh sách yêu thích để xem tại đây'
+                                                : 'Hãy thử tìm kiếm lại hoặc xem các sản phẩm khác'}
                                         </p>
                                     </div>
                                 ) : (
@@ -288,28 +249,17 @@ const ProductsPage = () => {
                                             wishlist={wishlist}
                                         />
 
-                                        {/* Pagination */}
                                         {products &&
                                             products.last_page &&
                                             products.last_page > 1 && (
                                                 <div className="mt-8 flex justify-center">
                                                     <div className="flex space-x-2">
-                                                        {[
-                                                            ...Array(
-                                                                products.last_page
-                                                            ),
-                                                        ].map((_, index) => (
+                                                        {[...Array(products.last_page)].map((_, index) => (
                                                             <button
                                                                 key={index}
-                                                                onClick={() =>
-                                                                    handlePageChange(
-                                                                        index +
-                                                                            1
-                                                                    )
-                                                                }
+                                                                onClick={() => handlePageChange(index + 1)}
                                                                 className={`px-4 py-2 rounded-lg ${
-                                                                    products.current_page ===
-                                                                    index + 1
+                                                                    products.current_page === index + 1
                                                                         ? "bg-blue-600 text-white"
                                                                         : "bg-white border border-neutral-200 hover:bg-neutral-50"
                                                                 }`}
@@ -327,7 +277,6 @@ const ProductsPage = () => {
                     </section>
                 </div>
 
-                {/* Scroll to Top Button */}
                 {showScrollTop && (
                     <button
                         onClick={scrollToTop}
