@@ -138,7 +138,7 @@ export const CartDialog = () => {
                     </span>
                 </div>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="w-full sm:max-w-md md:max-w-lg">
                 <DialogHeader>
                     <DialogTitle>Giỏ Hàng</DialogTitle>
                 </DialogHeader>
@@ -164,32 +164,34 @@ export const CartDialog = () => {
                                 <span>Chọn tất cả</span>
                             </label>
                         </div>
-                        <div className="flex-grow max-h-[60vh] overflow-y-auto">
+                        <div className="flex-grow max-h-[50vh] sm:max-h-[60vh] overflow-y-auto px-1 sm:px-2">
                             {cart.items.map((item) => (
-                                <div key={item.cart_item_id} className="flex items-center p-2">
+                                <div key={item.cart_item_id} className="flex items-start p-1 sm:p-2">
                                     <Checkbox
                                         checked={selectedItems.has(item.cart_item_id)}
                                         onCheckedChange={() => handleSelectItem(item.cart_item_id)}
-                                        className="mr-2"
+                                        className="mr-2 mt-1"
                                     />
-                                    <CartItem
-                                        item={item}
-                                        onUpdateQuantity={handleUpdateQuantity}
-                                        onRemove={handleRemoveItem}
-                                    />
+                                    <div className="flex-1">
+                                        <CartItem
+                                            item={item}
+                                            onUpdateQuantity={handleUpdateQuantity}
+                                            onRemove={handleRemoveItem}
+                                        />
+                                    </div>
                                 </div>
                             ))}
                         </div>
 
-                        <div className="p-4 border-t mt-auto">
-                            <div className="flex justify-between mb-4">
+                        <div className="p-3 sm:p-4 border-t mt-auto">
+                            <div className="flex justify-between mb-3 sm:mb-4">
                                 <span className="font-medium">Tổng tiền:</span>
                                 <span className="font-medium">
                                     {calculateTotal().toLocaleString('vi-VN')}đ
                                 </span>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-2">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                 <Button
                                     variant="outline"
                                     onClick={handleClearCart}
@@ -209,8 +211,8 @@ export const CartDialog = () => {
                         </div>
                     </div>
                 ) : (
-                    <div className="p-8 text-center text-gray-500">
-                        <ShoppingCart className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                    <div className="p-4 sm:p-8 text-center text-gray-500">
+                        <ShoppingCart className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-3 sm:mb-4 text-gray-400" />
                         <p className="mb-4">Giỏ hàng của bạn đang trống</p>
                         <Button asChild>
                             <Link href="/products">Tiếp tục mua sắm</Link>
@@ -221,4 +223,5 @@ export const CartDialog = () => {
         </Dialog>
     );
 };
+
 export default CartDialog;
