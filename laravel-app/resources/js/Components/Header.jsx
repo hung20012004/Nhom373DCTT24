@@ -5,6 +5,8 @@ import Dropdown from "@/Components/Dropdown";
 import { CartDialog } from "@/Components/cart/CartDialog";
 import axios from "axios";
 import ApplicationLogo from "@/Components/ApplicationLogo";
+import { useWishlist } from "@/Contexts/WishlistContext";
+
 const Header = () => {
     const { url } = usePage();
     const { auth } = usePage().props;
@@ -14,6 +16,12 @@ const Header = () => {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isScrolled, setIsScrolled] = useState(false);
+
+    // Sử dụng context thay vì state riêng
+    const { wishlist } = useWishlist();
+
+    // Tính toán số lượng sản phẩm yêu thích từ context
+    const wishlistCount = wishlist ? wishlist.length : 0;
 
     // Function to check if a link is active
     const isActive = (path) => {
@@ -131,15 +139,15 @@ const Header = () => {
                     <div className="flex items-center">
                         {/* Wishlist */}
                         <Link
-                            href="/wishlist"
-                            className={`p-2 relative ${getLinkClasses(
-                                "/wishlist"
-                            )}`}
+                            href="/products?filter_type=wishlist"
+                            className="p-2 relative"
                         >
                             <Heart className="h-6 w-6" />
-                            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                                0
-                            </span>
+                            {wishlistCount > 0 && (
+                                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                    {wishlistCount}
+                                </span>
+                            )}
                         </Link>
 
                         {/* Cart */}
@@ -181,6 +189,12 @@ const Header = () => {
                                                 className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                             >
                                                 Lịch sử mua hàng
+                                            </Link>
+                                            <Link
+                                                href="/products?filter_type=wishlist"
+                                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                            >
+                                                Sản phẩm yêu thích
                                             </Link>
                                             <Link
                                                 href="/logout"
@@ -241,6 +255,21 @@ const Header = () => {
                             className={getMobileLinkClasses("/products")}
                         >
                             Tất cả sản phẩm
+                        </Link>
+
+                        <Link
+                            href="/products?filter_type=wishlist"
+                            className={getMobileLinkClasses("/products?filter_type=wishlist")}
+                        >
+                            <div className="flex items-center">
+                                <Heart className="h-4 w-4 mr-2" />
+                                Sản phẩm yêu thích
+                                {wishlistCount > 0 && (
+                                    <span className="ml-2 bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                                        {wishlistCount}
+                                    </span>
+                                )}
+                            </div>
                         </Link>
 
                         {/* Mobile Categories Menu */}

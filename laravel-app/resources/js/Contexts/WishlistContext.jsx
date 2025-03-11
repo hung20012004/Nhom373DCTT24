@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import axios from 'axios';
 
 const WishlistContext = createContext();
@@ -6,31 +6,35 @@ const WishlistContext = createContext();
 export const WishlistProvider = ({ children }) => {
     const [wishlist, setWishlist] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [refreshTrigger, setRefreshTrigger] = useState(0); // Thêm state để kích hoạt cập nhật
+
+    // Fetch wishlist ban đầu và khi refreshTrigger thay đổi
+    useEffect(() => {
+        fetchWishlist();
+    }, [refreshTrigger]); // Thêm dependency vào useEffect
 
     const fetchWishlist = useCallback(async () => {
+        setIsLoading(true);
         try {
             const response = await axios.get('/wishlist');
-            setWishlist(response.data.data);
+            setWishlist(response.data?.data || []);
         } catch (error) {
             console.error('Error fetching wishlist:', error);
+            setWishlist([]); // Set a default empty array on error
         } finally {
             setIsLoading(false);
         }
     }, []);
 
-    const updateWishlist = useCallback(async () => {
-        try {
-            const response = await axios.get('/wishlist');
-            setWishlist(response.data.data);
-        } catch (error) {
-            console.error('Error updating wishlist:', error);
-        }
+    const updateWishlist = useCallback(() => {
+        // Thay vì gọi API trực tiếp, chỉ cần trigger refresh
+        setRefreshTrigger(prev => prev + 1);
     }, []);
 
     const removeItem = useCallback(async (wishlistItemId) => {
         try {
             await axios.delete(`/wishlist/${wishlistItemId}`);
-            await updateWishlist();
+            updateWishlist(); // Gọi hàm updateWishlist để trigger refresh
         } catch (error) {
             console.error('Error removing item:', error);
             throw error;
@@ -40,7 +44,7 @@ export const WishlistProvider = ({ children }) => {
     const clearWishlist = useCallback(async () => {
         try {
             await axios.delete('/wishlist/');
-            await updateWishlist();
+            updateWishlist(); // Gọi hàm updateWishlist để trigger refresh
         } catch (error) {
             console.error('Error clearing wishlist:', error);
             throw error;
@@ -52,7 +56,7 @@ export const WishlistProvider = ({ children }) => {
             const response = await axios.post('/wishlist/add', {
                 product_id: productId
             });
-            await updateWishlist();
+            updateWishlist(); // Gọi hàm updateWishlist để trigger refresh
             return {
                 success: true,
                 message: 'Item added to wishlist successfully'

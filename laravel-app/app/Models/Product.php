@@ -53,7 +53,10 @@ class Product extends Model
     }
     protected function getFinalPriceAttribute()
     {
-        // Nếu có giá sale và khác 0 thì lấy giá sale, ngược lại lấy giá gốc
         return $this->sale_price > 0 ? $this->sale_price : $this->price;
+    }
+    public function reviews()
+    {
+        return $this->hasMany(ProductReview::class, 'product_id', 'product_id');
     }
 }

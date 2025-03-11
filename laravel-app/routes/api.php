@@ -1,5 +1,4 @@
 <?php
-
 use App\Http\Controllers\API\CategoryController;
 use App\Http\Controllers\API\ProductController;
 use App\Http\Controllers\API\MaterialController;
@@ -13,6 +12,7 @@ use App\Http\Controllers\API\PurchaseOrderController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Http;
 
+// These routes should be directly under the /api prefix
 Route::get('/provinces', function () {
     $response = Http::get('https://provinces.open-api.vn/api/p/');
     return $response->json();
@@ -28,34 +28,23 @@ Route::get('/wards/{districtCode}', function ($districtCode) {
     return $response->json();
 });
 
-
 Route::prefix('v1')->group(function () {
     Route::get('/categories', [CategoryController::class, 'index']);
     Route::get('/categories/featured', [CategoryController::class, 'featured']);
-
-    Route::get('/colors', action: [ColorController::class, 'index']);
+    Route::get('/colors', [ColorController::class, 'index']);
     Route::get('/colors/{id}', [ColorController::class, 'show']);
-
     Route::get('/products', [ProductController::class, 'index']);
     Route::get('/products/featured', [ProductController::class, 'featured']);
     Route::get('/products/all', [ProductController::class, 'all']);
-
     Route::get('/materials', [MaterialController::class, 'index']);
-
     Route::get('/suppliers', [SupplierController::class, 'index']);
-
     Route::get('/sizes', [SizeController::class, 'index']);
-
     Route::get('/tags', [TagController::class, 'index']);
-
     Route::get('/purchase-orders', [PurchaseOrderController::class, 'index']);
     Route::get('/purchase-orders/{purchaseorderId}', [PurchaseOrderController::class, 'show']);
-
     Route::get('/inventory-checks', [InventoryCheckController::class, 'index']);
     Route::get('/inventory-checks/{checkId}', [InventoryCheckController::class, 'show']);
-
     Route::get('/banners/active', [BannerController::class, 'getActiveBanners']);
     Route::post('/banners', [BannerController::class, 'store'])->middleware('auth:sanctum');
-
     Route::get('/supplier', [SupplierController::class, 'index']);
 });

@@ -4,10 +4,8 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
-use App\Http\Resources\ProductResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
@@ -18,7 +16,6 @@ class ProductController extends Controller
                 'category',
                 'material',
                 'images',
-
                 'variants.color',
                 'variants.size'
             ])
@@ -37,6 +34,12 @@ class ProductController extends Controller
             $query->whereHas('category', function($q) use ($request) {
                 $q->where('slug', $request->category);
             });
+        }
+
+        // Handle specific product IDs (for wishlist)
+        if ($request->filled('ids')) {
+            $productIds = explode(',', $request->ids);
+            $query->whereIn('product_id', $productIds);
         }
 
         // Handle sorting
@@ -85,6 +88,7 @@ class ProductController extends Controller
 
         return response()->json($products);
     }
+
     public function featured()
     {
         $products = Product::with([
@@ -114,6 +118,7 @@ class ProductController extends Controller
         });
         return response()->json($products);
     }
+
     public function all()
     {
         $products = Product::with([
