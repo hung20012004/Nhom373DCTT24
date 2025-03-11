@@ -250,4 +250,36 @@ class OrderController extends Controller
             'order' => $order,
         ]);
     }
+    public function cancel(Request $request, $orderId)
+{
+    try {
+        $order = Order::where('order_id', $orderId)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
+        if (!in_array($order->order_status, ['new', 'processing'])) {
+            return back()->with('error', 'Đơn hàng không thể hủy ở trạng thái hiện tại.');
+        }
+
+        DB::beginTransaction();
+
+        $order->update([
+            'order_status' => 'cancelled',
+        ]);
+
+        // $order->history()->create([
+        //     'status' => 'cancelled',
+        //     'comment' => 'Đơn hàng đã bị hủy bởi khách hàng: ' . ($request->reason ?? 'Không có lý do'),
+        //     'updated_by' => Auth::id(),
+        // ]);
+
+        DB::commit();
+
+        return redirect()->back()->with('success', 'Đơn hàng đã được hủy thành công.');
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return back()->with('error', 'Đã có lỗi xảy ra: ' . $e->getMessage());
+    }
+}
 }
