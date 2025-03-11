@@ -121,7 +121,6 @@ export default function Index() {
         }
     };
 
-    // Debounced search and filter
     useEffect(() => {
         const timeoutId = setTimeout(() => {
             fetchOrders();
@@ -341,14 +340,23 @@ export default function Index() {
                                                         <Eye className="h-4 w-4" />
                                                     </Button>
 
-                                                    {order.order_status === 'new' && (
-                                                        <Button
-                                                            size="sm"
-                                                            className="bg-blue-600 hover:bg-blue-700 text-white"
-                                                            onClick={() => handleStatusChange(order.order_id, 'processing')}
-                                                        >
-                                                            Chuyển đến kho
-                                                        </Button>
+                                                    {order.order_status === 'processing' && (
+                                                        <>
+                                                            <Button
+                                                                size="sm"
+                                                                className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                                                                onClick={() => handleStatusChange(order.order_id, 'shipping')}
+                                                            >
+                                                                Vận chuyển
+                                                            </Button>
+                                                            <Button
+                                                                size="sm"
+                                                                variant="destructive"
+                                                                onClick={() => handleStatusChange(order.order_id, 'cancelled')}
+                                                            >
+                                                                Hủy
+                                                            </Button>
+                                                        </>
                                                     )}
                                                 </div>
                                             </TableCell>

@@ -9,6 +9,7 @@ use App\Http\Controllers\API\InventoryCheckController;
 use App\Http\Controllers\API\SizeController;
 use App\Http\Controllers\API\TagController;
 use App\Http\Controllers\API\PurchaseOrderController;
+use App\Http\Controllers\API\OrderController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Http;
 
@@ -44,6 +45,10 @@ Route::prefix('v1')->group(function () {
     Route::get('/purchase-orders/{purchaseorderId}', [PurchaseOrderController::class, 'show']);
     Route::get('/inventory-checks', [InventoryCheckController::class, 'index']);
     Route::get('/inventory-checks/{checkId}', [InventoryCheckController::class, 'show']);
+
+    Route::get('/orders', [OrderController::class, 'index']);
+    Route::get('/orders/{orderId}', [OrderController::class, 'show']);
+
     Route::get('/banners/active', [BannerController::class, 'getActiveBanners']);
     Route::post('/banners', [BannerController::class, 'store'])->middleware('auth:sanctum');
     Route::get('/supplier', [SupplierController::class, 'index']);

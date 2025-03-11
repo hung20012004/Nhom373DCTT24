@@ -2,108 +2,111 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\OrderDetail;
+use App\Models\CartItem;
+use App\Models\ShippingAddress;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class OrderController extends Controller
 {
-    /**
-     * Display a listing of the orders.
-     */
-    public function index(Request $request)
+    public function updateStatus(Request $request, $id)
     {
-        // Validate and sanitize input parameters
-        $search = $request->input('search', '');
-        $sortField = $request->input('sort_field', 'created_at');
-        $sortDirection = $request->input('sort_direction', 'desc');
-        $perPage = $request->input('per_page', 10);
-        $status = $request->input('status', null);
+        $order = Order::findOrFail($id);
 
-        // Build the query
-        $query = Order::with(['user', 'orderDetails.product'])
-            ->when($search, function ($query) use ($search) {
-                return $query->where(function ($q) use ($search) {
-                    $q->where('id', 'like', "%{$search}%")
-                      ->orWhereHas('user', function ($subQuery) use ($search) {
-                          $subQuery->where('name', 'like', "%{$search}%")
-                                   ->orWhere('email', 'like', "%{$search}%");
-                      });
-                });
-            })
-            ->when($status, function ($query) use ($status) {
-                return $query->where('status', $status);
-            });
-
-        // Apply sorting
-        $query->orderBy($sortField, $sortDirection);
-
-        // Paginate results
-        $orders = $query->paginate($perPage);
-
-        // Return data for Inertia
-        return Inertia::render('Admin/Orders/Index', [
-            'orders' => $orders,
-            'filters' => [
-                'search' => $search,
-                'status' => $status,
-                'sort_field' => $sortField,
-                'sort_direction' => $sortDirection,
-            ]
-        ]);
-    }
-
-    /**
-     * Update order status.
-     */
-    public function updateStatus(Request $request, $orderId)
-    {
         $request->validate([
-            'status' => 'required|in:pending,processing,shipped,delivered,cancelled'
+            'status' => ['required', Rule::in(['new', 'processing', 'shipping', 'delivered', 'cancelled'])]
         ]);
 
-        $order = Order::findOrFail($orderId);
-        $order->status = $request->input('status');
-        $order->save();
+        $currentStatus = $order->order_status;
+        $newStatus = $request->status;
 
-        return response()->json([
-            'message' => 'Order status updated successfully',
-            'order' => $order
-        ]);
+        // Validate status transitions
+        $allowedTransitions = [
+            'new' => ['processing', 'cancelled'],
+            'processing' => ['shipping', 'cancelled'],
+            'shipping' => ['delivered', 'cancelled'],
+            'delivered' => [],
+            'cancelled' => []
+        ];
+
+        if (!in_array($newStatus, $allowedTransitions[$currentStatus])) {
+            return response()->json([
+                'status' => 'error',
+                'message' => "Cannot change status from '$currentStatus' to '$newStatus'"
+            ], 400);
+        }
+
+        try {
+            // Update the status
+            $order->update([
+                'order_status' => $newStatus
+            ]);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Order status updated successfully',
+                'data' => $order
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to update order status: ' . $e->getMessage()
+            ], 500);
+        }
     }
-
-    /**
-     * Delete an order.
-     */
-    public function destroy($orderId)
+    public function updatePaymentStatus(Request $request, $id)
     {
-        $order = Order::findOrFail($orderId);
+        $order = Order::findOrFail($id);
 
-        // Optional: Add authorization check
-        // $this->authorize('delete', $order);
-
-        $order->delete();
-
-        return response()->json([
-            'message' => 'Order deleted successfully'
+        $request->validate([
+            'status' => ['required', Rule::in(['pending', 'paid', 'refunded', 'failed'])]
         ]);
-    }
 
-    /**
-     * Show order details.
-     */
-    public function show($orderId)
-    {
-        $order = Order::with([
-            'user',
-            'orderDetails.product',
-            'orderDetails.product.images',
-            'shippingAddress'
-        ])->findOrFail($orderId);
+        $currentStatus = $order->payment_status;
+        $newStatus = $request->status;
 
-        return Inertia::render('Admin/Orders/Show', [
-            'order' => $order
-        ]);
+        // Validate status transitions
+        $allowedTransitions = [
+            'pending' => ['paid', 'failed'],
+            'paid' => ['refunded'],
+            'refunded' => [],
+            'failed' => []
+        ];
+
+        if (!in_array($newStatus, $allowedTransitions[$currentStatus])) {
+            return response()->json([
+                'status' => 'error',
+                'message' => "Cannot change payment status from '$currentStatus' to '$newStatus'"
+            ], 400);
+        }
+
+        try {
+            // Update the status
+            $order->update([
+                'payment_status' => $newStatus
+            ]);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Payment status updated successfully',
+                'data' => $order
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to update order status: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }
