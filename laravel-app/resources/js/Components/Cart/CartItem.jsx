@@ -21,20 +21,38 @@ export const CartItem = ({ item, onUpdateQuantity, onRemove }) => {
     };
 
     return (
-        <div className="flex items-start gap-3 py-3 w-full">
+        <div className="flex items-start gap-3 py-3 w-full border-b">
+            {/* Product image - maintain aspect ratio */}
             <div className="w-16 h-16 flex-shrink-0 rounded-md overflow-hidden border bg-gray-50">
                 <img
                     src={item.variant.image_url}
                     alt={item.variant.product.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain"
                 />
             </div>
+
+            {/* Product details */}
             <div className="flex-grow min-w-0">
-                <h3 className="font-medium text-sm truncate">{item.variant.product.name}</h3>
-                <p className="text-xs text-gray-500 mb-2">
-                    {item.variant.color.name} - {item.variant.size.name}
-                </p>
-                <div className="flex items-center justify-between">
+                <div className="flex justify-between items-start">
+                    <div>
+                        <h3 className="font-medium text-sm truncate">{item.variant.product.name}</h3>
+                        <p className="text-xs text-gray-500 mb-2">
+                            {item.variant.color.name} - {item.variant.size.name}
+                        </p>
+                    </div>
+
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onRemove(item.cart_item_id)}
+                        className="text-gray-400 hover:text-red-500 hover:bg-red-50 h-8 w-8 flex-shrink-0 ml-2"
+                    >
+                        <Trash2 className="h-4 w-4" />
+                    </Button>
+                </div>
+
+                {/* Quantity controls and price */}
+                <div className="flex items-center justify-between mt-auto">
                     <div className="flex items-center border rounded-md">
                         <Button
                             type="button"
@@ -65,14 +83,6 @@ export const CartItem = ({ item, onUpdateQuantity, onRemove }) => {
                     </span>
                 </div>
             </div>
-            <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => onRemove(item.cart_item_id)}
-                className="text-gray-400 hover:text-red-500 hover:bg-red-50 h-8 w-8 flex-shrink-0"
-            >
-                <Trash2 className="h-4 w-4" />
-            </Button>
         </div>
     );
 };

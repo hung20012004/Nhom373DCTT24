@@ -1,5 +1,5 @@
-import React from 'react';
-import { Head, Link } from '@inertiajs/react';
+import React, { useState } from 'react';
+import { Head, Link, useForm, router  } from '@inertiajs/react';
 import Layout from '@/Layouts/Layout';
 import {
     Card,
@@ -10,13 +10,44 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Package, Truck, ShoppingBag, MapPin, Calendar, CreditCard, ClipboardList } from 'lucide-react';
+import {
+    ArrowLeft,
+    Package,
+    Truck,
+    ShoppingBag,
+    MapPin,
+    Calendar,
+    CreditCard,
+    ClipboardList,
+    AlertCircle
+} from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/components/ui/use-toast';
+
 const formatCurrency = (value) => {
     if (value == null || isNaN(value)) return '0 ₫';
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
 };
+
 const OrderShow = ({ order }) => {
+    const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+    const [cancelling, setCancelling] = useState(false);
+    const { toast } = useToast();
+
+    const form = useForm({
+        reason: '',
+    });
+
     // Get status badge properties
     const getStatusBadge = (status) => {
         switch(status) {
@@ -70,9 +101,41 @@ const OrderShow = ({ order }) => {
                 return <Truck className="h-6 w-6" />;
             case 'delivered':
                 return <ClipboardList className="h-6 w-6" />;
+            case 'cancelled':
+                return <AlertCircle className="h-6 w-6" />;
             default:
                 return <ShoppingBag className="h-6 w-6" />;
         }
+    };
+
+    const handleCancelOrder = () => {
+        setCancelling(true);
+
+        router.post(`/order/${order.order_id}/cancel`, {
+            reason: form.data.reason,
+        }, {
+            onSuccess: () => {
+                setCancelling(false);
+                setCancelDialogOpen(false);
+                toast({
+                    title: "Thành công",
+                    description: "Đơn hàng đã được hủy thành công.",
+                });
+                // Reload the page to reflect changes
+                router.reload();
+            },
+            onError: (errors) => {
+                setCancelling(false);
+                toast({
+                    title: "Lỗi",
+                    description: errors.error || "Đã xảy ra lỗi khi hủy đơn hàng",
+                    variant: "destructive",
+                });
+            },
+            onFinish: () => {
+                setCancelling(false);
+            }
+        });
     };
 
     const renderOrderHistory = () => {
@@ -109,6 +172,9 @@ const OrderShow = ({ order }) => {
             </div>
         );
     };
+
+    // Check if order can be cancelled
+    const canBeCancelled = ['new', 'processing'].includes(order.order_status);
 
     return (
         <Layout>
@@ -274,8 +340,48 @@ const OrderShow = ({ order }) => {
                         {/* Hành động */}
                         <div className="flex space-x-3">
                             <Button variant="outline" className="flex-1">Liên hệ hỗ trợ</Button>
-                            {order.order_status !== 'cancelled' && order.order_status === 'new' && (
-                                <Button variant="destructive" className="flex-1">Hủy đơn hàng</Button>
+                            {canBeCancelled && (
+                                <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+                                    <DialogTrigger asChild>
+                                        <Button variant="destructive" className="flex-1">Hủy đơn hàng</Button>
+                                    </DialogTrigger>
+                                    <DialogContent className="sm:max-w-md">
+                                        <DialogHeader>
+                                            <DialogTitle>Xác nhận hủy đơn hàng</DialogTitle>
+                                            <DialogDescription>
+                                                Bạn có chắc chắn muốn hủy đơn hàng #{order.order_id}? Hành động này không thể hoàn tác.
+                                            </DialogDescription>
+                                        </DialogHeader>
+                                        <div className="space-y-4 py-4">
+                                            <div className="space-y-2">
+                                                <p className="text-sm font-medium">Lý do hủy đơn hàng (tùy chọn):</p>
+                                                <Textarea
+                                                    placeholder="Nhập lý do hủy đơn hàng..."
+                                                    value={form.data.reason}
+                                                    onChange={(e) => form.setData('reason', e.target.value)}
+                                                    className="w-full"
+                                                    rows={3}
+                                                />
+                                            </div>
+                                        </div>
+                                        <DialogFooter>
+                                            <Button
+                                                variant="outline"
+                                                onClick={() => setCancelDialogOpen(false)}
+                                                disabled={cancelling}
+                                            >
+                                                Đóng
+                                            </Button>
+                                            <Button
+                                                variant="destructive"
+                                                onClick={handleCancelOrder}
+                                                disabled={cancelling}
+                                            >
+                                                {cancelling ? 'Đang hủy...' : 'Xác nhận hủy'}
+                                            </Button>
+                                        </DialogFooter>
+                                    </DialogContent>
+                                </Dialog>
                             )}
                         </div>
                     </div>

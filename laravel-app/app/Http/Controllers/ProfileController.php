@@ -35,15 +35,25 @@ class ProfileController extends Controller
     public function update(Request $request): RedirectResponse
     {
         $user = $request->user();
-        $existingProfile = UserProfile::where('phone', $request->input('phone'))
-        ->where('profile_id', '!=', $user->profile->profile_id)
-        ->first();
 
-        if ($existingProfile) {
-            return Redirect::back()->withErrors([
-                'phone' => 'Số điện thoại này đã được sử dụng bởi người dùng khác.'
-            ])->withInput();
+        // Check if phone number already exists for another user
+        if ($request->input('phone')) {
+            $query = UserProfile::where('phone', $request->input('phone'));
+
+            // Only check for different users if current user has a profile
+            if ($user->profile) {
+                $query->where('profile_id', '!=', $user->profile->profile_id);
+            }
+
+            $existingProfile = $query->first();
+
+            if ($existingProfile) {
+                return Redirect::back()->withErrors([
+                    'phone' => 'Số điện thoại này đã được sử dụng bởi người dùng khác.'
+                ])->withInput();
+            }
         }
+
         // Validate the incoming request
         $validatedData = $request->validate([
             'full_name' => 'required|string|max:255',
@@ -61,8 +71,13 @@ class ProfileController extends Controller
         }
         $user->save();
 
-        // Update or create profile
-        $profile = $user->profile ?? $user->profile()->create();
+        // Get or create profile
+        $profile = $user->profile ?? new UserProfile();
+
+        if (!$user->profile) {
+            // Associate the new profile with the user
+            $profile->user_id = $user->id;
+        }
 
         // Handle avatar upload
         if ($request->hasFile('avatar_url')) {

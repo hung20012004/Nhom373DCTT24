@@ -190,6 +190,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
         Route::get('/confirmation/{order}', [OrderController::class, 'confirmation'])->name('order.confirmation');
         Route::post('/', [OrderController::class, 'checkout'])->name('order.checkout');
         Route::get('/confirmation/{order}', [OrderController::class, 'confirmation'])->name('order.confirmation');
+        Route::post('/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
     });
     Route::post('/products/{productId}/reviews', [ProductReviewController::class, 'store']);
     Route::put('/products/{productId}/reviews/{reviewId}', [ProductReviewController::class, 'update']);
