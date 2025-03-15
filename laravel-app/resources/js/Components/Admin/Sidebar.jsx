@@ -23,7 +23,8 @@ import {
     Palette,
     Star,
     MapPin,
-    Send
+    Send,
+    Warehouse
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -59,6 +60,8 @@ const Sidebar = () => {
             title: 'Quản lý đơn hàng',
             items: [
                 { title: 'Đơn hàng', icon: <ShoppingBag size={20} />, path: '/admin/orders' },
+                { title: 'Kho hàng', icon: <Warehouse size={20} />, path: '/admin/order-warehouse' },
+                { title: 'Đơn vị vận chuyển', icon: <Truck size={20} />, path: '/admin/order-shipping' },
                 { title: 'Đơn nhập hàng', icon: <ShoppingCart size={20} />, path: '/admin/purchase-orders' },
                 { title: 'Lịch sử đơn hàng', icon: <FileText size={20} />, path: '/admin/order-history' },
                 { title: 'Thanh toán', icon: <ShoppingCart size={20} />, path: '/admin/payments' },

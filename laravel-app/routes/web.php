@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\SupplierController;
 use App\Http\Controllers\Admin\TagController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\PurchaseOrderController;
+use App\Http\Controllers\Admin\OrderController AS AdminOrder;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -81,7 +82,19 @@ Route::middleware(['auth', 'verified','check.role'])->prefix('admin')->group(fun
     Route::get('/inventory-checks/{id}', function ($id) {
         return Inertia::render('Admin/InventoryChecks/Show', ['checkId' => $id]);
     })->name('admin.inventory-checks.show');
-
+    Route::get('/orders', function () {
+        return Inertia::render('Admin/Orders/Index');
+    })->name('admin.orders');
+    Route::get('/order-warehouse', function () {
+        return Inertia::render('Admin/Orders/IndexWarehouse');
+    })->name('admin.order.warehouse');
+    Route::get('/order-shipping', function () {
+        return Inertia::render('Admin/Orders/IndexShipping');
+    })->name('admin.order.shipping');
+    Route::get('/orders/{id}', function ($id) {
+        return Inertia::render('Admin/Orders/Show', ['orderId' => $id]);
+    })->name('admin.orders.show');
+    // API Routes
     Route::prefix('purchase-orders')->group(function () {
         Route::post('/', [PurchaseOrderController::class, 'store']);
         Route::put('/{purchaseorderId}', [PurchaseOrderController::class, 'update']);
@@ -93,6 +106,11 @@ Route::middleware(['auth', 'verified','check.role'])->prefix('admin')->group(fun
         Route::put('/{checkId}', [InventoryCheckController::class, 'update']);
         Route::put('/{checkId}/status', [InventoryCheckController::class, 'updateStatus']);
         Route::delete('/{checkId}', [InventoryCheckController::class, 'destroy']);
+    });
+    Route::prefix('orders')->group(function () {
+        Route::put('/{orderId}', [AdminOrder::class, 'update']);
+        Route::put('/{orderId}/status', [AdminOrder::class, 'updateStatus']);
+        Route::put('/{orderId}/payment-status', [AdminOrder::class, 'updatePaymentStatus']);
     });
     Route::prefix('categories')->group(function () {
         Route::post('/', [CategoryController::class, 'store']);
@@ -140,7 +158,6 @@ Route::middleware(['auth', 'verified','check.role'])->prefix('admin')->group(fun
         Route::get('/index', [CustomerController::class, 'index']);
         Route::get('/{id}', [CustomerController::class, 'show']);
     });
-
 });
 
 Route::middleware(['auth:sanctum', 'verified'])->group(function () {

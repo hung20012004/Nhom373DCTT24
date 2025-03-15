@@ -18,104 +18,105 @@ import axios from 'axios';
 import { ArrowUpDown } from 'lucide-react';
 
 export default function Index() {
-    const [products, setProducts] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [search, setSearch] = useState('');
-    const [showForm, setShowForm] = useState(false);
-    const [editProduct, setEditProduct] = useState(null);
-    const [pagination, setPagination] = useState({
-        current_page: 1,
-        per_page: 10,
-        total: 0,
-        last_page: 1
+    const [sanPham, setSanPham] = useState([]);
+    const [dangTai, setDangTai] = useState(true);
+    const [timKiem, setTimKiem] = useState('');
+    const [hienThiBieuMau, setHienThiBieuMau] = useState(false);
+    const [suaSanPham, setSuaSanPham] = useState(null);
+    const [phanTrang, setPhanTrang] = useState({
+        trang_hien_tai: 1,
+        so_luong_moi_trang: 10,
+        tong_so: 0,
+        trang_cuoi: 1
     });
-    const [sortField, setSortField] = useState('name');
-    const [sortDirection, setSortDirection] = useState('asc');
-    console.log('editProduct in Index:', editProduct);
-    const fetchProducts = async () => {
+    const [truongSapXep, setTruongSapXep] = useState('name');
+    const [huongSapXep, setHuongSapXep] = useState('asc');
+    console.log('suaSanPham trong Index:', suaSanPham);
+
+    const layDanhSachSanPham = async () => {
         try {
-            setLoading(true);
+            setDangTai(true);
             const response = await axios.get('/api/v1/products', {
                 params: {
-                    search,
-                    page: pagination.current_page,
-                    per_page: pagination.per_page,
-                    sort_field: sortField,
-                    sort_direction: sortDirection,
+                    search: timKiem,
+                    page: phanTrang.trang_hien_tai,
+                    per_page: phanTrang.so_luong_moi_trang,
+                    sort_field: truongSapXep,
+                    sort_direction: huongSapXep,
                     with: 'variants.color,variants.size,category, material, tag'
                 }
             });
 
             if (response.data && response.data.data) {
-                setProducts(response.data.data);
-                setPagination({
-                    current_page: response.data.current_page,
-                    per_page: response.data.per_page,
-                    total: response.data.total,
-                    last_page: response.data.last_page
+                setSanPham(response.data.data);
+                setPhanTrang({
+                    trang_hien_tai: response.data.current_page,
+                    so_luong_moi_trang: response.data.per_page,
+                    tong_so: response.data.total,
+                    trang_cuoi: response.data.last_page
                 });
             }
         } catch (error) {
-            console.error('Error fetching products:', error);
-            setProducts([]);
+            console.error('Lỗi khi lấy danh sách sản phẩm:', error);
+            setSanPham([]);
         } finally {
-            setLoading(false);
+            setDangTai(false);
         }
     };
 
     useEffect(() => {
         const timeoutId = setTimeout(() => {
-            fetchProducts();
+            layDanhSachSanPham();
         }, 300);
 
         return () => clearTimeout(timeoutId);
-    }, [search, pagination.current_page, sortField, sortDirection]);
+    }, [timKiem, phanTrang.trang_hien_tai, truongSapXep, huongSapXep]);
 
-    const handleSort = (field) => {
-        if (sortField === field) {
-            setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    const xuLySapXep = (truong) => {
+        if (truongSapXep === truong) {
+            setHuongSapXep(huongSapXep === 'asc' ? 'desc' : 'asc');
         } else {
-            setSortField(field);
-            setSortDirection('asc');
+            setTruongSapXep(truong);
+            setHuongSapXep('asc');
         }
     };
 
-    const handleDelete = async (productId) => {
-        if (confirm('Are you sure you want to delete this product?')) {
+    const xuLyXoa = async (sanPhamId) => {
+        if (confirm('Bạn có chắc chắn muốn xóa sản phẩm này không?')) {
             try {
-                await axios.delete(`/admin/products/${productId}`);
-                fetchProducts();
+                await axios.delete(`/admin/products/${sanPhamId}`);
+                layDanhSachSanPham();
             } catch (error) {
-                console.error('Error deleting product:', error);
+                console.error('Lỗi khi xóa sản phẩm:', error);
             }
         }
     };
 
-    const breadcrumbItems = [
-        { label: 'Products', href: '/admin/products' }
+    const cacMucBreadcrumb = [
+        { label: 'Sản phẩm', href: '/admin/products' }
     ];
 
-    const renderPagination = () => {
-        const pages = [];
-        for (let i = 1; i <= pagination.last_page; i++) {
-            pages.push(
+    const hienThiPhanTrang = () => {
+        const trang = [];
+        for (let i = 1; i <= phanTrang.trang_cuoi; i++) {
+            trang.push(
                 <Button
                     key={i}
-                    variant={pagination.current_page === i ? "default" : "outline"}
+                    variant={phanTrang.trang_hien_tai === i ? "default" : "outline"}
                     className="w-10 h-10"
-                    onClick={() => setPagination(prev => ({ ...prev, current_page: i }))}
+                    onClick={() => setPhanTrang(prev => ({ ...prev, trang_hien_tai: i }))}
                 >
                     {i}
                 </Button>
             );
         }
-        return pages;
+        return trang;
     };
 
-    const SortableHeader = ({ field, children }) => (
+    const TieuDeSapXep = ({ truong, children }) => (
         <TableHead
             className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-            onClick={() => handleSort(field)}
+            onClick={() => xuLySapXep(truong)}
         >
             <div className="flex items-center space-x-1">
                 <span>{children}</span>
@@ -124,30 +125,37 @@ export default function Index() {
         </TableHead>
     );
 
+    const formatCurrency = (amount) => {
+        return new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND'
+        }).format(amount);
+    };
+
     return (
         <AdminLayout>
-            <Head title="Products Management" />
+            <Head title="Quản lý Sản phẩm" />
 
             <div className="container mx-auto py-6 px-4">
-                <Breadcrumb items={breadcrumbItems} />
+                <Breadcrumb items={cacMucBreadcrumb} />
 
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                    <h1 className="text-3xl font-bold text-gray-900">Products</h1>
+                    <h1 className="text-3xl font-bold text-gray-900">Sản phẩm</h1>
                     <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
                         <Input
                             type="text"
-                            placeholder="Search products..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
+                            placeholder="Tìm kiếm sản phẩm..."
+                            value={timKiem}
+                            onChange={(e) => setTimKiem(e.target.value)}
                             className="w-full sm:w-64"
                         />
                         <Button
                             onClick={() => {
-                                setEditProduct(null);
-                                setShowForm(true);
+                                setSuaSanPham(null);
+                                setHienThiBieuMau(true);
                             }}
                         >
-                            Add New Product
+                            Thêm sản phẩm mới
                         </Button>
                     </div>
                 </div>
@@ -157,22 +165,20 @@ export default function Index() {
                         <Table>
                             <TableHeader>
                                 <TableRow className="bg-gray-50">
-                                    <SortableHeader field="id">ID</SortableHeader>
-                                    <SortableHeader field="brand">Brand</SortableHeader>
-                                    <SortableHeader field="name">Name</SortableHeader>
-                                    <SortableHeader field="category">Category</SortableHeader>
-                                    <SortableHeader field="category">Material</SortableHeader>
-                                    <SortableHeader field="category">Tag</SortableHeader>
+                                    <TieuDeSapXep truong="id">ID</TieuDeSapXep>
+                                    <TieuDeSapXep truong="brand">Thương Hiệu</TieuDeSapXep>
+                                    <TieuDeSapXep truong="name">Tên</TieuDeSapXep>
+                                    <TieuDeSapXep truong="category">Danh Mục</TieuDeSapXep>
                                     <TableHead className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Variants
+                                        Biến Thể
                                     </TableHead>
-                                    <SortableHeader field="price">Price</SortableHeader>
-                                    <SortableHeader field="stock_quantity">Stock</SortableHeader>
-                                    <TableHead className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</TableHead>
+                                    <TieuDeSapXep truong="price">Giá</TieuDeSapXep>
+                                    <TieuDeSapXep truong="stock_quantity">Tồn Kho</TieuDeSapXep>
+                                    <TableHead className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hành Động</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {loading ? (
+                                {dangTai ? (
                                     <TableRow>
                                         <TableCell colSpan={6} className="text-center py-4">
                                             <div className="flex justify-center">
@@ -180,45 +186,39 @@ export default function Index() {
                                             </div>
                                         </TableCell>
                                     </TableRow>
-                                ) : !products || products.length === 0 ? (
+                                ) : !sanPham || sanPham.length === 0 ? (
                                     <TableRow>
                                         <TableCell colSpan={6} className="text-center py-4 text-gray-500">
-                                            No products found
+                                            Không tìm thấy sản phẩm
                                         </TableCell>
                                     </TableRow>
                                 ) : (
-                                    products.map((product) => (
+                                    sanPham.map((sanPham) => (
                                         <TableRow
-                                            key={product.product_id}
+                                            key={sanPham.product_id}
                                             className="hover:bg-gray-50 transition-colors"
                                         >
-                                            <TableCell className="py-4 px-6 text-sm text-gray-900">{product.product_id}</TableCell>
-                                            <TableCell className="py-4 px-6 text-sm text-gray-900">{product.brand}</TableCell>
-                                            <TableCell className="py-4 px-6 text-sm text-gray-900">{product.name}</TableCell>
+                                            <TableCell className="py-4 px-6 text-sm text-gray-900">{sanPham.product_id}</TableCell>
+                                            <TableCell className="py-4 px-6 text-sm text-gray-900">{sanPham.brand}</TableCell>
+                                            <TableCell className="py-4 px-6 text-sm text-gray-900">{sanPham.name}</TableCell>
                                             <TableCell className="py-4 px-6 text-sm text-gray-900">
-                                                {product.category?.name || 'Uncategorized'}
-                                            </TableCell>
-                                            <TableCell className="py-4 px-6 text-sm text-gray-900">
-                                                {product.material?.name || 'Unknown material'}
-                                            </TableCell>
-                                            <TableCell className="py-4 px-6 text-sm text-gray-900">
-                                                {product.tag?.name || 'Unknown material'}
+                                                {sanPham.category?.name || 'Chưa phân loại'}
                                             </TableCell>
                                             <TableCell className="py-4 px-6">
-                                                <VariantDisplay variants={product.variants} />
+                                                <VariantDisplay variants={sanPham.variants} />
                                             </TableCell>
                                             <TableCell className="py-4 px-6 text-sm text-gray-900">
-                                                ${product.price.toLocaleString()}
+                                                {formatCurrency(sanPham.price)}
                                             </TableCell>
                                             <TableCell className="py-4 px-6 text-sm">
                                                 <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                                    product.stock_quantity > 10
+                                                    sanPham.stock_quantity > 10
                                                         ? 'bg-green-100 text-green-800'
-                                                        : product.stock_quantity > 0
+                                                        : sanPham.stock_quantity > 0
                                                             ? 'bg-yellow-100 text-yellow-800'
                                                             : 'bg-red-100 text-red-800'
                                                 }`}>
-                                                    {product.stock_quantity}
+                                                    {sanPham.stock_quantity}
                                                 </span>
                                             </TableCell>
                                             <TableCell className="py-4 px-6 text-sm text-gray-900">
@@ -227,18 +227,18 @@ export default function Index() {
                                                         variant="outline"
                                                         className="text-blue-600 hover:text-blue-700 border border-blue-600 hover:border-blue-700"
                                                         onClick={() => {
-                                                            setEditProduct(product);
-                                                            setShowForm(true);
+                                                            setSuaSanPham(sanPham);
+                                                            setHienThiBieuMau(true);
                                                         }}
                                                     >
-                                                        Edit
+                                                        Sửa
                                                     </Button>
                                                     <Button
                                                         variant="destructive"
                                                         className="bg-red-600 hover:bg-red-700 text-white"
-                                                        onClick={() => handleDelete(product.product_id)}
+                                                        onClick={() => xuLyXoa(sanPham.product_id)}
                                                     >
-                                                        Delete
+                                                        Xóa
                                                     </Button>
                                                 </div>
                                             </TableCell>
@@ -251,25 +251,25 @@ export default function Index() {
 
                     <div className="flex justify-between items-center p-4 border-t">
                         <div className="text-sm text-gray-600">
-                            Showing {products.length} of {pagination.total} results
+                            Hiển thị {sanPham.length} trong tổng số {phanTrang.tong_so} kết quả
                         </div>
                         <div className="flex gap-2">
-                            {renderPagination()}
+                            {hienThiPhanTrang()}
                         </div>
                     </div>
                 </div>
 
-                {showForm && (
+                {hienThiBieuMau && (
                     <ProductForm
-                        product={editProduct}
+                        product={suaSanPham}
                         onClose={() => {
-                            setShowForm(false);
-                            setEditProduct(null);
+                            setHienThiBieuMau(false);
+                            setSuaSanPham(null);
                         }}
                         onSuccess={() => {
-                            setShowForm(false);
-                            setEditProduct(null);
-                            fetchProducts();
+                            setHienThiBieuMau(false);
+                            setSuaSanPham(null);
+                            layDanhSachSanPham();
                         }}
                     />
                 )}

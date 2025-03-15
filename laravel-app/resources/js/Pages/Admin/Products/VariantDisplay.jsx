@@ -78,7 +78,7 @@ const VariantDisplay = ({ variants }) => {
         <div className="space-y-2">
             {/* Sizes Section */}
             <div>
-                <div className="text-xs font-medium mb-1">Sizes:</div>
+                <div className="text-xs font-medium mb-1">Cỡ:</div>
                 <div className="flex flex-wrap gap-1">
                     {uniqueSizes.map((size) => {
                         const isActive = selectedSize === size;
@@ -104,7 +104,7 @@ const VariantDisplay = ({ variants }) => {
 
             {/* Colors Section */}
             <div>
-                <div className="text-xs font-medium mb-1">Colors:</div>
+                <div className="text-xs font-medium mb-1">Màu:</div>
                 <div className="flex flex-wrap gap-1">
                     {uniqueColors.map((color) => {
                         const isActive = selectedColor === color;
