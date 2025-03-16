@@ -14,7 +14,8 @@ class OrderHistory extends Model
         'status',
         'note',
         'processed_by_user_id',
-        'shipped_by_user_id'
+        'shipped_by_user_id',
+        'prepared_by_user_id',
     ];
 
     protected $casts = [
@@ -31,6 +32,10 @@ class OrderHistory extends Model
     public function processedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'processed_by_user_id', 'id');
+    }
+    public function preparedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'prepared_by_user_id', 'id');
     }
 
     public function shippedBy(): BelongsTo

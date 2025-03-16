@@ -39,7 +39,7 @@ const Sidebar = () => {
         {
             title: 'Tổng quan',
             items: [
-                { title: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/admin/dashboard' },
+                { title: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/dashboard' },
                 { title: 'Thông báo', icon: <Bell size={20} />, path: '/admin/notifications' },
             ]
         },
@@ -63,7 +63,6 @@ const Sidebar = () => {
                 { title: 'Đóng hàng', icon: <Warehouse size={20} />, path: '/admin/order-warehouse' },
                 { title: 'Vận chuyển', icon: <Truck size={20} />, path: '/admin/order-shipping' },
                 { title: 'Đơn nhập hàng', icon: <ShoppingCart size={20} />, path: '/admin/purchase-orders' },
-                { title: 'Lịch sử đơn hàng', icon: <FileText size={20} />, path: '/admin/order-history' },
                 { title: 'Thanh toán', icon: <ShoppingCart size={20} />, path: '/admin/payments' },
             ]
         },
@@ -74,19 +73,12 @@ const Sidebar = () => {
                 { title: 'Đánh giá', icon: <Star size={20} />, path: '/admin/reviews' },
             ]
         },
-        {
-            title: 'Marketing',
-            items: [
-                { title: 'Khuyến mãi', icon: <Percent size={20} />, path: '/admin/promotions' },
-                { title: 'Gửi thông báo', icon: <Send size={20} />, path: '/admin/notifications-send' },
-            ]
-        },
+
         {
             title: 'Cài đặt hệ thống',
             items: [
                 { title: 'Cấu hình', icon: <Settings size={20} />, path: '/admin/settings' },
                 { title: 'Quản lý nhân viên', icon: <UserCog size={20} />, path: '/admin/staffs' },
-                { title: 'Quyền & Chức vụ', icon: <Users size={20} />, path: '/admin/roles' },
             ]
         },
     ];
