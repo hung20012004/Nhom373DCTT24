@@ -20,23 +20,24 @@ class OrderController extends Controller
         $order = Order::findOrFail($id);
 
         $request->validate([
-            'status' => ['required', Rule::in(['new', 'processing', 'shipping', 'delivered', 'cancelled'])],
+            'status' => ['required', Rule::in(['new', 'processing', 'preparing', 'packed', 'shipping', 'delivered', 'cancelled'])],
             'note' => 'nullable|string|max:500'
         ]);
 
         $currentStatus = $order->order_status;
         $newStatus = $request->status;
 
-        // Validate status transitions
         $allowedTransitions = [
             'new' => ['processing', 'cancelled'],
-            'processing' => ['shipping', 'cancelled'],
+            'processing' => ['preparing', 'cancelled'],
+            'preparing' => ['packed', 'cancelled'],
+            'packed' => ['shipping', 'cancelled'],
             'shipping' => ['delivered', 'cancelled'],
             'delivered' => [],
             'cancelled' => []
         ];
 
-        if (!in_array($newStatus, $allowedTransitions[$currentStatus])) {
+        if (!in_array($newStatus, $allowedTransitions[$currentStatus] ?? [])) {
             return response()->json([
                 'status' => 'error',
                 'message' => "Cannot change status from '$currentStatus' to '$newStatus'"
@@ -46,12 +47,10 @@ class OrderController extends Controller
         try {
             DB::beginTransaction();
 
-            // Update the status
             $order->update([
                 'order_status' => $newStatus
             ]);
 
-            // Create order history record with Vietnamese note
             $statusVietnamese = $this->getVietnameseOrderStatus($newStatus);
             $currentStatusVietnamese = $this->getVietnameseOrderStatus($currentStatus);
 
@@ -93,7 +92,6 @@ class OrderController extends Controller
         $currentStatus = $order->payment_status;
         $newStatus = $request->status;
 
-        // Validate status transitions
         $allowedTransitions = [
             'pending' => ['paid', 'failed'],
             'paid' => ['refunded'],
@@ -101,7 +99,7 @@ class OrderController extends Controller
             'failed' => []
         ];
 
-        if (!in_array($newStatus, $allowedTransitions[$currentStatus])) {
+        if (!in_array($newStatus, $allowedTransitions[$currentStatus] ?? [])) {
             return response()->json([
                 'status' => 'error',
                 'message' => "Cannot change payment status from '$currentStatus' to '$newStatus'"
@@ -111,12 +109,10 @@ class OrderController extends Controller
         try {
             DB::beginTransaction();
 
-            // Update the status
             $order->update([
                 'payment_status' => $newStatus
             ]);
 
-            // Create order history record for payment status change with Vietnamese note
             $statusVietnamese = $this->getVietnamesePaymentStatus($newStatus);
             $currentStatusVietnamese = $this->getVietnamesePaymentStatus($currentStatus);
 
@@ -146,14 +142,13 @@ class OrderController extends Controller
         }
     }
 
-    /**
-     * Convert order status to Vietnamese
-     */
     private function getVietnameseOrderStatus($status)
     {
         $statusMap = [
             'new' => 'Mới',
             'processing' => 'Đang xử lý',
+            'preparing' => 'Đang chuẩn bị hàng',
+            'packed' => 'Đã đóng hàng',
             'shipping' => 'Đang giao hàng',
             'delivered' => 'Đã giao hàng',
             'cancelled' => 'Đã hủy'
@@ -162,9 +157,6 @@ class OrderController extends Controller
         return $statusMap[$status] ?? $status;
     }
 
-    /**
-     * Convert payment status to Vietnamese
-     */
     private function getVietnamesePaymentStatus($status)
     {
         $statusMap = [
