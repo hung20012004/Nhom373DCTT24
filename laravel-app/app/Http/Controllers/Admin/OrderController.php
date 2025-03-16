@@ -20,7 +20,7 @@ class OrderController extends Controller
         $order = Order::findOrFail($id);
 
         $request->validate([
-            'status' => ['required', Rule::in(['new', 'processing', 'preparing', 'packed', 'shipping', 'delivered', 'cancelled'])],
+            'status' => ['required', Rule::in(['new', 'processing','confirmed', 'preparing', 'packed', 'shipping', 'delivered', 'cancelled'])],
             'note' => 'nullable|string|max:500'
         ]);
 
@@ -29,7 +29,8 @@ class OrderController extends Controller
 
         $allowedTransitions = [
             'new' => ['processing', 'cancelled'],
-            'processing' => ['preparing', 'cancelled'],
+            'processing' => ['confirmed', 'cancelled'],
+            'confirmed' => ['preparing', 'cancelled'],
             'preparing' => ['packed', 'cancelled'],
             'packed' => ['shipping', 'cancelled'],
             'shipping' => ['delivered', 'cancelled'],
@@ -147,6 +148,7 @@ class OrderController extends Controller
         $statusMap = [
             'new' => 'Mới',
             'processing' => 'Đang xử lý',
+            'confirmed'=>'Đã xác nhận',
             'preparing' => 'Đang chuẩn bị hàng',
             'packed' => 'Đã đóng hàng',
             'shipping' => 'Đang giao hàng',

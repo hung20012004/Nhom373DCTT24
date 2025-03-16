@@ -21,7 +21,8 @@ import {
     ClipboardList,
     AlertCircle,
     Box,
-    PackageCheck
+    PackageCheck,
+    CheckCircle
 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import {
@@ -55,6 +56,8 @@ const OrderShow = ({ order }) => {
         switch(status) {
             case 'new':
                 return { label: 'Mới tạo', color: 'bg-blue-500' };
+            case 'confirmed':
+                return { label: 'Đã xác nhận', color: 'bg-green-700' };
             case 'processing':
                 return { label: 'Đang xử lý', color: 'bg-orange-500' };
             case 'preparing':
@@ -101,6 +104,8 @@ const OrderShow = ({ order }) => {
         switch(status) {
             case 'new':
                 return <ShoppingBag className="h-6 w-6" />;
+            case 'confirmed':
+                return <CheckCircle className="h-6 w-6" />;
             case 'processing':
                 return <Package className="h-6 w-6" />;
             case 'preparing':
@@ -182,6 +187,7 @@ const OrderShow = ({ order }) => {
             </div>
         );
     };
+
 
     // Check if order can be cancelled
     const canBeCancelled = ['new', 'processing', 'preparing', 'packed'].includes(order.order_status);

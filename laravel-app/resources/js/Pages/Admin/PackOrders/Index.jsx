@@ -33,7 +33,7 @@ export default function KanbanOrders() {
 
     // Trạng thái có thể cập nhật trong Kanban
     const kanbanStatuses = {
-        'processing': 'Đang xử lý',
+        'confirmed': 'Đã xác nhận',
         'preparing': 'Đang chuẩn bị hàng',
         'packed': 'Đã đóng gói',
     };
@@ -48,6 +48,7 @@ export default function KanbanOrders() {
 
     const statusClasses = {
         'new': 'bg-blue-100 text-blue-800',
+        'confirmed': 'bg-cyan-100 text-cyan-800',
         'processing': 'bg-green-100 text-green-800',
         'cancelled': 'bg-red-100 text-red-800',
         'preparing': 'bg-yellow-100 text-yellow-800',

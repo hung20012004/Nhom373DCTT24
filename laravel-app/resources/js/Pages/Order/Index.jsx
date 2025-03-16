@@ -29,13 +29,18 @@ const OrderIndex = ({ orders }) => {
         return matchesSearch && order.order_status === activeStatus;
     });
 
-    // Get status badge properties
     const getStatusBadge = (status) => {
         switch(status) {
             case 'new':
-                return { label: 'Mới tạo', color: 'bg-blue-500' };
+                return { label: 'Mới', color: 'bg-blue-500' };
             case 'processing':
                 return { label: 'Đang xử lý', color: 'bg-orange-500' };
+            case 'confirmed':
+                return { label: 'Đã xác nhận', color: 'bg-teal-500' };
+            case 'preparing':
+                return { label: 'Đang chuẩn bị hàng', color: 'bg-yellow-500' };
+            case 'packed':
+                return { label: 'Đã đóng hàng', color: 'bg-indigo-500' };
             case 'shipping':
                 return { label: 'Đang giao hàng', color: 'bg-purple-500' };
             case 'delivered':
@@ -46,7 +51,6 @@ const OrderIndex = ({ orders }) => {
                 return { label: 'Khác', color: 'bg-gray-500' };
         }
     };
-
     // Get payment status badge properties
     const getPaymentBadge = (status) => {
         switch(status) {
@@ -61,16 +65,17 @@ const OrderIndex = ({ orders }) => {
         }
     };
 
-    // Format date to local Vietnamese format
     const formatDate = (dateString) => {
         return new Date(dateString).toLocaleDateString('vi-VN');
     };
 
-    // Status options for filter
     const statusOptions = [
         { value: 'all', label: 'Tất cả' },
-        { value: 'new', label: 'Mới tạo' },
+        { value: 'new', label: 'Mới' },
         { value: 'processing', label: 'Đang xử lý' },
+        { value: 'confirmed', label: 'Đã xác nhận' },
+        { value: 'preparing', label: 'Đang chuẩn bị hàng' },
+        { value: 'packed', label: 'Đã đóng hàng' },
         { value: 'shipping', label: 'Đang giao' },
         { value: 'delivered', label: 'Đã giao' },
         { value: 'cancelled', label: 'Đã hủy' }
