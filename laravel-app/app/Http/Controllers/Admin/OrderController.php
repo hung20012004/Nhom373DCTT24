@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\Order;
 use App\Models\OrderDetail;
+use App\Models\OrderHistory;
 use App\Models\CartItem;
 use App\Models\ShippingAddress;
 use Illuminate\Http\Request;
@@ -19,7 +20,8 @@ class OrderController extends Controller
         $order = Order::findOrFail($id);
 
         $request->validate([
-            'status' => ['required', Rule::in(['new', 'processing', 'shipping', 'delivered', 'cancelled'])]
+            'status' => ['required', Rule::in(['new', 'processing', 'shipping', 'delivered', 'cancelled'])],
+            'note' => 'nullable|string|max:500'
         ]);
 
         $currentStatus = $order->order_status;
@@ -42,10 +44,26 @@ class OrderController extends Controller
         }
 
         try {
+            DB::beginTransaction();
+
             // Update the status
             $order->update([
                 'order_status' => $newStatus
             ]);
+
+            // Create order history record with Vietnamese note
+            $statusVietnamese = $this->getVietnameseOrderStatus($newStatus);
+            $currentStatusVietnamese = $this->getVietnameseOrderStatus($currentStatus);
+
+            OrderHistory::create([
+                'order_id' => $order->order_id,
+                'status' => $newStatus,
+                'note' => $request->note ?? "Trạng thái đơn hàng đã thay đổi từ {$currentStatusVietnamese} sang {$statusVietnamese}",
+                'processed_by_user_id' => Auth::id(),
+                'shipped_by_user_id' => $newStatus === 'shipping' ? Auth::id() : null
+            ]);
+
+            DB::commit();
 
             return response()->json([
                 'status' => 'success',
@@ -62,12 +80,14 @@ class OrderController extends Controller
             ], 500);
         }
     }
+
     public function updatePaymentStatus(Request $request, $id)
     {
         $order = Order::findOrFail($id);
 
         $request->validate([
-            'status' => ['required', Rule::in(['pending', 'paid', 'refunded', 'failed'])]
+            'status' => ['required', Rule::in(['pending', 'paid', 'refunded', 'failed'])],
+            'note' => 'nullable|string|max:500'
         ]);
 
         $currentStatus = $order->payment_status;
@@ -89,10 +109,26 @@ class OrderController extends Controller
         }
 
         try {
+            DB::beginTransaction();
+
             // Update the status
             $order->update([
                 'payment_status' => $newStatus
             ]);
+
+            // Create order history record for payment status change with Vietnamese note
+            $statusVietnamese = $this->getVietnamesePaymentStatus($newStatus);
+            $currentStatusVietnamese = $this->getVietnamesePaymentStatus($currentStatus);
+
+            OrderHistory::create([
+                'order_id' => $order->order_id,
+                'status' => 'payment_' . $newStatus,
+                'note' => $request->note ?? "Trạng thái thanh toán đã thay đổi từ {$currentStatusVietnamese} sang {$statusVietnamese}",
+                'processed_by_user_id' => Auth::id(),
+                'shipped_by_user_id' => null
+            ]);
+
+            DB::commit();
 
             return response()->json([
                 'status' => 'success',
@@ -108,5 +144,36 @@ class OrderController extends Controller
                 'message' => 'Failed to update order status: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Convert order status to Vietnamese
+     */
+    private function getVietnameseOrderStatus($status)
+    {
+        $statusMap = [
+            'new' => 'Mới',
+            'processing' => 'Đang xử lý',
+            'shipping' => 'Đang giao hàng',
+            'delivered' => 'Đã giao hàng',
+            'cancelled' => 'Đã hủy'
+        ];
+
+        return $statusMap[$status] ?? $status;
+    }
+
+    /**
+     * Convert payment status to Vietnamese
+     */
+    private function getVietnamesePaymentStatus($status)
+    {
+        $statusMap = [
+            'pending' => 'Chờ thanh toán',
+            'paid' => 'Đã thanh toán',
+            'refunded' => 'Đã hoàn tiền',
+            'failed' => 'Thanh toán thất bại'
+        ];
+
+        return $statusMap[$status] ?? $status;
     }
 }

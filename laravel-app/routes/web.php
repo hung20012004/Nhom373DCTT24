@@ -86,7 +86,7 @@ Route::middleware(['auth', 'verified','check.role'])->prefix('admin')->group(fun
         return Inertia::render('Admin/Orders/Index');
     })->name('admin.orders');
     Route::get('/order-warehouse', function () {
-        return Inertia::render('Admin/Orders/IndexWarehouse');
+        return Inertia::render('Admin/PackOrders/Index');
     })->name('admin.order.warehouse');
     Route::get('/order-shipping', function () {
         return Inertia::render('Admin/Orders/IndexShipping');
