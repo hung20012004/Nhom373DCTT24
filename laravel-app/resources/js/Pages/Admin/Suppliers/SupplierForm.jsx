@@ -135,7 +135,7 @@ export default function SupplierForm({ supplier, onClose, onSuccess }) {
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>
-                        {supplier ? 'Edit Supplier' : 'Add New Supplier'}
+                        {supplier ? 'Cập nhật' : 'Thêm mới'}
                     </DialogTitle>
                 </DialogHeader>
 
@@ -147,7 +147,7 @@ export default function SupplierForm({ supplier, onClose, onSuccess }) {
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="space-y-2">
-                        <Label>Supplier Logo</Label>
+                        <Label>Logo</Label>
                         <div className="flex items-center gap-4">
                             {imagePreview && (
                                 <div className="relative">
@@ -184,7 +184,7 @@ export default function SupplierForm({ supplier, onClose, onSuccess }) {
 
                     <div className="space-y-4">
                         <div>
-                            <Label htmlFor="name">Name</Label>
+                            <Label htmlFor="name">Tên</Label>
                             <Input
                                 id="name"
                                 value={formData.name}
@@ -195,7 +195,7 @@ export default function SupplierForm({ supplier, onClose, onSuccess }) {
                         </div>
 
                         <div>
-                            <Label htmlFor="contact_name">Contact Name</Label>
+                            <Label htmlFor="contact_name">Tên công ty</Label>
                             <Input
                                 id="contact_name"
                                 value={formData.contact_name}
@@ -206,7 +206,7 @@ export default function SupplierForm({ supplier, onClose, onSuccess }) {
                         </div>
 
                         <div>
-                            <Label htmlFor="phone">Phone</Label>
+                            <Label htmlFor="phone">Số điện thoại</Label>
                             <Input
                                 id="phone"
                                 value={formData.phone}
@@ -229,7 +229,7 @@ export default function SupplierForm({ supplier, onClose, onSuccess }) {
                         </div>
 
                         <div>
-                            <Label htmlFor="address">Address</Label>
+                            <Label htmlFor="address">Địa chỉ</Label>
                             <Input
                                 id="address"
                                 value={formData.address}
@@ -240,7 +240,7 @@ export default function SupplierForm({ supplier, onClose, onSuccess }) {
                         </div>
 
                         <div>
-                            <Label htmlFor="description">Description</Label>
+                            <Label htmlFor="description">Mô tả</Label>
                             <Textarea
                                 id="description"
                                 value={formData.description}
@@ -256,7 +256,7 @@ export default function SupplierForm({ supplier, onClose, onSuccess }) {
                                 checked={formData.is_active}
                                 onCheckedChange={(checked) => setFormData({...formData, is_active: checked})}
                             />
-                            <Label htmlFor="is_active">Active</Label>
+                            <Label htmlFor="is_active">Đang hoạt động</Label>
                         </div>
                     </div>
 
@@ -267,14 +267,14 @@ export default function SupplierForm({ supplier, onClose, onSuccess }) {
                             onClick={onClose}
                             disabled={loading}
                         >
-                            Cancel
+                            Hủy
                         </Button>
                         <Button
                             type="submit"
                             disabled={loading}
                             className="min-w-[100px]"
                         >
-                            {loading ? 'Saving...' : (supplier ? 'Update' : 'Create')}
+                            {loading ? 'Đang lưu...' : (supplier ? 'Cập nhật' : 'Thêm mới')}
                         </Button>
                     </div>
                 </form>

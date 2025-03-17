@@ -73,7 +73,7 @@ export default function SizeForm({ size, onClose, onSuccess }) {
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>
-                        {size ? 'Edit Size' : 'Add New Size'}
+                        {size ? 'Cập nhật' : 'Thêm mới'}
                     </DialogTitle>
                 </DialogHeader>
 
@@ -86,7 +86,7 @@ export default function SizeForm({ size, onClose, onSuccess }) {
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="space-y-4">
                         <div>
-                            <Label htmlFor="name">Name</Label>
+                            <Label htmlFor="name">Tên</Label>
                             <Input
                                 id="name"
                                 value={formData.name}
@@ -96,7 +96,7 @@ export default function SizeForm({ size, onClose, onSuccess }) {
                             {errors.name && <span className="text-red-500 text-sm">{errors.name}</span>}
                         </div>
                         <div>
-                            <Label htmlFor="description">Description</Label>
+                            <Label htmlFor="description">Mô tả</Label>
                             <Textarea
                                 id="description"
                                 value={formData.description}
@@ -114,14 +114,14 @@ export default function SizeForm({ size, onClose, onSuccess }) {
                             onClick={onClose}
                             disabled={loading}
                         >
-                            Cancel
+                            Hủy
                         </Button>
                         <Button
                             type="submit"
                             disabled={loading}
                             className="min-w-[100px]"
                         >
-                            {loading ? 'Saving...' : (size ? 'Update' : 'Create')}
+                            {loading ? 'Đang lưu...' : (size ? 'Cập nhật' : 'Thêm mới')}
                         </Button>
                     </div>
                 </form>

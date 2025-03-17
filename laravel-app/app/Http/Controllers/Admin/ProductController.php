@@ -31,44 +31,48 @@ class ProductController extends Controller
             'brand' => 'nullable|string|max:100',
             'sku' => 'required|string|unique:products,sku',
             'tags' => 'nullable|array',
-            'tags.*' => 'exists:tags,id',
+            'tags.*' => 'exists:tags,tag_id',
             'variants' => 'nullable|array',
-            'variants.*.size_id' => 'required|exists:sizes,id',
-            'variants.*.color_id' => 'required|exists:colors,id',
+            'variants.*.size_id' => 'required|exists:sizes,size_id',
+            'variants.*.color_id' => 'required|exists:colors,color_id',
             'variants.*.price' => 'required|numeric|min:0',
             'variants.*.stock_quantity' => 'required|integer|min:0',
         ]);
 
+        // In ra dữ liệu nhận được từ request để kiểm tra
+        Log::info('Product data received:', $request->all());
+
         DB::beginTransaction();
         try {
-            // Create the core product data
+            // Create the core product data - đảm bảo trường name được đưa vào
             $productData = [
-                'category_id' => $validated['category_id'],
-                'material_id' => $validated['material_id'],
-                'name' => $validated['name'],
-                'description' => $validated['description'] ?? null,
-                'price' => $validated['price'],
-                'sale_price' => $validated['sale_price'] ?? null,
-                'stock_quantity' => $validated['stock_quantity'],
-                'min_purchase_quantity' => $validated['min_purchase_quantity'] ?? 1,
-                'max_purchase_quantity' => $validated['max_purchase_quantity'] ?? 10,
-                'gender' => $validated['gender'] ?? 'unisex',
-                'care_instruction' => $validated['care_instruction'] ?? null,
-                'brand' => $validated['brand'] ?? null,
-                'sku' => $validated['sku'],
-                'slug' => Str::slug($validated['name'] . ' ' . uniqid()),
-                'is_active' => $validated['is_active'],
+                'category_id' => $request->category_id,
+                'material_id' => $request->material_id,
+                'name' => $request->name, // Đảm bảo name được lấy từ request
+                'description' => $request->description ?? null,
+                'price' => $request->price,
+                'sale_price' => $request->sale_price ?? null,
+                'stock_quantity' => $request->stock_quantity,
+                'min_purchase_quantity' => $request->min_purchase_quantity ?? 1,
+                'max_purchase_quantity' => $request->max_purchase_quantity ?? 10,
+                'gender' => $request->gender ?? 'unisex',
+                'care_instruction' => $request->care_instruction ?? null,
+                'brand' => $request->brand ?? null,
+                'sku' => $request->sku,
+                'slug' => Str::slug($request->name . ' ' . uniqid()),
+                'is_active' => $request->is_active,
             ];
 
-            // Create product
+            // In ra dữ liệu sản phẩm trước khi tạo
+            Log::info('Product data before create:', $productData);
+
             $product = Product::create($productData);
 
-            // Handle tags
             if ($request->has('tags') && is_array($request->tags)) {
                 $product->tags()->sync($request->tags);
             }
 
-            // Handle variants
+
             if ($request->has('variants') && is_array($request->variants)) {
                 foreach ($request->variants as $variantData) {
                     $product->variants()->create([
@@ -80,22 +84,22 @@ class ProductController extends Controller
                 }
             }
 
-            // Handle images
             if ($request->has('images')) {
                 $images = json_decode($request->images, true);
                 if (is_array($images)) {
                     foreach ($images as $index => $imageData) {
-                        if ($imageData['type'] === 'new' && isset($imageData['url'])) {
-                            $product->images()->create([
-                                'image_url' => $imageData['url'],
-                                'display_order' => $imageData['order'] ?? $index,
-                                'is_primary' => $index === 0 // First image is primary
+                        if ($imageData['type'] === 'new' && isset($imageData['image_url'])) {
+                            // Make sure product_id is explicitly set
+                            ProductImage::create([
+                                'product_id' => $product->product_id,  // This line is problematic
+                                'image_url' => $imageData['image_url'],
+                                'display_order' => $imageData['display_order'] ?? $index,
+                                'is_primary' => $imageData['is_primary'] ?? ($index === 0)
                             ]);
                         }
                     }
                 }
             }
-
             DB::commit();
             return response()->json([
                 'success' => true,
@@ -105,10 +109,12 @@ class ProductController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error creating product: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
             return response()->json([
                 'success' => false,
                 'message' => 'Error creating product',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'request_data' => $request->all() // Thêm dữ liệu request vào response
             ], 500);
         }
     }
@@ -131,15 +137,18 @@ class ProductController extends Controller
             'is_active' => 'boolean',
             'sku' => 'string|unique:products,sku,' . $productId . ',product_id',
             'tags' => 'nullable|array',
-            'tags.*' => 'exists:tags,id',
+            'tags.*' => 'exists:tags,tag_id',
             'variants' => 'nullable|array',
-            'variants.*.size_id' => 'required|exists:sizes,id',
-            'variants.*.color_id' => 'required|exists:colors,id',
+            'variants.*.size_id' => 'required|exists:sizes,size_id',
+            'variants.*.color_id' => 'required|exists:colors,color_id',
             'variants.*.price' => 'required|numeric|min:0',
             'variants.*.stock_quantity' => 'required|integer|min:0',
         ];
 
         $validated = $request->validate($rules);
+
+        // In ra dữ liệu nhận được từ request để kiểm tra
+        Log::info('Product update data received:', $request->all());
 
         DB::beginTransaction();
         try {
@@ -164,6 +173,9 @@ class ProductController extends Controller
             if ($request->has('name')) {
                 $updateData['slug'] = Str::slug($request->name . ' ' . uniqid());
             }
+
+            // Log update data
+            Log::info('Product update data:', $updateData);
 
             // Update the product
             if (!empty($updateData)) {
@@ -199,20 +211,20 @@ class ProductController extends Controller
                     $existingImageIds = [];
 
                     foreach ($images as $index => $imageData) {
-                        if ($imageData['type'] === 'new' && isset($imageData['url'])) {
+                        if ($imageData['type'] === 'new' && isset($imageData['image_url'])) {
                             // Create new image
                             $product->images()->create([
-                                'image_url' => $imageData['url'],
-                                'display_order' => $imageData['order'] ?? $index,
-                                'is_primary' => $index === 0
+                                'image_url' => $imageData['image_url'],
+                                'display_order' => $imageData['display_order'] ?? $index,
+                                'is_primary' => $imageData['is_primary'] ?? ($index === 0)
                             ]);
                         } else if ($imageData['type'] === 'existing' && isset($imageData['image_id'])) {
                             // Update existing image
                             $existingImage = ProductImage::find($imageData['image_id']);
                             if ($existingImage) {
                                 $existingImage->update([
-                                    'display_order' => $imageData['order'] ?? $index,
-                                    'is_primary' => $index === 0
+                                    'display_order' => $imageData['display_order'] ?? $index,
+                                    'is_primary' => $imageData['is_primary'] ?? ($index === 0)
                                 ]);
                                 $existingImageIds[] = $imageData['image_id'];
                             }
@@ -236,6 +248,7 @@ class ProductController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error updating product: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
             return response()->json([
                 'success' => false,
                 'message' => 'Error updating product',

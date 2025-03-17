@@ -8,7 +8,8 @@ use App\Http\Controllers\Customer\WishlistController;
 use App\Http\Controllers\Customer\ShippingAddressController;
 use App\Http\Controllers\Customer\ProductReviewController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\Admin\OrderController as AdminOrderController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ColorController;
@@ -32,10 +33,6 @@ Route::get('/', function () {
         'phpVersion' => PHP_VERSION,
     ]);
 })->name('home');
-
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified','check.role'])->name('dashboard');
 
 Route::get('/about', function () {
     return Inertia::render('About');
@@ -99,7 +96,12 @@ Route::middleware(['auth', 'verified','check.role'])->prefix('admin')->group(fun
     Route::get('/banners', function () {
         return Inertia::render('Admin/Banners/Index');
     })->name('admin.banners');
-    // API Routes
+
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
+    Route::get('/reports', [ReportController::class, 'index'])->name('admin.reports');
+    Route::post('/reports/get-data', [ReportController::class, 'getReportData'])->name('admin.reports.data');
+    Route::get('/reports/download', [ReportController::class, 'downloadReport'])->name('admin.reports.download');
+
     Route::prefix('purchase-orders')->group(function () {
         Route::post('/', [PurchaseOrderController::class, 'store']);
         Route::put('/{purchaseorderId}', [PurchaseOrderController::class, 'update']);

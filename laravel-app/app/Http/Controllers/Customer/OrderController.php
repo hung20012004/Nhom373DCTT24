@@ -286,7 +286,8 @@ class OrderController extends Controller
     public function cancel(Request $request, $orderId)
     {
         try {
-            $order = Order::where('order_id', $orderId)
+            $order = Order::with('details.variant')
+                ->where('order_id', $orderId)
                 ->where('user_id', Auth::id())
                 ->firstOrFail();
 
@@ -295,6 +296,12 @@ class OrderController extends Controller
             }
 
             DB::beginTransaction();
+
+            foreach ($order->details as $detail) {
+                $variant = $detail->variant;
+                $variant->stock_quantity += $detail->quantity;
+                $variant->save();
+            }
 
             $order->update([
                 'order_status' => 'cancelled',

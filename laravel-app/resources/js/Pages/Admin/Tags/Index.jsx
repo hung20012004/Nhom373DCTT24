@@ -128,7 +128,7 @@ export default function Index() {
 
     return (
         <AdminLayout>
-            <Head title="Tags Management" />
+            <Head title="Tags" />
 
             <div className="container mx-auto py-6 px-4">
                 <Breadcrumb items={breadcrumbItems} />
@@ -138,7 +138,7 @@ export default function Index() {
                     <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
                         <Input
                             type="text"
-                            placeholder="Search tags..."
+                            placeholder="Tìm kiếm..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             className="w-full sm:w-64"
@@ -149,7 +149,7 @@ export default function Index() {
                                 setShowForm(true);
                             }}
                         >
-                            Add New Tag
+                            Thêm mới
                         </Button>
                     </div>
                 </div>
@@ -159,9 +159,9 @@ export default function Index() {
                         <Table>
                             <TableHeader>
                                 <TableRow className="bg-gray-50">
-                                    <SortableHeader field="name">Name</SortableHeader>
+                                    <SortableHeader field="name">Tên</SortableHeader>
                                     <SortableHeader field="slug">Slug</SortableHeader>
-                                    <TableHead className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</TableHead>
+                                    <TableHead className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hành động</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -197,14 +197,14 @@ export default function Index() {
                                                             setShowForm(true);
                                                         }}
                                                     >
-                                                        Edit
+                                                        Chỉnh sửa
                                                     </Button>
                                                     <Button
                                                         variant="destructive"
                                                         className="bg-red-600 hover:bg-red-700 text-white"
                                                         onClick={() => handleDelete(tag.id)}
                                                     >
-                                                        Delete
+                                                        Xóa
                                                     </Button>
                                                 </div>
                                             </TableCell>
@@ -217,7 +217,7 @@ export default function Index() {
 
                     <div className="flex justify-between items-center p-4 border-t">
                         <div className="text-sm text-gray-600">
-                            Showing {tags.length} of {pagination.total} results
+                            Hiển thị {tags.length} trên {pagination.total} kết quả
                         </div>
                         <div className="flex gap-2">
                             {renderPagination()}

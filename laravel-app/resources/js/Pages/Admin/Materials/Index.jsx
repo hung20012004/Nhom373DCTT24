@@ -79,12 +79,12 @@ export default function MaterialIndex() {
     };
 
     const handleDelete = async (materialId) => {
-        if (confirm('Are you sure you want to delete this material?')) {
+        if (confirm('Bạn có xác nhận xóa?')) {
             try {
                 const response = await axios.delete(`/admin/materials/${materialId}`);
                 if (response.status === 200) {
                     fetchMaterials();
-                    alert('Material deleted successfully');
+                    alert('Xóa thành công');
                 }
             } catch (error) {
                 console.error('Error deleting material:', error);
@@ -94,7 +94,7 @@ export default function MaterialIndex() {
     };
 
     const breadcrumbItems = [
-        { label: 'Materials', href: '/admin/materials' }
+        { label: 'Chất liệu', href: '/admin/materials' }
     ];
 
     const renderPagination = () => {
@@ -128,13 +128,13 @@ export default function MaterialIndex() {
 
     return (
         <AdminLayout>
-            <Head title="Materials Management" />
+            <Head title="Chất liệu" />
 
             <div className="container mx-auto py-6 px-4">
                 <Breadcrumb items={breadcrumbItems} />
 
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                    <h1 className="text-3xl font-bold text-gray-900">Materials</h1>
+                    <h1 className="text-3xl font-bold text-gray-900">Chất liệu</h1>
                     <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
                         <Input
                             type="text"
@@ -149,7 +149,7 @@ export default function MaterialIndex() {
                                 setShowForm(true);
                             }}
                         >
-                            Add New Material
+                            Thêm mới
                         </Button>
                     </div>
                 </div>
@@ -159,8 +159,8 @@ export default function MaterialIndex() {
                         <Table>
                             <TableHeader>
                                 <TableRow className="bg-gray-50">
-                                    <SortableHeader field="name">Name</SortableHeader>
-                                    <TableHead className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</TableHead>
+                                    <SortableHeader field="name">Tên</SortableHeader>
+                                    <TableHead className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mô tả</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -199,14 +199,14 @@ export default function MaterialIndex() {
                                                             setShowForm(true);
                                                         }}
                                                     >
-                                                        Edit
+                                                        Chỉnh sửa
                                                     </Button>
                                                     <Button
                                                         variant="destructive"
                                                         className="bg-red-600 hover:bg-red-700 text-white"
                                                         onClick={() => handleDelete(material.id)}
                                                     >
-                                                        Delete
+                                                        Xóa
                                                     </Button>
                                                 </div>
                                             </TableCell>
@@ -219,7 +219,7 @@ export default function MaterialIndex() {
 
                     <div className="flex justify-between items-center p-4 border-t">
                         <div className="text-sm text-gray-600">
-                            Showing {materials.length} of {pagination.total} results
+                            Hiển thị {materials.length} trên {pagination.total} kết quả
                         </div>
                         <div className="flex gap-2">
                             {renderPagination()}

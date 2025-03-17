@@ -9,8 +9,9 @@ class Product extends Model
 {
     use HasFactory;
 
-
+    protected $primaryKey = 'product_id';
     protected $fillable = [
+        'name',
         'category_id',
         'material_id',
         'brand',
@@ -22,6 +23,8 @@ class Product extends Model
         'slug',
         'description',
         'price',
+        'sku',
+        'is_active',
         'sale_price',
         'max_purchase_quantity'
     ];
@@ -49,7 +52,7 @@ class Product extends Model
 
     public function tags()
     {
-        return $this->belongsToMany(Tag::class, 'product_tags');
+        return $this->belongsToMany(Tag::class, 'product_tags', 'product_id', 'tag_id');
     }
     protected function getFinalPriceAttribute()
     {

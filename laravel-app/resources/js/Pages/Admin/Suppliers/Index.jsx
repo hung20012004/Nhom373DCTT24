@@ -79,12 +79,12 @@ export default function SupplierIndex() {
     };
 
     const handleDelete = async (supplierId) => {
-        if (confirm('Are you sure you want to delete this supplier?')) {
+        if (confirm('Bạn có muốn xóa?')) {
             try {
                 const response = await axios.delete(`/admin/suppliers/${supplierId}`);
                 if (response.status === 200) {
                     fetchSuppliers();
-                    alert('Supplier deleted successfully');
+                    alert('Xóa thành công');
                 }
             } catch (error) {
                 console.error('Error deleting supplier:', error);
@@ -94,7 +94,7 @@ export default function SupplierIndex() {
     };
 
     const breadcrumbItems = [
-        { label: 'Suppliers', href: '/admin/suppliers' }
+        { label: 'Nhà cung cấp', href: '/admin/suppliers' }
     ];
 
     const renderPagination = () => {
@@ -160,13 +160,13 @@ export default function SupplierIndex() {
                             <TableHeader>
                                 <TableRow className="bg-gray-50">
                                     <TableHead className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Logo</TableHead>
-                                    <SortableHeader field="name">Name</SortableHeader>
-                                    <SortableHeader field="contact_name">Contact Name</SortableHeader>
+                                    <SortableHeader field="name">Tên</SortableHeader>
+                                    <SortableHeader field="contact_name">Tên công ty</SortableHeader>
                                     <SortableHeader field="email">Email</SortableHeader>
-                                    <SortableHeader field="phone">Phone</SortableHeader>
-                                    <TableHead className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address</TableHead>
-                                    <SortableHeader field="is_active">Status</SortableHeader>
-                                    <TableHead className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</TableHead>
+                                    <SortableHeader field="phone">Số điện thoại</SortableHeader>
+                                    <TableHead className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Địa chỉ</TableHead>
+                                    <SortableHeader field="is_active">Trạng thái</SortableHeader>
+                                    <TableHead className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hành động</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -230,14 +230,14 @@ export default function SupplierIndex() {
                                                             setShowForm(true);
                                                         }}
                                                     >
-                                                        Edit
+                                                        Cập nhật
                                                     </Button>
                                                     <Button
                                                         variant="destructive"
                                                         className="bg-red-600 hover:bg-red-700 text-white"
                                                         onClick={() => handleDelete(supplier.id)}
                                                     >
-                                                        Delete
+                                                        Xóa
                                                     </Button>
                                                 </div>
                                             </TableCell>
@@ -250,7 +250,7 @@ export default function SupplierIndex() {
 
                     <div className="flex justify-between items-center p-4 border-t">
                         <div className="text-sm text-gray-600">
-                            Showing {suppliers.length} of {pagination.total} results
+                            Hiển thị {suppliers.length} trên {pagination.total} kết quả
                         </div>
                         <div className="flex gap-2">
                             {renderPagination()}
