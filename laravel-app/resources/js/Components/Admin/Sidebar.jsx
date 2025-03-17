@@ -75,7 +75,7 @@ const Sidebar = () => {
             title: 'Quản lý khách hàng',
             items: [
                 { title: 'Khách hàng', icon: <Users size={20} />, path: '/admin/customers' },
-                { title: 'Yêu cầu', icon: <DockIcon size={20} />, path: '/admin/requests' },
+                { title: 'Yêu cầu', icon: <DockIcon size={20} />, path: '/admin/support-requests' },
                 { title: 'Đánh giá', icon: <Star size={20} />, path: '/admin/reviews' },
             ]
         },

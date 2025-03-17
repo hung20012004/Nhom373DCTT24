@@ -22,6 +22,7 @@ use App\Http\Controllers\Admin\TagController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\PurchaseOrderController;
 use App\Http\Controllers\Admin\OrderController AS AdminOrder;
+use App\Http\Controllers\Admin\SupportRequestController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -96,6 +97,12 @@ Route::middleware(['auth', 'verified','check.role'])->prefix('admin')->group(fun
     Route::get('/banners', function () {
         return Inertia::render('Admin/Banners/Index');
     })->name('admin.banners');
+    Route::get('/support-requests', function () {
+        return Inertia::render('Admin/SupportRequests/Index');
+    })->name('admin.support-requests');
+    Route::get('/support-requests/{id}', function ($id) {
+        return Inertia::render('Admin/SupportRequests/Show', ['requestId' => $id]);
+    })->name('admin.support-requests.show');
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
     Route::get('/reports', [ReportController::class, 'index'])->name('admin.reports');
@@ -171,6 +178,10 @@ Route::middleware(['auth', 'verified','check.role'])->prefix('admin')->group(fun
         Route::put('/{bannerId}/toggle-status', [BannerController::class, 'toggleStatus']);
         Route::delete('/{bannerId}', [BannerController::class, 'destroy']);
     });
+    Route::prefix('support-requests')->group(function () {
+        Route::put('/{id}/status', [SupportRequestController::class, 'updateStatus']);
+        Route::delete('/{id}', [SupportRequestController::class, 'destroy']);
+    });
 });
 
 Route::middleware(['auth:sanctum', 'verified'])->group(function () {
@@ -216,6 +227,9 @@ Route::prefix('wishlist')->group(function () {
     Route::delete('/{id}', [WishlistController::class, 'remove']);
     Route::delete('/', [WishlistController::class, 'clear']);
     Route::get('/check/{productId}', [WishlistController::class, 'check']);
+});
+Route::prefix('support-requests')->group(function () {
+    Route::post('/{orderId}', [SupportRequestController::class, 'store']);
 });
 Route::get('/products/{productId}/reviews', [ProductReviewController::class, 'getProductReviews']);
 Route::get('/products/{productId}/reviews/user', [ProductReviewController::class, 'getUserReview']);

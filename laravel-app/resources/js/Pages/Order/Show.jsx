@@ -36,6 +36,9 @@ import {
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import SupportForm from './SupportForm';
 
 const formatCurrency = (value) => {
     if (value == null || isNaN(value)) return '0 ₫';
@@ -45,9 +48,10 @@ const formatCurrency = (value) => {
 const OrderShow = ({ order }) => {
     const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
     const [cancelling, setCancelling] = useState(false);
+    const [showForm, setShowForm] = useState(false);
     const { toast } = useToast();
 
-    const form = useForm({
+    const cancelForm = useForm({
         reason: '',
     });
 
@@ -127,7 +131,7 @@ const OrderShow = ({ order }) => {
         setCancelling(true);
 
         router.post(`/order/${order.order_id}/cancel`, {
-            reason: form.data.reason,
+            reason: cancelForm.data.reason,
         }, {
             onSuccess: () => {
                 setCancelling(false);
@@ -187,7 +191,6 @@ const OrderShow = ({ order }) => {
             </div>
         );
     };
-
 
     // Check if order can be cancelled
     const canBeCancelled = ['new', 'processing', 'preparing', 'packed'].includes(order.order_status);
@@ -355,7 +358,13 @@ const OrderShow = ({ order }) => {
 
                         {/* Hành động */}
                         <div className="flex space-x-3">
-                            <Button variant="outline" className="flex-1">Liên hệ hỗ trợ</Button>
+                            <Button
+                                onClick={() => {
+                                    setShowForm(true);
+                                }}
+                            >
+                                Liên hệ hỗ trợ
+                            </Button>
                             {canBeCancelled && (
                                 <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
                                     <DialogTrigger asChild>
@@ -373,8 +382,8 @@ const OrderShow = ({ order }) => {
                                                 <p className="text-sm font-medium">Lý do hủy đơn hàng (tùy chọn):</p>
                                                 <Textarea
                                                     placeholder="Nhập lý do hủy đơn hàng..."
-                                                    value={form.data.reason}
-                                                    onChange={(e) => form.setData('reason', e.target.value)}
+                                                    value={cancelForm.data.reason}
+                                                    onChange={(e) => cancelForm.setData('reason', e.target.value)}
                                                     className="w-full"
                                                     rows={3}
                                                 />
@@ -402,6 +411,18 @@ const OrderShow = ({ order }) => {
                         </div>
                     </div>
                 </div>
+                {showForm && (
+                    <SupportForm
+                        orderId={order.order_id}
+                        onClose={() => {
+                            setShowForm(false);
+                        }}
+                        onSuccess={() => {
+                            setShowForm(false);
+                            fetchCategories();
+                        }}
+                    />
+                )}
             </div>
         </Layout>
     );
