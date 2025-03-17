@@ -50,4 +50,18 @@ class Order extends Model
     {
         return $this->hasMany(OrderHistory::class, 'order_id', 'order_id');
     }
+    public function payment()
+    {
+        return $this->hasOne(Payment::class, 'order_id', 'order_id');
+    }
+
+    public function isCod(): bool
+    {
+        return $this->payment_method === 'cod';
+    }
+
+    public function isVnpay(): bool
+    {
+        return $this->payment_method === 'vnpay';
+    }
 }

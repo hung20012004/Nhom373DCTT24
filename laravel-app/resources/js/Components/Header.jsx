@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, usePage } from "@inertiajs/react";
-import { Menu, X, ShoppingCart, User, Heart } from "lucide-react";
+import { Menu, X, ShoppingCart, User, Heart, Search } from "lucide-react";
 import Dropdown from "@/Components/Dropdown";
 import { CartDialog } from "@/Components/cart/CartDialog";
 import axios from "axios";
 import ApplicationLogo from "@/Components/ApplicationLogo";
 import { useWishlist } from "@/Contexts/WishlistContext";
+import { router } from '@inertiajs/react';
 
 const Header = () => {
     const { url } = usePage();
@@ -17,10 +18,18 @@ const Header = () => {
     const [loading, setLoading] = useState(true);
     const [isScrolled, setIsScrolled] = useState(false);
 
-    // Sử dụng context thay vì state riêng
+    // Search state
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
+    const searchInputRef = useRef(null);
+
+    // Mobile search state
+    const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+
+    // Use context instead of individual state
     const { wishlist } = useWishlist();
 
-    // Tính toán số lượng sản phẩm yêu thích từ context
+    // Calculate wishlist count from context
     const wishlistCount = wishlist ? wishlist.length : 0;
 
     // Function to check if a link is active
@@ -70,6 +79,28 @@ const Header = () => {
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
+    // Handle click outside of search input to close it
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (searchInputRef.current && !searchInputRef.current.contains(event.target)) {
+                setIsSearchOpen(false);
+            }
+        }
+        // Bind the event listener
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            // Unbind the event listener on clean up
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [searchInputRef]);
+
+    // Focus search input when opened
+    useEffect(() => {
+        if (isSearchOpen && searchInputRef.current) {
+            searchInputRef.current.focus();
+        }
+    }, [isSearchOpen]);
+
     const dropdownItems = [
         ...(categories || []).map(({ slug, name, products_count }) => ({
             href: `/products?category=${slug}`,
@@ -85,7 +116,23 @@ const Header = () => {
     // Close mobile menu when route changes
     useEffect(() => {
         setIsMenuOpen(false);
+        setIsSearchOpen(false);
+        setIsMobileSearchOpen(false);
     }, [url]);
+
+    // Fixed search handler - uses Inertia router for proper page updates
+    const handleSearch = (e) => {
+        e.preventDefault();
+        if (searchQuery.trim()) {
+            // Use Inertia router to navigate with the search parameter
+            router.visit(`/products?search=${encodeURIComponent(searchQuery)}`);
+
+            // Reset search state
+            setIsSearchOpen(false);
+            setIsMobileSearchOpen(false);
+            setSearchQuery("");
+        }
+    };
 
     return (
         <nav
@@ -137,6 +184,42 @@ const Header = () => {
 
                     {/* Right Side Buttons */}
                     <div className="flex items-center">
+                        {/* Desktop Search Button and Input */}
+                        <div className="hidden sm:flex sm:relative sm:items-center">
+                            <button
+                                onClick={() => setIsSearchOpen(!isSearchOpen)}
+                                className="p-2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                                aria-label="Search"
+                            >
+                                <Search className="h-5 w-5" />
+                            </button>
+
+                            {/* Search Input Dropdown */}
+                            {isSearchOpen && (
+                                <div
+                                    ref={searchInputRef}
+                                    className="absolute right-0 top-full mt-2 w-64 bg-white shadow-lg rounded-md overflow-hidden z-20"
+                                >
+                                    <form onSubmit={handleSearch} className="relative">
+                                        <input
+                                            type="text"
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            placeholder="Tìm kiếm sản phẩm..."
+                                            className="w-full border-gray-200 py-2 pl-4 pr-10 focus:ring-blue-500 focus:border-blue-500"
+                                        />
+                                        <button
+                                            type="submit"
+                                            className="absolute right-0 top-0 h-full px-3 text-gray-500 hover:text-blue-600 transition-colors"
+                                            aria-label="Tìm kiếm"
+                                        >
+                                            <Search className="w-5 h-5" />
+                                        </button>
+                                    </form>
+                                </div>
+                            )}
+                        </div>
+
                         {/* Wishlist */}
                         <Link
                             href="/products?filter_type=wishlist"
@@ -153,6 +236,17 @@ const Header = () => {
                         {/* Cart */}
                         <div className="p-2">
                             <CartDialog />
+                        </div>
+
+                        {/* Mobile Search Button */}
+                        <div className="sm:hidden flex items-center ml-2">
+                            <button
+                                onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)}
+                                className="p-2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                                aria-label="Search"
+                            >
+                                <Search className="h-5 w-5" />
+                            </button>
                         </div>
 
                         {/* Desktop Authentication Menu */}
@@ -240,6 +334,29 @@ const Header = () => {
                         </div>
                     </div>
                 </div>
+
+                {/* Mobile Search Bar (shows below header) */}
+                {isMobileSearchOpen && (
+                    <div className="sm:hidden py-2 pb-3 border-t border-gray-200">
+                        <form onSubmit={handleSearch} className="relative">
+                            <input
+                                type="text"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                placeholder="Tìm kiếm sản phẩm..."
+                                className="w-full border-gray-200 rounded-lg pl-4 pr-10 py-2 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all"
+                                autoFocus
+                            />
+                            <button
+                                type="submit"
+                                className="absolute right-0 top-0 h-full px-3 text-gray-500 hover:text-blue-600 transition-colors"
+                                aria-label="Tìm kiếm"
+                            >
+                                <Search className="w-5 h-5" />
+                            </button>
+                        </form>
+                    </div>
+                )}
             </div>
 
             {/* Mobile Navigation Menu */}
@@ -259,7 +376,9 @@ const Header = () => {
 
                         <Link
                             href="/products?filter_type=wishlist"
-                            className={getMobileLinkClasses("/products?filter_type=wishlist")}
+                            className={getMobileLinkClasses(
+                                "/products?filter_type=wishlist"
+                            )}
                         >
                             <div className="flex items-center">
                                 <Heart className="h-4 w-4 mr-2" />

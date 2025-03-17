@@ -39,7 +39,7 @@ const Sidebar = () => {
         {
             title: 'Tổng quan',
             items: [
-                { title: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/dashboard' },
+                { title: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/admin/dashboard' },
                 { title: 'Thông báo', icon: <Bell size={20} />, path: '/admin/notifications' },
             ]
         },
