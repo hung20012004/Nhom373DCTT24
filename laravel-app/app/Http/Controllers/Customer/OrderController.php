@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Models\Payment;
 use Inertia\Inertia;
 
 class OrderController extends Controller
@@ -104,6 +105,15 @@ class OrderController extends Controller
                 'note' => $validated['note'],
             ]);
 
+            // Create payment record for the order
+            Payment::create([
+                'order_id' => $order->order_id,
+                'amount' => $total,
+                'payment_method' => $validated['payment_method'],
+                'payment_status' => $validated['payment_method'] === 'cod' ? 'pending' : 'awaiting_payment',
+                'transaction_id' => null,
+                'note' => 'Thanh toán được tạo cùng đơn hàng mới'
+            ]);
 
             OrderHistory::create([
                 'order_id' => $order->order_id,
@@ -143,7 +153,6 @@ class OrderController extends Controller
             ], 500);
         }
     }
-
     /**
      * Xử lý thanh toán qua VNPAY
      */

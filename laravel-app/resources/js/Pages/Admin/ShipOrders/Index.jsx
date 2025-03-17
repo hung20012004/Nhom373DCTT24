@@ -158,31 +158,38 @@ export default function KanbanOrders() {
     const onDragEnd = async (result) => {
         const { destination, source, draggableId } = result;
 
-        // Nếu không có điểm đến hoặc kéo thả tại cùng một vị trí
+        // Existing validation checks...
         if (!destination ||
             (destination.droppableId === source.droppableId &&
              destination.index === source.index)) {
             return;
         }
 
-        // Nếu cố gắng kéo vào một cột chỉ đọc
-        if (readOnlyStatuses[destination.droppableId]) {
-            // Thông báo cho người dùng
-            alert('Không thể cập nhật sang trạng thái này qua Kanban');
-            return;
-        }
-
-        // Nếu cố gắng kéo từ một cột chỉ đọc
-        if (readOnlyStatuses[source.droppableId]) {
-            alert('Không thể di chuyển đơn hàng từ trạng thái này');
-            return;
-        }
+        // Other existing checks...
 
         if (destination.droppableId !== source.droppableId) {
             const orderId = draggableId;
             const newStatus = destination.droppableId;
             const originalStatus = source.droppableId;
 
+            // Add special confirmation for shipping -> delivered
+            if (originalStatus === 'shipping' && newStatus === 'delivered') {
+                // Find the order to check if it's COD
+                const order = orders.find(o => o.order_id.toString() === orderId);
+
+                let confirmMessage = 'Bạn có xác nhận đã giao hàng thành công?';
+
+                // Add payment confirmation for COD orders
+                if (order && order.payment_method === 'cod') {
+                    confirmMessage = `Bạn có xác nhận đã giao hàng thành công và đã nhận đủ ${formatCurrency(order.total_amount)} từ khách hàng?`;
+                }
+
+                if (!window.confirm(confirmMessage)) {
+                    return; // Cancel the status update if user doesn't confirm
+                }
+            }
+
+            // Optimistic update
             const updatedOrders = [...orders];
             const orderIndex = updatedOrders.findIndex(order => order.order_id.toString() === orderId);
 

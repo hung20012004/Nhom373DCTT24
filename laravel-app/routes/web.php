@@ -8,6 +8,7 @@ use App\Http\Controllers\Customer\WishlistController;
 use App\Http\Controllers\Customer\ShippingAddressController;
 use App\Http\Controllers\Customer\ProductReviewController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\CustomerController;
@@ -178,6 +179,18 @@ Route::middleware(['auth', 'verified','check.role'])->prefix('admin')->group(fun
         Route::put('/{bannerId}/toggle-status', [BannerController::class, 'toggleStatus']);
         Route::delete('/{bannerId}', [BannerController::class, 'destroy']);
     });
+    Route::prefix('payment')->group(function () {
+        Route::get('/', [PaymentController::class, 'index'])->name('admin.payments.index');
+        Route::post('/{paymentId}/confirm-cod', [PaymentController::class, 'confirmCodPayment'])->name('admin.payments.confirm-cod');
+        Route::post('/{paymentId}/reject-cod', [PaymentController::class, 'rejectCodPayment'])->name('admin.payments.reject-cod');
+        Route::post('/{paymentId}/verify-vnpay', [PaymentController::class, 'verifyVnpayPayment'])->name('admin.payments.verify-vnpay');
+        Route::get('/reconcile-vnpay', function () {
+            return Inertia::render('Payments/Reconcile');
+        })->name('admin.payments.reconcile-vnpay');
+        Route::post('/reconcile-vnpay', [PaymentController::class, 'reconcileVnpay'])->name('admin.payments.reconcile-vnpay.process');
+        Route::get('/report', [PaymentController::class, 'report'])->name('admin.payments.report');
+    });
+
     Route::prefix('support-requests')->group(function () {
         Route::put('/{id}/status', [SupportRequestController::class, 'updateStatus']);
         Route::delete('/{id}', [SupportRequestController::class, 'destroy']);
