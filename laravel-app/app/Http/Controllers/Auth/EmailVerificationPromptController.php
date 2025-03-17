@@ -20,7 +20,7 @@ class EmailVerificationPromptController extends Controller
             if ($user->role && $user->role->name === 'Customer') {
                 return redirect()->intended(route('home', absolute: false));
             } else {
-                return redirect()->intended(route('dashboard', absolute: false));
+                return redirect()->intended(route('admin.dashboard', absolute: false));
             }
         }
 

@@ -19,7 +19,7 @@ class PaymentController extends Controller
         $endDate = $request->query('end_date', null);
         $search = $request->query('search', '');
 
-        $query = Payment::with(['order', 'order.shippingAddress', 'confirmedBy'])
+        $query = Payment::with(['order', 'order.shippingAddress','order.user', 'confirmedBy'])
             ->where('payment_method', $paymentType);
 
         if ($status) {
@@ -48,7 +48,7 @@ class PaymentController extends Controller
             'today_amount' => $query->whereDate('created_at', today())->sum('amount')
         ];
 
-        return Inertia::render('Payments/Index', [
+        return Inertia::render('Admin/Payments/Index', [
             'payments' => $payments,
             'summary' => $summary,
             'filters' => [

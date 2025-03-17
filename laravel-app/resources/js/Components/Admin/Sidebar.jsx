@@ -72,6 +72,14 @@ const Sidebar = () => {
             ]
         },
         {
+            title: 'Quản lý thanh toán',
+            items: [
+                { title: 'Danh sách thanh toán', icon: <BadgeIndianRupeeIcon size={20} />, path: '/admin/payment' },
+                { title: 'Đối soát VNPay', icon: <GitPullRequestIcon size={20} />, path: '/admin/payment/reconcile-vnpay' },
+                { title: 'Báo cáo thanh toán', icon: <FileText size={20} />, path: '/admin/payment/report' },
+            ]
+        },
+        {
             title: 'Quản lý khách hàng',
             items: [
                 { title: 'Khách hàng', icon: <Users size={20} />, path: '/admin/customers' },
