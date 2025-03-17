@@ -10,6 +10,35 @@ use Illuminate\Support\Facades\DB;
 
 class SupplierController extends Controller
 {
+    public function store(Request $request)
+    {
+        $rules = [
+            'name' => 'required|string|max:255',
+            'contact_name' => 'required|string|max:255',
+            'phone' => 'required|string|max:20',
+            'email' => 'required|email|max:255',
+            'address' => 'required|string|max:500',
+            'description' => 'nullable|string',
+            'logo_url' => 'nullable|string',
+            'is_active' => 'boolean'
+        ];
+
+        $validated = $request->validate($rules);
+
+        DB::beginTransaction();
+        try {
+            $supplier = Supplier::create($validated);
+            DB::commit();
+            return response()->json(new SupplierResource($supplier), 201);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Error creating supplier',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
     public function update(Request $request, $supplierId)
     {
         $rules = [

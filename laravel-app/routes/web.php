@@ -179,6 +179,10 @@ Route::middleware(['auth', 'verified','check.role'])->prefix('admin')->group(fun
         Route::put('/{bannerId}/toggle-status', [BannerController::class, 'toggleStatus']);
         Route::delete('/{bannerId}', [BannerController::class, 'destroy']);
     });
+    Route::prefix('support-requests')->group(function () {
+        Route::put('/{id}/status', [SupportRequestController::class, 'updateStatus']);
+        Route::delete('/{id}', [SupportRequestController::class, 'destroy']);
+    });
     Route::prefix('payment')->group(function () {
         Route::get('/', [PaymentController::class, 'index'])->name('admin.payments.index');
         Route::post('/{paymentId}/confirm-cod', [PaymentController::class, 'confirmCodPayment'])->name('admin.payments.confirm-cod');
@@ -189,11 +193,6 @@ Route::middleware(['auth', 'verified','check.role'])->prefix('admin')->group(fun
         })->name('admin.payments.reconcile-vnpay');
         Route::post('/reconcile-vnpay', [PaymentController::class, 'reconcileVnpay'])->name('admin.payments.reconcile-vnpay.process');
         Route::get('/report', [PaymentController::class, 'report'])->name('admin.payments.report');
-    });
-
-    Route::prefix('support-requests')->group(function () {
-        Route::put('/{id}/status', [SupportRequestController::class, 'updateStatus']);
-        Route::delete('/{id}', [SupportRequestController::class, 'destroy']);
     });
 });
 
