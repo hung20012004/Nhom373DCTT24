@@ -12,7 +12,6 @@ class PaymentController extends Controller
 {
     public function index(Request $request)
     {
-        // Mặc định hiển thị các thanh toán COD cần xác nhận
         $paymentType = $request->query('type', 'cod');
         $status = $request->query('status', null);
         $startDate = $request->query('start_date', null);
@@ -40,12 +39,27 @@ class PaymentController extends Controller
             ->paginate(10)
             ->appends($request->query());
 
-        // Tổng kết số liệu
+        // Tổng kết số liệu - không tính các thanh toán đã hủy (cancelled)
+        $summaryQuery = clone $query;
+        $summaryQuery->where('payment_status', '!=', 'cancelled');
+
+        // Tổng số tiền đã xác nhận (confirmed)
+        $confirmedQuery = clone $summaryQuery;
+        $confirmedAmount = $confirmedQuery->where('payment_status', 'confirmed')->sum('amount');
+
+        // Tổng số tiền đang chờ (paid - chờ kế toán xác nhận)
+        $pendingQuery = clone $summaryQuery;
+        $pendingAmount = $pendingQuery->where('payment_status', 'paid')->sum('amount');
+
+        // Tổng số tiền hôm nay (không bao gồm cancelled)
+        $todayQuery = clone $summaryQuery;
+        $todayAmount = $todayQuery->whereDate('created_at', today())->sum('amount');
+
         $summary = [
-            'total_amount' => $query->sum('amount'),
-            'confirmed_amount' => $query->where('payment_status', 'confirmed')->sum('amount'),
-            'pending_amount' => $query->where('payment_status', 'pending')->sum('amount'),
-            'today_amount' => $query->whereDate('created_at', today())->sum('amount')
+            'total_amount' => $summaryQuery->sum('amount'),
+            'confirmed_amount' => $confirmedAmount,
+            'pending_amount' => $pendingAmount,
+            'today_amount' => $todayAmount
         ];
 
         return Inertia::render('Admin/Payments/Index', [
@@ -73,6 +87,11 @@ class PaymentController extends Controller
             return back()->with('error', 'Chỉ có thể xác nhận thanh toán COD');
         }
 
+        // Chỉ có thể xác nhận các thanh toán có trạng thái là "paid" (shipper đã thu tiền)
+        if ($payment->payment_status !== 'paid') {
+            return back()->with('error', 'Chỉ có thể xác nhận thanh toán có trạng thái "Đã thanh toán"');
+        }
+
         $payment->payment_status = 'confirmed';
         $payment->confirmation_date = now();
         $payment->confirmed_by_user_id = Auth::id();
@@ -92,6 +111,11 @@ class PaymentController extends Controller
 
         if ($payment->payment_method !== 'cod') {
             return back()->with('error', 'Chỉ có thể từ chối thanh toán COD');
+        }
+
+        // Chỉ có thể từ chối các thanh toán có trạng thái là "paid"
+        if ($payment->payment_status !== 'paid') {
+            return back()->with('error', 'Chỉ có thể từ chối thanh toán có trạng thái "Đã thanh toán"');
         }
 
         $payment->payment_status = 'rejected';

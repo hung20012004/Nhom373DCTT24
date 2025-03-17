@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Head, usePage, Link, router } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { Button } from '@/Components/ui/button';
@@ -17,19 +17,23 @@ import { ArrowUpDown } from 'lucide-react';
 export default function Index({ payments, summary, filters }) {
     const { flash } = usePage().props;
     const [filterForm, setFilterForm] = useState({
-        type: filters.type || 'cod',
-        status: filters.status || '',
-        start_date: filters.start_date || '',
-        end_date: filters.end_date || '',
-        search: filters.search || '',
+        type: filters?.type || 'cod',
+        status: filters?.status || '',
+        start_date: filters?.start_date || '',
+        end_date: filters?.end_date || '',
+        search: filters?.search || '',
     });
+    const [loading, setLoading] = useState(false);
+    const [sortField, setSortField] = useState('created_at');
+    const [sortDirection, setSortDirection] = useState('desc');
     const formatCurrency = (amount, locale = 'vi-VN', currency = 'VND') => {
         return new Intl.NumberFormat(locale, {
           style: 'currency',
           currency: currency,
           minimumFractionDigits: 0
         }).format(amount);
-      };
+    };
+
     const handleFilterChange = (e) => {
         setFilterForm({
             ...filterForm,
@@ -39,12 +43,37 @@ export default function Index({ payments, summary, filters }) {
 
     const handleSearch = (e) => {
         e.preventDefault();
-        router.get(route('admin.payments.index'), filterForm);
+        setLoading(true);
+        router.get(route('admin.payments.index'), {
+            ...filterForm,
+            sort_field: sortField,
+            sort_direction: sortDirection
+        });
+    };
+
+    const handleSort = (field) => {
+        if (sortField === field) {
+            const newDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            setSortDirection(newDirection);
+            router.get(route('admin.payments.index'), {
+                ...filterForm,
+                sort_field: field,
+                sort_direction: newDirection
+            });
+        } else {
+            setSortField(field);
+            setSortDirection('asc');
+            router.get(route('admin.payments.index'), {
+                ...filterForm,
+                sort_field: field,
+                sort_direction: 'asc'
+            });
+        }
     };
 
     const handleConfirmPayment = (paymentId) => {
         const note = prompt('Nhập ghi chú xác nhận thanh toán (nếu có):');
-        router.post(route('admin.payments.confirm-cod', paymentId), {
+        router.post(route('admin.payments.confirm-cod', { paymentId: paymentId }), {
             note: note || '',
         });
     };
@@ -65,18 +94,21 @@ export default function Index({ payments, summary, filters }) {
     };
 
     const breadcrumbItems = [
-        { label: 'Quản lý', href: '/admin' },
         { label: 'Thanh toán', href: '/admin/payments' }
     ];
 
     const getStatusBadgeClass = (status) => {
         switch (status) {
             case 'paid':
+                return 'bg-yellow-100 text-yellow-800';
+            case 'confirmed':
                 return 'bg-green-100 text-green-800';
             case 'pending':
-                return 'bg-yellow-100 text-yellow-800';
-            case 'cancelled':
+                return 'bg-blue-100 text-blue-800';
+            case 'rejected':
                 return 'bg-red-100 text-red-800';
+            case 'cancelled':
+                return 'bg-gray-100 text-gray-800';
             default:
                 return 'bg-gray-100 text-gray-800';
         }
@@ -85,14 +117,59 @@ export default function Index({ payments, summary, filters }) {
     const getStatusText = (status) => {
         switch (status) {
             case 'paid':
-                return 'Đã thanh toán';
+                return 'Đã thu tiền';
+            case 'confirmed':
+                return 'Đã xác nhận';
             case 'pending':
                 return 'Chờ thanh toán';
+            case 'rejected':
+                return 'Đã từ chối';
             case 'cancelled':
                 return 'Đã hủy';
             default:
                 return status;
         }
+    };
+
+    const SortableHeader = ({ field, children }) => (
+        <TableHead
+            className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+            onClick={() => handleSort(field)}
+        >
+            <div className="flex items-center space-x-1">
+                <span>{children}</span>
+                <ArrowUpDown className="w-4 h-4" />
+            </div>
+        </TableHead>
+    );
+
+    const renderPagination = () => {
+        if (!payments.links || payments.links.length <= 3) return null;
+
+        return payments.links.map((link, index) => {
+            if (index === 0 || index === payments.links.length - 1) {
+                // Skip "Previous" and "Next" links
+                return null;
+            }
+
+            return (
+                <div key={index}>
+                    {link.url ? (
+                        <Button
+                            variant={link.active ? "default" : "outline"}
+                            className="w-auto h-10"
+                            onClick={() => router.get(link.url)}
+                            dangerouslySetInnerHTML={{ __html: link.label }}
+                        />
+                    ) : (
+                        <span
+                            className="px-3 py-2 text-gray-400"
+                            dangerouslySetInnerHTML={{ __html: link.label }}
+                        />
+                    )}
+                </div>
+            );
+        });
     };
 
     return (
@@ -125,18 +202,21 @@ export default function Index({ payments, summary, filters }) {
                         <p className="mt-1 text-2xl font-semibold text-indigo-600">
                             {formatCurrency(summary.total_amount)}
                         </p>
+                        <p className="text-xs text-gray-500 mt-1">Không bao gồm đã hủy</p>
                     </div>
                     <div className="bg-white overflow-hidden shadow-sm rounded-lg p-6">
                         <h3 className="text-lg font-medium text-gray-900">Đã xác nhận</h3>
                         <p className="mt-1 text-2xl font-semibold text-green-600">
                             {formatCurrency(summary.confirmed_amount)}
                         </p>
+                        <p className="text-xs text-gray-500 mt-1">Kế toán đã xác nhận</p>
                     </div>
                     <div className="bg-white overflow-hidden shadow-sm rounded-lg p-6">
-                        <h3 className="text-lg font-medium text-gray-900">Đang chờ</h3>
+                        <h3 className="text-lg font-medium text-gray-900">Chờ xác nhận</h3>
                         <p className="mt-1 text-2xl font-semibold text-yellow-600">
                             {formatCurrency(summary.pending_amount)}
                         </p>
+                        <p className="text-xs text-gray-500 mt-1">Shipper đã thu tiền</p>
                     </div>
                     <div className="bg-white overflow-hidden shadow-sm rounded-lg p-6">
                         <h3 className="text-lg font-medium text-gray-900">Hôm nay</h3>
@@ -171,9 +251,11 @@ export default function Index({ payments, summary, filters }) {
                                     className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                                 >
                                     <option value="">Tất cả</option>
-                                    <option value="pending">Chờ xác nhận</option>
+                                    <option value="pending">Chờ thanh toán</option>
+                                    <option value="paid">Đã thu tiền</option>
                                     <option value="confirmed">Đã xác nhận</option>
                                     <option value="rejected">Đã từ chối</option>
+                                    <option value="cancelled">Đã hủy</option>
                                 </select>
                             </div>
                             <div>
@@ -262,18 +344,33 @@ export default function Index({ payments, summary, filters }) {
                         <Table>
                             <TableHeader>
                                 <TableRow className="bg-gray-50">
-                                    <TableHead className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã đơn hàng</TableHead>
-                                    <TableHead className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Khách hàng</TableHead>
-                                    <TableHead className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Số tiền</TableHead>
-                                    <TableHead className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</TableHead>
-                                    <TableHead className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thời gian</TableHead>
+                                    <SortableHeader field="order_id">Mã đơn hàng</SortableHeader>
+                                    <SortableHeader field="customer_name">Khách hàng</SortableHeader>
+                                    <SortableHeader field="amount">Số tiền</SortableHeader>
+                                    <SortableHeader field="payment_status">Trạng thái</SortableHeader>
+                                    <SortableHeader field="confirmed_by">Người xác nhận</SortableHeader>
+                                    <SortableHeader field="created_at">Thời gian</SortableHeader>
                                     <TableHead className="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Thao tác</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {payments.data && payments.data.length > 0 ? (
+                                {loading ? (
+                                    <TableRow>
+                                        <TableCell colSpan={7} className="text-center py-4">
+                                            <div className="flex justify-center">
+                                                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                ) : (!payments.data || payments.data.length === 0) ? (
+                                    <TableRow>
+                                        <TableCell colSpan={7} className="text-center py-4 text-gray-500">
+                                            Không tìm thấy thanh toán nào
+                                        </TableCell>
+                                    </TableRow>
+                                ) : (
                                     payments.data.map((payment) => (
-                                        <TableRow key={payment.id} className="hover:bg-gray-50 transition-colors">
+                                        <TableRow key={payment.payment_id} className="hover:bg-gray-50 transition-colors">
                                             <TableCell className="py-4 px-6 text-sm text-gray-900">
                                                 {payment.order.order_id}
                                             </TableCell>
@@ -288,6 +385,9 @@ export default function Index({ payments, summary, filters }) {
                                                     {getStatusText(payment.payment_status)}
                                                 </span>
                                             </TableCell>
+                                            <TableCell className="py-4 px-6 text-sm text-gray-900">
+                                                {payment.confirmed_by?.name || '-'}
+                                            </TableCell>
                                             <TableCell className="py-4 px-6 text-sm text-gray-500">
                                                 {new Date(payment.created_at).toLocaleDateString('vi-VN')}
                                             </TableCell>
@@ -298,23 +398,24 @@ export default function Index({ payments, summary, filters }) {
                                                             <Button
                                                                 variant="outline"
                                                                 className="text-green-600 border-green-600 hover:bg-green-50"
-                                                                onClick={() => handleConfirmPayment(payment.id)}
+                                                                onClick={() => handleConfirmPayment(payment.payment_id)}
                                                             >
                                                                 Xác nhận
                                                             </Button>
                                                             <Button
                                                                 variant="outline"
                                                                 className="text-red-600 border-red-600 hover:bg-red-50"
-                                                                onClick={() => handleRejectPayment(payment.id)}
+                                                                onClick={() => handleRejectPayment(payment.payment_id)}
                                                             >
                                                                 Từ chối
-                                                            </Button></>
+                                                            </Button>
+                                                        </>
                                                     )}
                                                     {payment.payment_method === 'vnpay' && payment.payment_status === 'pending' && (
                                                         <Button
                                                             variant="outline"
                                                             className="text-blue-600 border-blue-600 hover:bg-blue-50"
-                                                            onClick={() => handleVerifyVnpay(payment.id)}
+                                                            onClick={() => handleVerifyVnpay(payment.payment_id)}
                                                         >
                                                             Xác minh VNPay
                                                         </Button>
@@ -331,12 +432,6 @@ export default function Index({ payments, summary, filters }) {
                                             </TableCell>
                                         </TableRow>
                                     ))
-                                ) : (
-                                    <TableRow>
-                                        <TableCell colSpan={6} className="text-center py-4 text-gray-500">
-                                            Không tìm thấy thanh toán nào
-                                        </TableCell>
-                                    </TableRow>
                                 )}
                             </TableBody>
                         </Table>
@@ -344,28 +439,12 @@ export default function Index({ payments, summary, filters }) {
 
                     {/* Pagination */}
                     {payments.links && (
-                        <div className="flex items-center justify-between p-4 border-t">
+                        <div className="flex justify-between items-center p-4 border-t">
                             <div className="text-sm text-gray-600">
                                 Hiển thị {payments.from || 0} đến {payments.to || 0} trên {payments.total} kết quả
                             </div>
-                            <div className="flex space-x-1">
-                                {payments.links.map((link, index) => (
-                                    <div key={index}>
-                                        {link.url ? (
-                                            <Button
-                                                variant={link.active ? "default" : "outline"}
-                                                className="w-auto h-10"
-                                                onClick={() => router.get(link.url)}
-                                                dangerouslySetInnerHTML={{ __html: link.label }}
-                                            />
-                                        ) : (
-                                            <span
-                                                className="px-3 py-2 text-gray-400"
-                                                dangerouslySetInnerHTML={{ __html: link.label }}
-                                            />
-                                        )}
-                                    </div>
-                                ))}
+                            <div className="flex gap-2">
+                                {renderPagination()}
                             </div>
                         </div>
                     )}
