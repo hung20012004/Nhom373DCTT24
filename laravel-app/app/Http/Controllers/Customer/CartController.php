@@ -28,7 +28,7 @@ class CartController extends Controller
         ]);
     }
 
-    public function add(Request $request): JsonResponse // Thay đổi kiểu trả về
+    public function add(Request $request): JsonResponse
     {
         $request->validate([
             'variant_id' => 'required|exists:product_variants,variant_id',
@@ -57,8 +57,11 @@ class CartController extends Controller
             ])->first();
 
             $totalQuantity = $request->quantity;
+            $additionalQuantity = $request->quantity;
+
             if ($existingItem) {
                 $totalQuantity += $existingItem->quantity;
+                $additionalQuantity = $totalQuantity - $existingItem->quantity;
             }
 
             if ($variant->stock_quantity < $totalQuantity) {
@@ -67,6 +70,10 @@ class CartController extends Controller
                     'message' => 'Cannot add more items than available in stock'
                 ], 400);
             }
+
+            // Cập nhật số lượng trong kho
+            $variant->stock_quantity -= $additionalQuantity;
+            $variant->save();
 
             CartItem::updateOrCreate(
                 [
@@ -95,7 +102,7 @@ class CartController extends Controller
             DB::rollBack();
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to add item to cart'
+                'message' => 'Failed to add item to cart: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -107,6 +114,8 @@ class CartController extends Controller
         ]);
 
         try {
+            DB::beginTransaction();
+
             if ($cartItem->cart->user_id !== Auth::id()) {
                 return response()->json([
                     'status' => 'error',
@@ -114,17 +123,28 @@ class CartController extends Controller
                 ], 403);
             }
 
-            // Kiểm tra số lượng tồn kho
-            if ($cartItem->variant->stock_quantity < $request->quantity) {
+            $variant = $cartItem->variant;
+            $oldQuantity = $cartItem->quantity;
+            $newQuantity = $request->quantity;
+            $quantityDifference = $newQuantity - $oldQuantity;
+
+            // Nếu tăng số lượng, kiểm tra xem có đủ hàng không
+            if ($quantityDifference > 0 && $variant->stock_quantity < $quantityDifference) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Not enough stock available'
                 ], 400);
             }
 
+            // Cập nhật số lượng trong kho
+            $variant->stock_quantity -= $quantityDifference;
+            $variant->save();
+
             $cartItem->update([
-                'quantity' => $request->quantity
+                'quantity' => $newQuantity
             ]);
+
+            DB::commit();
 
             // Trả về cart đã cập nhật
             $updatedCart = Cart::with(['items.variant.product'])
@@ -137,9 +157,10 @@ class CartController extends Controller
                 'data' => $updatedCart
             ]);
         } catch (\Exception $e) {
+            DB::rollBack();
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to update cart item'
+                'message' => 'Failed to update cart item: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -147,6 +168,8 @@ class CartController extends Controller
     public function remove(CartItem $cartItem): JsonResponse
     {
         try {
+            DB::beginTransaction();
+
             if ($cartItem->cart->user_id !== Auth::id()) {
                 return response()->json([
                     'status' => 'error',
@@ -154,7 +177,14 @@ class CartController extends Controller
                 ], 403);
             }
 
+            // Khôi phục số lượng sản phẩm vào kho
+            $variant = $cartItem->variant;
+            $variant->stock_quantity += $cartItem->quantity;
+            $variant->save();
+
             $cartItem->delete();
+
+            DB::commit();
 
             // Trả về cart đã cập nhật
             $updatedCart = Cart::with(['items.variant.product'])
@@ -167,9 +197,10 @@ class CartController extends Controller
                 'data' => $updatedCart
             ]);
         } catch (\Exception $e) {
+            DB::rollBack();
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to remove item from cart'
+                'message' => 'Failed to remove item from cart: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -177,11 +208,22 @@ class CartController extends Controller
     public function clear(): JsonResponse
     {
         try {
+            DB::beginTransaction();
+
             $cart = Cart::where('user_id', Auth::id())->first();
 
             if ($cart) {
+                // Khôi phục số lượng sản phẩm vào kho cho tất cả sản phẩm trong giỏ hàng
+                foreach ($cart->items as $cartItem) {
+                    $variant = $cartItem->variant;
+                    $variant->stock_quantity += $cartItem->quantity;
+                    $variant->save();
+                }
+
                 $cart->items()->delete();
             }
+
+            DB::commit();
 
             return response()->json([
                 'status' => 'success',
@@ -189,9 +231,10 @@ class CartController extends Controller
                 'data' => $cart
             ]);
         } catch (\Exception $e) {
+            DB::rollBack();
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to clear cart'
+                'message' => 'Failed to clear cart: ' . $e->getMessage()
             ], 500);
         }
     }
