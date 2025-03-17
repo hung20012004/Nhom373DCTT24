@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Customer;
 
 use App\Models\Order;
 use App\Models\OrderDetail;
+use App\Models\OrderHistory;
 use App\Models\CartItem;
 use App\Models\ShippingAddress;
 use Illuminate\Http\Request;
@@ -20,7 +21,10 @@ class OrderController extends Controller
             'details' => function ($query) {
                 $query->with('variant.product', 'variant.color', 'variant.size');
             },
-            'shippingAddress'
+            'shippingAddress',
+            'history' => function ($query) {
+                $query->with('processedBy')->orderBy('created_at', 'desc');
+            }
         ])
             ->where('user_id', Auth::id())
             ->orderBy('order_date', 'desc')
@@ -37,7 +41,10 @@ class OrderController extends Controller
             'details' => function ($query) {
                 $query->with('variant.product', 'variant.color', 'variant.size');
             },
-            'shippingAddress'
+            'shippingAddress',
+            'history' => function ($query) {
+                $query->with('processedBy')->orderBy('created_at', 'desc');
+            }
         ])
             ->where('order_id', $orderId)
             ->where('user_id', Auth::id())
@@ -47,6 +54,7 @@ class OrderController extends Controller
             'order' => $order,
         ]);
     }
+
     public function checkout(Request $request)
     {
         try {
@@ -94,6 +102,14 @@ class OrderController extends Controller
                 'payment_status' => $validated['payment_method'] === 'cod' ? 'pending' : 'awaiting_payment',
                 'order_status' => 'new',
                 'note' => $validated['note'],
+            ]);
+
+
+            OrderHistory::create([
+                'order_id' => $order->order_id,
+                'status' => 'new',
+                'note' => 'Đơn hàng mới được tạo',
+                'processed_by_user_id' => null,
             ]);
 
             foreach ($cartItems as $item) {
@@ -176,7 +192,6 @@ class OrderController extends Controller
         return $vnp_Url;
     }
 
-
     public function vnpayCallback(Request $request)
     {
         $vnp_HashSecret = env('VNPAY_HASH_SECRET');
@@ -196,20 +211,34 @@ class OrderController extends Controller
             $order = Order::find($orderId);
 
             if ($order && $status === '00') { // Thanh toán thành công
-                $order->update([
-                    'payment_status' => 'paid',
-                ]);
+                DB::beginTransaction();
 
-                $order->history()->create([
-                    'status' => 'paid',
-                    'comment' => 'Thanh toán thành công qua VNPAY, Mã giao dịch: ' . $inputData['vnp_TransactionNo'],
-                    'updated_by' => Auth::id() ?? $order->user_id,
-                ]);
+                try {
+                    $order->update([
+                        'payment_status' => 'paid',
+                    ]);
 
-                return response()->json([
-                    'message' => 'Thanh toán thành công!',
-                    'redirect' => route('orders.confirmation', ['order' => $orderId]),
-                ], 200);
+                    // Tạo lịch sử thanh toán
+                    OrderHistory::create([
+                        'order_id' => $orderId,
+                        'status' => 'paid',
+                        'note' => 'Thanh toán thành công qua VNPAY, Mã giao dịch: ' . $inputData['vnp_TransactionNo'],
+                        'processed_by_user_id' => null, // Tự động xử lý
+                    ]);
+
+                    DB::commit();
+
+                    return response()->json([
+                        'message' => 'Thanh toán thành công!',
+                        'redirect' => route('order.confirmation', ['order' => $orderId]),
+                    ], 200);
+                } catch (\Exception $e) {
+                    DB::rollBack();
+
+                    return response()->json([
+                        'error' => 'Lỗi khi cập nhật trạng thái thanh toán: ' . $e->getMessage(),
+                    ], 500);
+                }
             }
 
             return response()->json([
@@ -228,7 +257,10 @@ class OrderController extends Controller
             'details' => function ($query) {
                 $query->with('variant.product');
             },
-            'shippingAddress'
+            'shippingAddress',
+            'history' => function ($query) {
+                $query->with('processedBy')->orderBy('created_at', 'desc');
+            }
         ])
             ->where('order_id', $orderId)
             ->where('user_id', Auth::id())
@@ -250,36 +282,55 @@ class OrderController extends Controller
             'order' => $order,
         ]);
     }
+
     public function cancel(Request $request, $orderId)
-{
-    try {
-        $order = Order::where('order_id', $orderId)
+    {
+        try {
+            $order = Order::where('order_id', $orderId)
+                ->where('user_id', Auth::id())
+                ->firstOrFail();
+
+            if (!in_array($order->order_status, ['new', 'processing'])) {
+                return back()->with('error', 'Đơn hàng không thể hủy ở trạng thái hiện tại.');
+            }
+
+            DB::beginTransaction();
+
+            $order->update([
+                'order_status' => 'cancelled',
+            ]);
+
+            OrderHistory::create([
+                'order_id' => $order->order_id,
+                'status' => 'cancelled',
+                'note' => 'Đơn hàng đã bị hủy bởi khách hàng: ' . ($request->reason ?? 'Không có lý do'),
+                'processed_by_user_id' => Auth::id(),
+            ]);
+
+            DB::commit();
+
+            return redirect()->back()->with('success', 'Đơn hàng đã được hủy thành công.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Đã có lỗi xảy ra: ' . $e->getMessage());
+        }
+    }
+
+    public function history($orderId)
+    {
+        $order = Order::with([
+            'history' => function ($query) {
+                $query->with('processedBy')->orderBy('created_at', 'desc');
+            }
+        ])
+            ->where('order_id', $orderId)
             ->where('user_id', Auth::id())
             ->firstOrFail();
 
-        if (!in_array($order->order_status, ['new', 'processing'])) {
-            return back()->with('error', 'Đơn hàng không thể hủy ở trạng thái hiện tại.');
-        }
-
-        DB::beginTransaction();
-
-        $order->update([
-            'order_status' => 'cancelled',
+        return Inertia::render('Order/History', [
+            'order' => $order,
+            'orderHistory' => $order->history,
         ]);
-
-        // $order->history()->create([
-        //     'status' => 'cancelled',
-        //     'comment' => 'Đơn hàng đã bị hủy bởi khách hàng: ' . ($request->reason ?? 'Không có lý do'),
-        //     'updated_by' => Auth::id(),
-        // ]);
-
-        DB::commit();
-
-        return redirect()->back()->with('success', 'Đơn hàng đã được hủy thành công.');
-
-    } catch (\Exception $e) {
-        DB::rollBack();
-        return back()->with('error', 'Đã có lỗi xảy ra: ' . $e->getMessage());
     }
-}
 }

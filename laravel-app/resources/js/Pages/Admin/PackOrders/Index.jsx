@@ -33,19 +33,14 @@ export default function KanbanOrders() {
 
     // Trạng thái có thể cập nhật trong Kanban
     const kanbanStatuses = {
-        'new': 'Mới tạo',
-        'processing': 'Đang xử lý',
         'confirmed': 'Đã xác nhận',
-        'cancelled': 'Hủy'
+        'preparing': 'Đang chuẩn bị hàng',
+        'packed': 'Đã đóng gói',
     };
 
     // Trạng thái chỉ xem, không thể cập nhật qua Kanban
     const readOnlyStatuses = {
-        'preparing': 'Đang chuẩn bị hàng',
-        'packed': 'Đã đóng gói',
-        'shipping': 'Đang giao hàng',
-        'delivered': 'Giao hàng thành công',
-        'shipping_failed': 'Giao không thành công'
+
     };
 
     // Tất cả các trạng thái để hiển thị
@@ -98,7 +93,7 @@ export default function KanbanOrders() {
             params.page = pagination.current_page;
             params.per_page = pagination.per_page;
 
-            // Lấy tất cả các trạng thái, bao gồm cả chỉ đọc
+
             params.order_status = Object.keys(allStatuses).join(',');
 
             const response = await axios.get('/api/v1/orders', { params });
@@ -135,7 +130,7 @@ export default function KanbanOrders() {
             });
 
             if (response.data.status === 'success') {
-                fetchOrders(); // Refresh all orders to ensure consistency
+                fetchOrders();
                 alert('Trạng thái đơn hàng đã được cập nhật thành công');
                 return true;
             }
@@ -144,7 +139,7 @@ export default function KanbanOrders() {
             console.error('Lỗi khi cập nhật trạng thái đơn hàng:', error);
             alert(error.response?.data?.message || 'Lỗi khi cập nhật trạng thái đơn hàng');
 
-            // Revert UI change on failure
+
             const updatedOrders = [...orders];
             const orderIndex = updatedOrders.findIndex(order => order.order_id.toString() === orderId);
 
@@ -204,7 +199,7 @@ export default function KanbanOrders() {
     };
 
     const breadcrumbItems = [
-        { label: 'Đơn hàng', href: '/admin/orders' }
+        { label: 'Đóng gói đơn hàng', href: '/admin/orders' }
     ];
 
     const formatDate = (dateString) => {
@@ -215,7 +210,6 @@ export default function KanbanOrders() {
     const formatCurrency = (amount) => {
         return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
     };
-
 
     // Nhóm các đơn hàng theo trạng thái
     const groupedOrders = orders.reduce((acc, order) => {
@@ -276,13 +270,13 @@ export default function KanbanOrders() {
 
     return (
         <AdminLayout>
-            <Head title="Quản lý đơn hàng" />
+            <Head title="Đóng gói đơn hàng" />
 
             <div className="container mx-auto py-6 px-4">
                 <Breadcrumb items={breadcrumbItems} />
 
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                    <h1 className="text-3xl font-bold text-gray-900">Quản lý đơn hàng</h1>
+                    <h1 className="text-3xl font-bold text-gray-900">Đóng gói đơn hàng</h1>
                 </div>
 
                 <div className="bg-white rounded-lg shadow overflow-hidden mb-6">

@@ -22,12 +22,33 @@ class OrderController extends Controller
             'shippingAddress','user'
         ]);
 
+        // Xử lý lọc theo nhiều trạng thái đơn hàng
         if ($request->has('order_status')) {
-            $query->where('order_status', $request->status);
+            // Nếu order_status chứa dấu phẩy, xử lý như một danh sách các trạng thái
+            if (strpos($request->order_status, ',') !== false) {
+                $statuses = explode(',', $request->order_status);
+                $query->whereIn('order_status', $statuses);
+            } else {
+                // Xử lý như trước nếu chỉ có một giá trị
+                $query->where('order_status', $request->order_status);
+            }
         }
 
+        // Lọc theo trạng thái thanh toán
         if ($request->has('payment_status')) {
-            $query->where('payment_status', $request->supplier_id);
+            $query->where('payment_status', $request->payment_status);
+        }
+
+        // Tìm kiếm theo mã đơn hàng hoặc thông tin khách hàng
+        if ($request->has('search') && !empty($request->search)) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('order_id', 'like', "%{$search}%")
+                  ->orWhereHas('user', function($query) use ($search) {
+                      $query->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%");
+                  });
+            });
         }
 
         // Date range filter
@@ -39,8 +60,20 @@ class OrderController extends Controller
             $query->whereDate('order_date', '<=', $request->to_date);
         }
 
+        // Sắp xếp kết quả
+        $sortField = $request->input('sort_field', 'order_date');
+        $sortDirection = $request->input('sort_direction', 'desc');
+
+        // Đảm bảo sortField là một trường hợp lệ để tránh lỗi SQL
+        $allowedSortFields = ['order_id', 'order_date', 'payment_status', 'order_status', 'total_amount'];
+        if (!in_array($sortField, $allowedSortFields)) {
+            $sortField = 'order_date';
+        }
+
+        $query->orderBy($sortField, $sortDirection);
+
         $perPage = $request->input('per_page', 15);
-        $orders = $query->orderBy('order_id', 'asc')->paginate($perPage);
+        $orders = $query->paginate($perPage);
 
         return response()->json([
             'status' => 'success',

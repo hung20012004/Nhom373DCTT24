@@ -19,7 +19,10 @@ import {
     Calendar,
     CreditCard,
     ClipboardList,
-    AlertCircle
+    AlertCircle,
+    Box,
+    PackageCheck,
+    CheckCircle
 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import {
@@ -53,10 +56,16 @@ const OrderShow = ({ order }) => {
         switch(status) {
             case 'new':
                 return { label: 'Mới tạo', color: 'bg-blue-500' };
+            case 'confirmed':
+                return { label: 'Đã xác nhận', color: 'bg-green-700' };
             case 'processing':
                 return { label: 'Đang xử lý', color: 'bg-orange-500' };
+            case 'preparing':
+                return { label: 'Đang chuẩn bị hàng', color: 'bg-yellow-500' };
+            case 'packed':
+                return { label: 'Đã đóng gói', color: 'bg-purple-500' };
             case 'shipping':
-                return { label: 'Đang giao hàng', color: 'bg-purple-500' };
+                return { label: 'Đang giao hàng', color: 'bg-indigo-500' };
             case 'delivered':
                 return { label: 'Đã giao hàng', color: 'bg-green-500' };
             case 'cancelled':
@@ -95,8 +104,14 @@ const OrderShow = ({ order }) => {
         switch(status) {
             case 'new':
                 return <ShoppingBag className="h-6 w-6" />;
+            case 'confirmed':
+                return <CheckCircle className="h-6 w-6" />;
             case 'processing':
                 return <Package className="h-6 w-6" />;
+            case 'preparing':
+                return <Box className="h-6 w-6" />;
+            case 'packed':
+                return <PackageCheck className="h-6 w-6" />;
             case 'shipping':
                 return <Truck className="h-6 w-6" />;
             case 'delivered':
@@ -173,8 +188,9 @@ const OrderShow = ({ order }) => {
         );
     };
 
+
     // Check if order can be cancelled
-    const canBeCancelled = ['new', 'processing'].includes(order.order_status);
+    const canBeCancelled = ['new', 'processing', 'preparing', 'packed'].includes(order.order_status);
 
     return (
         <Layout>
