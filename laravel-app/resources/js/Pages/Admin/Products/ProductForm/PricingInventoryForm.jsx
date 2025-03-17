@@ -2,11 +2,11 @@ import React from 'react';
 import { Input } from '@/Components/ui/input';
 import { Label } from '@/Components/ui/label';
 
-const PricingInventoryForm = ({ formData, handleChange, ErrorMessage }) => {
+const PricingInventoryForm = ({ formData, handleChange, ErrorMessage, stockQuantityReadOnly = false }) => {
     return (
         <div className="space-y-4">
             <div>
-                <Label htmlFor="price">Giá (VND)</Label>
+                <Label htmlFor="price">Giá sản phẩm (VND)</Label>
                 <Input
                     id="price"
                     name="price"
@@ -32,7 +32,9 @@ const PricingInventoryForm = ({ formData, handleChange, ErrorMessage }) => {
             </div>
 
             <div>
-                <Label htmlFor="stock_quantity">Số lượng tồn kho</Label>
+                <Label htmlFor="stock_quantity">
+                    Số lượng trong kho {stockQuantityReadOnly && "(Tự động tính từ các biến thể)"}
+                </Label>
                 <Input
                     id="stock_quantity"
                     name="stock_quantity"
@@ -40,36 +42,41 @@ const PricingInventoryForm = ({ formData, handleChange, ErrorMessage }) => {
                     value={formData.stock_quantity}
                     onChange={handleChange}
                     className="mt-1"
+                    readOnly={stockQuantityReadOnly}
+                    disabled={stockQuantityReadOnly}
                 />
+                {stockQuantityReadOnly && (
+                    <p className="text-sm text-gray-500 mt-1">
+                        Số lượng này được tính tự động từ tổng số lượng của tất cả biến thể
+                    </p>
+                )}
                 <ErrorMessage field="stock_quantity" />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-                <div>
-                    <Label htmlFor="min_purchase_quantity">Số lượng mua tối thiểu</Label>
-                    <Input
-                        id="min_purchase_quantity"
-                        name="min_purchase_quantity"
-                        type="number"
-                        value={formData.min_purchase_quantity}
-                        onChange={handleChange}
-                        className="mt-1"
-                    />
-                    <ErrorMessage field="min_purchase_quantity" />
-                </div>
+            <div>
+                <Label htmlFor="min_purchase_quantity">Số lượng mua tối thiểu</Label>
+                <Input
+                    id="min_purchase_quantity"
+                    name="min_purchase_quantity"
+                    type="number"
+                    value={formData.min_purchase_quantity}
+                    onChange={handleChange}
+                    className="mt-1"
+                />
+                <ErrorMessage field="min_purchase_quantity" />
+            </div>
 
-                <div>
-                    <Label htmlFor="max_purchase_quantity">Số lượng mua tối đa</Label>
-                    <Input
-                        id="max_purchase_quantity"
-                        name="max_purchase_quantity"
-                        type="number"
-                        value={formData.max_purchase_quantity}
-                        onChange={handleChange}
-                        className="mt-1"
-                    />
-                    <ErrorMessage field="max_purchase_quantity" />
-                </div>
+            <div>
+                <Label htmlFor="max_purchase_quantity">Số lượng mua tối đa</Label>
+                <Input
+                    id="max_purchase_quantity"
+                    name="max_purchase_quantity"
+                    type="number"
+                    value={formData.max_purchase_quantity}
+                    onChange={handleChange}
+                    className="mt-1"
+                />
+                <ErrorMessage field="max_purchase_quantity" />
             </div>
         </div>
     );

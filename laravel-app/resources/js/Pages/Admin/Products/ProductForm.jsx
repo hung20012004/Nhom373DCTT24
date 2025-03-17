@@ -21,13 +21,13 @@ export default function ProductForm({ product, onClose, onSuccess }) {
         description: '',
         price: '',
         sale_price: '',
-        stock_quantity: '',
+        stock_quantity: '0', // Will be calculated automatically from variants
         min_purchase_quantity: '1',
         max_purchase_quantity: '10',
         gender: 'unisex',
         care_instruction: '',
-        is_active: true, // Đảm bảo trường is_active có giá trị mặc định
-        sku: '', // Đảm bảo trường sku có giá trị mặc định
+        is_active: true,
+        sku: '',
     });
 
     const [selectedTags, setSelectedTags] = useState([]);
@@ -45,6 +45,18 @@ export default function ProductForm({ product, onClose, onSuccess }) {
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+
+    // Calculate total stock quantity whenever variants change
+    useEffect(() => {
+        const totalStock = variants.reduce((sum, variant) => {
+            return sum + (parseInt(variant.stock_quantity) || 0);
+        }, 0);
+
+        setFormData(prev => ({
+            ...prev,
+            stock_quantity: totalStock.toString()
+        }));
+    }, [variants]);
 
     // Load necessary data when component mounts
     useEffect(() => {
@@ -75,7 +87,7 @@ export default function ProductForm({ product, onClose, onSuccess }) {
                         description: product.description || '',
                         price: product.price?.toString() || '',
                         sale_price: product.sale_price?.toString() || '',
-                        stock_quantity: product.stock_quantity?.toString() || '',
+                        stock_quantity: '0', // Will be calculated from variants
                         min_purchase_quantity: product.min_purchase_quantity?.toString() || '1',
                         max_purchase_quantity: product.max_purchase_quantity?.toString() || '10',
                         gender: product.gender || 'unisex',
@@ -230,11 +242,12 @@ export default function ProductForm({ product, onClose, onSuccess }) {
                                 ErrorMessage={ErrorMessage}
                             />
 
-                            {/* Pricing and Inventory */}
+                            {/* Pricing and Inventory - Modified to display calculated stock quantity */}
                             <PricingInventoryForm
                                 formData={formData}
                                 handleChange={handleChange}
                                 ErrorMessage={ErrorMessage}
+                                stockQuantityReadOnly={true} // New prop to make stock quantity read-only
                             />
                         </div>
 
