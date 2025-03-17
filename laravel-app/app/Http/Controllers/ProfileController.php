@@ -36,11 +36,8 @@ class ProfileController extends Controller
     {
         $user = $request->user();
 
-        // Check if phone number already exists for another user
         if ($request->input('phone')) {
             $query = UserProfile::where('phone', $request->input('phone'));
-
-            // Only check for different users if current user has a profile
             if ($user->profile) {
                 $query->where('profile_id', '!=', $user->profile->profile_id);
             }
@@ -64,29 +61,22 @@ class ProfileController extends Controller
             'avatar_url' => 'nullable|image|max:2048'
         ]);
 
-        // Update user email
         $user->email = $validatedData['email'];
         if ($user->isDirty('email')) {
             $user->email_verified_at = null;
         }
         $user->save();
 
-        // Get or create profile
         $profile = $user->profile ?? new UserProfile();
 
         if (!$user->profile) {
-            // Associate the new profile with the user
             $profile->user_id = $user->id;
         }
-
-        // Handle avatar upload
         if ($request->hasFile('avatar_url')) {
-            // Delete old avatar if exists
             if ($profile->avatar_url) {
                 Storage::disk('public')->delete($profile->avatar_url);
             }
 
-            // Store new avatar
             $avatarPath = $request->file('avatar_url')->store('avatars', 'public');
             $validatedData['avatar_url'] = $avatarPath;
         }
@@ -98,7 +88,7 @@ class ProfileController extends Controller
             'gender' => $validatedData['gender'] ?? null,
             'avatar_url' => $validatedData['avatar_url'] ?? $profile->avatar_url,
         ])->save();
-
+        $profile->user->update(['name' => $request->full_name]);
         return Redirect::route('profile.edit')->with('status', 'Profile updated successfully');
     }
 
