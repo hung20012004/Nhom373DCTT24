@@ -1,4 +1,6 @@
 <?php
+
+use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Customer\CartController;
 use App\Http\Controllers\Customer\CheckoutController;
 use App\Http\Controllers\Customer\OrderController;
@@ -91,11 +93,15 @@ Route::middleware(['auth', 'verified','check.role'])->prefix('admin')->group(fun
     Route::get('/orders/{id}', function ($id) {
         return Inertia::render('Admin/Orders/Show', ['orderId' => $id]);
     })->name('admin.orders.show');
+    Route::get('/banners', function () {
+        return Inertia::render('Admin/Banners/Index');
+    })->name('admin.banners');
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
     Route::get('/reports', [ReportController::class, 'index'])->name('admin.reports');
     Route::post('/reports/get-data', [ReportController::class, 'getReportData'])->name('admin.reports.data');
     Route::get('/reports/download', [ReportController::class, 'downloadReport'])->name('admin.reports.download');
+
     Route::prefix('purchase-orders')->group(function () {
         Route::post('/', [PurchaseOrderController::class, 'store']);
         Route::put('/{purchaseorderId}', [PurchaseOrderController::class, 'update']);
@@ -158,6 +164,12 @@ Route::middleware(['auth', 'verified','check.role'])->prefix('admin')->group(fun
     Route::prefix('customers')->group(function () {
         Route::get('/index', [CustomerController::class, 'index']);
         Route::get('/{id}', [CustomerController::class, 'show']);
+    });
+    Route::prefix('banners')->group(function () {
+        Route::post('/', [BannerController::class, 'store']);
+        Route::put('/{bannerId}', [BannerController::class, 'update']);
+        Route::put('/{bannerId}/toggle-status', [BannerController::class, 'toggleStatus']);
+        Route::delete('/{bannerId}', [BannerController::class, 'destroy']);
     });
 });
 

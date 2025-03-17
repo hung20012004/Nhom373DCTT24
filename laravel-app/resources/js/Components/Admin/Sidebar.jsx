@@ -24,8 +24,13 @@ import {
     Star,
     MapPin,
     Send,
-    Warehouse
+    Warehouse,
+    BanIcon,
+    BadgeIndianRupeeIcon,
+    GitPullRequestIcon,
+    DockIcon
 } from 'lucide-react';
+import { StarIcon } from '@radix-ui/react-icons';
 
 const Sidebar = () => {
     const [collapsed, setCollapsed] = useState(false);
@@ -70,10 +75,18 @@ const Sidebar = () => {
             title: 'Quản lý khách hàng',
             items: [
                 { title: 'Khách hàng', icon: <Users size={20} />, path: '/admin/customers' },
+                { title: 'Yêu cầu', icon: <DockIcon size={20} />, path: '/admin/requests' },
                 { title: 'Đánh giá', icon: <Star size={20} />, path: '/admin/reviews' },
             ]
         },
-
+        {
+            title: 'Marketing',
+            items: [
+                { title: 'Khuyến mãi', icon: <Percent size={20} />, path: '/admin/promotions' },
+                { title: 'Băng khuyến mãi', icon: <StarIcon size={25} />, path: '/admin/banners' },
+                { title: 'Gửi thông báo', icon: <Send size={20} />, path: '/admin/notifications-send' },
+            ]
+        },
         {
             title: 'Cài đặt hệ thống',
             items: [

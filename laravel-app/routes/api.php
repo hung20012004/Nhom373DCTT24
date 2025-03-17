@@ -49,7 +49,8 @@ Route::prefix('v1')->group(function () {
     Route::get('/orders', [OrderController::class, 'index']);
     Route::get('/orders/{orderId}', [OrderController::class, 'show']);
 
+    Route::get('/banners', [BannerController::class, 'index']);
     Route::get('/banners/active', [BannerController::class, 'getActiveBanners']);
-    Route::post('/banners', [BannerController::class, 'store'])->middleware('auth:sanctum');
+
     Route::get('/supplier', [SupplierController::class, 'index']);
 });
