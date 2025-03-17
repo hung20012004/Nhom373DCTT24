@@ -79,12 +79,12 @@ export default function Index() {
     };
 
     const handleDelete = async (sizeId) => {
-        if (confirm('Are you sure you want to delete this size?')) {
+        if (confirm('Bạn có muốn xóa?')) {
             try {
                 const response = await axios.delete(`/admin/sizes/${sizeId}`);
                 if (response.status === 200) {
                     fetchSizes();
-                    alert('Size deleted successfully');
+                    alert('Xóa thành công');
                 }
             } catch (error) {
                 console.error('Error deleting size:', error);
@@ -94,7 +94,7 @@ export default function Index() {
     };
 
     const breadcrumbItems = [
-        { label: 'Sizes', href: '/admin/sizes' }
+        { label: 'Kích thước', href: '/admin/sizes' }
     ];
 
     const renderPagination = () => {
@@ -134,11 +134,11 @@ export default function Index() {
                 <Breadcrumb items={breadcrumbItems} />
 
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                    <h1 className="text-3xl font-bold text-gray-900">Sizes</h1>
+                    <h1 className="text-3xl font-bold text-gray-900">Kích thước</h1>
                     <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
                         <Input
                             type="text"
-                            placeholder="Search sizes..."
+                            placeholder="Tìm kiếm..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             className="w-full sm:w-64"
@@ -149,7 +149,7 @@ export default function Index() {
                                 setShowForm(true);
                             }}
                         >
-                            Add New Size
+                            Thêm mới
                         </Button>
                     </div>
                 </div>
@@ -159,9 +159,9 @@ export default function Index() {
                         <Table>
                             <TableHeader>
                                 <TableRow className="bg-gray-50">
-                                    <SortableHeader field="name">Name</SortableHeader>
-                                    <TableHead className="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Description</TableHead>
-                                    <TableHead className="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</TableHead>
+                                    <SortableHeader field="name">Tên</SortableHeader>
+                                    <TableHead className="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Mô tả</TableHead>
+                                    <TableHead className="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Hành động</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -200,14 +200,14 @@ export default function Index() {
                                                             setShowForm(true);
                                                         }}
                                                     >
-                                                        Edit
+                                                        Cập nhật
                                                     </Button>
                                                     <Button
                                                         variant="destructive"
                                                         className="bg-red-600 text-center hover:bg-red-700 text-white"
                                                         onClick={() => handleDelete(size.id)}
                                                     >
-                                                        Delete
+                                                        Xóa
                                                     </Button>
                                                 </div>
                                             </TableCell>
@@ -220,7 +220,7 @@ export default function Index() {
 
                     <div className="flex justify-between items-center p-4 border-t">
                         <div className="text-sm text-gray-600">
-                            Showing {sizes.length} of {pagination.total} results
+                            Hiển thị {sizes.length} trên {pagination.total} kết quả
                         </div>
                         <div className="flex gap-2">
                             {renderPagination()}

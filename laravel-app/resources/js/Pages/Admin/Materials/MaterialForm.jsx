@@ -69,7 +69,7 @@ export default function MaterialForm({ material, onClose, onSuccess }) {
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>
-                        {material ? 'Edit Material' : 'Add New Material'}
+                        {material ? 'Chỉnh sửa' : 'Tạo mới'}
                     </DialogTitle>
                 </DialogHeader>
 
@@ -82,25 +82,25 @@ export default function MaterialForm({ material, onClose, onSuccess }) {
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="space-y-4">
                         <div>
-                            <Label htmlFor="name">Name</Label>
+                            <Label htmlFor="name">Tên</Label>
                             <Input
                                 id="name"
                                 value={formData.name}
                                 onChange={(e) => setFormData({...formData, name: e.target.value})}
                                 required
-                                placeholder="Enter material name"
+                                placeholder=""
                             />
                             {errors.name && <span className="text-red-500 text-sm">{errors.name}</span>}
                         </div>
 
                         <div>
-                            <Label htmlFor="description">Description</Label>
+                            <Label htmlFor="description">Mô tả</Label>
                             <Textarea
                                 id="description"
                                 value={formData.description}
                                 onChange={(e) => setFormData({...formData, description: e.target.value})}
                                 rows={4}
-                                placeholder="Enter material description"
+                                placeholder=""
                             />
                             {errors.description && <span className="text-red-500 text-sm">{errors.description}</span>}
                         </div>
@@ -113,14 +113,14 @@ export default function MaterialForm({ material, onClose, onSuccess }) {
                             onClick={onClose}
                             disabled={loading}
                         >
-                            Cancel
+                            Hủy
                         </Button>
                         <Button
                             type="submit"
                             disabled={loading}
                             className="min-w-[100px]"
                         >
-                            {loading ? 'Saving...' : (material ? 'Update' : 'Create')}
+                            {loading ? 'Saving...' : (material ? 'Tạo mới' : 'Tạo mới')}
                         </Button>
                     </div>
                 </form>

@@ -8,14 +8,13 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import axios from 'axios';
 
 export default function ColorForm({ color, onClose, onSuccess }) {
     const [formData, setFormData] = useState({
         name: '',
-        description: ''
+        colorCode: '#000000'
     });
 
     const [loading, setLoading] = useState(false);
@@ -26,7 +25,7 @@ export default function ColorForm({ color, onClose, onSuccess }) {
         if (color) {
             setFormData({
                 name: color.name || '',
-                description: color.description || ''
+                colorCode: color.description || '#000000'
             });
         }
     }, [color]);
@@ -40,7 +39,7 @@ export default function ColorForm({ color, onClose, onSuccess }) {
         try {
             const dataToSubmit = {
                 ...formData,
-                description: `${formData.description || ''}`.trim(),
+                description: formData.colorCode
             };
 
             if (color) {
@@ -74,7 +73,7 @@ export default function ColorForm({ color, onClose, onSuccess }) {
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>
-                        {color ? 'Edit Color' : 'Add New Color'}
+                        {color ? 'Cập nhật' : 'Thêm mới'}
                     </DialogTitle>
                 </DialogHeader>
 
@@ -87,7 +86,7 @@ export default function ColorForm({ color, onClose, onSuccess }) {
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="space-y-4">
                         <div>
-                            <Label htmlFor="name">Name</Label>
+                            <Label htmlFor="name">Tên màu</Label>
                             <Input
                                 id="name"
                                 value={formData.name}
@@ -97,12 +96,12 @@ export default function ColorForm({ color, onClose, onSuccess }) {
                             {errors.name && <span className="text-red-500 text-sm">{errors.name}</span>}
                         </div>
                         <div>
-                            <Label htmlFor="description">Description</Label>
-                            <Textarea
-                                id="description"
-                                value={formData.description}
-                                onChange={(e) => setFormData({...formData, description: e.target.value})}
-                                rows={4}
+                            <Label htmlFor="colorCode">Chọn màu</Label>
+                            <Input
+                                id="colorCode"
+                                type="color"
+                                value={formData.colorCode}
+                                onChange={(e) => setFormData({...formData, colorCode: e.target.value})}
                             />
                             {errors.description && <span className="text-red-500 text-sm">{errors.description}</span>}
                         </div>
@@ -115,14 +114,14 @@ export default function ColorForm({ color, onClose, onSuccess }) {
                             onClick={onClose}
                             disabled={loading}
                         >
-                            Cancel
+                            Hủy
                         </Button>
                         <Button
                             type="submit"
                             disabled={loading}
                             className="min-w-[100px]"
                         >
-                            {loading ? 'Saving...' : (color ? 'Update' : 'Create')}
+                            {loading ? 'Đang lưu...' : (color ? 'Cập nhật' : 'Tạo mới')}
                         </Button>
                     </div>
                 </form>

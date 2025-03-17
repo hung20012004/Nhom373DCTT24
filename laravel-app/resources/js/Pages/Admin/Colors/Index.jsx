@@ -79,12 +79,12 @@ export default function Index() {
     };
 
     const handleDelete = async (colorId) => {
-        if (confirm('Are you sure you want to delete this color?')) {
+        if (confirm('Bạn có xác nhận xóa?')) {
             try {
                 const response = await axios.delete(`/admin/colors/${colorId}`);
                 if (response.status === 200) {
                     fetchColors();
-                    alert('Color deleted successfully');
+                    alert('Xóa thành công');
                 }
             } catch (error) {
                 console.error('Error deleting color:', error);
@@ -94,7 +94,7 @@ export default function Index() {
     };
 
     const breadcrumbItems = [
-        { label: 'Colors', href: '/admin/colors' }
+        { label: 'Màu sắc', href: '/admin/colors' }
     ];
 
     const renderPagination = () => {
@@ -128,17 +128,17 @@ export default function Index() {
 
     return (
         <AdminLayout>
-            <Head title="Colors Management" />
+            <Head title="Màu sắc" />
 
             <div className="container mx-auto py-6 px-4">
                 <Breadcrumb items={breadcrumbItems} />
 
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                    <h1 className="text-3xl font-bold text-gray-900">Colors</h1>
+                    <h1 className="text-3xl font-bold text-gray-900">Quản lý màu sắc</h1>
                     <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
                         <Input
                             type="text"
-                            placeholder="Search colors..."
+                            placeholder="Tìm kiếm..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             className="w-full sm:w-64"
@@ -149,7 +149,7 @@ export default function Index() {
                                 setShowForm(true);
                             }}
                         >
-                            Add New Color
+                            Thêm mới
                         </Button>
                     </div>
                 </div>
@@ -159,9 +159,9 @@ export default function Index() {
                         <Table>
                             <TableHeader>
                                 <TableRow className="bg-gray-50">
-                                    <SortableHeader field="name">Name</SortableHeader>
-                                    <TableHead className="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Description</TableHead>
-                                    <TableHead className="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</TableHead>
+                                    <SortableHeader field="name">Tên màu</SortableHeader>
+                                    <TableHead className="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Màu sắc</TableHead>
+                                    <TableHead className="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Hành động</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -187,8 +187,12 @@ export default function Index() {
                                         >
                                             <TableCell className="py-4 px-6 text-sm text-gray-900">{color.name}</TableCell>
                                             <TableCell className="py-4 px-6 text-center text-sm text-gray-900">
-                                                {color.description?.substring(0, 50)}
-                                                {color.description?.length > 50 ? '...' : ''}
+                                                <div className="flex justify-center items-center">
+                                                    <div
+                                                        className="w-8 h-8 rounded-full border border-gray-300"
+                                                        style={{ backgroundColor: color.description }}
+                                                    ></div>
+                                                </div>
                                             </TableCell>
                                             <TableCell className="py-4 px-6 text-sm text-gray-900">
                                                 <div className="flex justify-center gap-2">
@@ -200,14 +204,14 @@ export default function Index() {
                                                             setShowForm(true);
                                                         }}
                                                     >
-                                                        Edit
+                                                        Chỉnh sửa
                                                     </Button>
                                                     <Button
                                                         variant="destructive"
                                                         className="bg-red-600 text-center hover:bg-red-700 text-white"
                                                         onClick={() => handleDelete(color.id)}
                                                     >
-                                                        Delete
+                                                        Xóa
                                                     </Button>
                                                 </div>
                                             </TableCell>
@@ -220,7 +224,7 @@ export default function Index() {
 
                     <div className="flex justify-between items-center p-4 border-t">
                         <div className="text-sm text-gray-600">
-                            Showing {colors.length} of {pagination.total} results
+                            Hiển thị {colors.length} trên {pagination.total} kết quả
                         </div>
                         <div className="flex gap-2">
                             {renderPagination()}
