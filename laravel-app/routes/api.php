@@ -10,6 +10,7 @@ use App\Http\Controllers\API\SizeController;
 use App\Http\Controllers\API\TagController;
 use App\Http\Controllers\API\PurchaseOrderController;
 use App\Http\Controllers\API\OrderController;
+use App\Http\Controllers\API\SupportRequestController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Http;
 
@@ -51,6 +52,9 @@ Route::prefix('v1')->group(function () {
 
     Route::get('/banners', [BannerController::class, 'index']);
     Route::get('/banners/active', [BannerController::class, 'getActiveBanners']);
+
+    Route::get('/support-requests', [SupportRequestController::class, 'index']);
+    Route::get('/support-requests/{id}', [SupportRequestController::class, 'show']);
 
     Route::get('/supplier', [SupplierController::class, 'index']);
 });
