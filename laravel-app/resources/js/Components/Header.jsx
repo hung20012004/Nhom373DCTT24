@@ -285,6 +285,12 @@ const Header = () => {
                                                 Lịch sử mua hàng
                                             </Link>
                                             <Link
+                                                href="/support-requests"
+                                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                            >
+                                                Yêu cầu hỗ trợ
+                                            </Link>
+                                            <Link
                                                 href="/products?filter_type=wishlist"
                                                 className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                             >

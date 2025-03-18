@@ -24,6 +24,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\PurchaseOrderController;
 use App\Http\Controllers\Admin\OrderController AS AdminOrder;
 use App\Http\Controllers\Admin\SupportRequestController;
+use App\Http\Controllers\Customer\SupportRequestController as CustomerSupportRequestController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -227,6 +228,14 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
         Route::post('/', [OrderController::class, 'checkout'])->name('order.checkout');
         Route::get('/confirmation/{order}', [OrderController::class, 'confirmation'])->name('order.confirmation');
         Route::post('/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+    });
+    Route::prefix('support-requests')->group(function () {
+        Route::get('/', [CustomerSupportRequestController::class, 'index'])->name('orders.index');
+        Route::get('/{order}', [CustomerSupportRequestController::class, 'show'])->name('orders.show');
+        Route::get('/confirmation/{order}', [CustomerSupportRequestController::class, 'confirmation'])->name('order.confirmation');
+        Route::post('/', [CustomerSupportRequestController::class, 'checkout'])->name('order.checkout');
+        Route::get('/confirmation/{order}', [CustomerSupportRequestController::class, 'confirmation'])->name('order.confirmation');
+        Route::post('/{order}/cancel', [CustomerSupportRequestController::class, 'cancel'])->name('orders.cancel');
     });
     Route::post('/products/{productId}/reviews', [ProductReviewController::class, 'store']);
     Route::put('/products/{productId}/reviews/{reviewId}', [ProductReviewController::class, 'update']);
