@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 
 class CustomerController extends Controller
 {
+    // Trong App\Http\Controllers\Admin\CustomerController.php
     public function index(Request $request)
     {
         try {
@@ -26,7 +27,7 @@ class CustomerController extends Controller
                     'users.created_at'
                 ]);
 
-            // Join with user_profiles
+            // Join với user_profiles
             $query->leftJoin('user_profiles', 'users.id', '=', 'user_profiles.user_id')
                 ->addSelect([
                     'user_profiles.full_name',
@@ -35,21 +36,25 @@ class CustomerController extends Controller
                     'user_profiles.date_of_birth'
                 ]);
 
+            // Join với bảng roles và lọc theo role customer
+            $query->join('roles', 'users.role_id', '=', 'roles.role_id')
+                ->where('roles.name', '=', 'customer');
+
             // Log the initial query
             Log::info('Initial query build complete');
 
-            // Handle search
+            // Phần code xử lý tìm kiếm và sắp xếp giữ nguyên
             if ($request->filled('search')) {
                 $search = $request->search;
-                $query->where(function($q) use ($search) {
+                $query->where(function ($q) use ($search) {
                     $q->where('user_profiles.full_name', 'like', '%' . $search . '%')
-                      ->orWhere('users.email', 'like', '%' . $search . '%')
-                      ->orWhere('user_profiles.phone', 'like', '%' . $search . '%');
+                        ->orWhere('users.email', 'like', '%' . $search . '%')
+                        ->orWhere('user_profiles.phone', 'like', '%' . $search . '%');
                 });
                 Log::info('Search applied', ['search' => $search]);
             }
 
-            // Handle sorting
+            // Phần code xử lý sắp xếp giữ nguyên
             $sortField = $request->input('sort_field', 'full_name');
             $sortDirection = $request->input('sort_direction', 'asc');
 
@@ -68,10 +73,9 @@ class CustomerController extends Controller
                 ]);
             }
 
-            // Get paginated results
+            // Phần code xử lý phân trang giữ nguyên
             $perPage = $request->input('per_page', 10);
 
-            // Log the final query
             Log::info('Query before pagination', [
                 'sql' => $query->toSql(),
                 'bindings' => $query->getBindings()
@@ -79,7 +83,6 @@ class CustomerController extends Controller
 
             $customers = $query->paginate($perPage);
 
-            // Log the executed queries
             Log::info('Executed queries', [
                 'queries' => DB::getQueryLog()
             ]);
@@ -103,49 +106,73 @@ class CustomerController extends Controller
             ], 500);
         }
     }
-
     public function show($id)
-    {
-        try {
-            DB::enableQueryLog();
+{
+    try {
+        DB::enableQueryLog();
 
-            $customer = User::with(['profile', 'defaultShippingAddress'])
-                ->select([
-                    'users.id as user_id',
-                    'users.email',
-                    'users.is_active',
-                    'users.last_login'
-                ])
-                ->leftJoin('user_profiles', 'users.id', '=', 'user_profiles.user_id')
-                ->addSelect([
-                    'user_profiles.full_name',
-                    'user_profiles.phone',
-                    'user_profiles.gender',
-                    'user_profiles.date_of_birth'
-                ])
-                ->findOrFail($id);
+        // First find the user with the customer role
+        $user = User::where('id', $id)
+            ->join('roles', 'users.role_id', '=', 'roles.role_id')
+            ->where('roles.name', '=', 'customer')
+            ->firstOrFail();
 
-            Log::info('Show customer query', [
-                'queries' => DB::getQueryLog()
-            ]);
+        // Then load the user with all required relationships
+        $customer = User::where('id', $user->id)
+            ->with([
+                'profile',
+                'shippingAddresses' => function($query) {
+                    $query->where('is_default', true);
+                },
+                'orders' => function ($query) {
+                    $query->latest()->limit(5);
+                }
+            ])
+            ->first();
 
-            return response()->json($customer);
+        // Transform the data to match the frontend expectations
+        $customerData = $customer->toArray();
 
-        } catch (\Exception $e) {
-            Log::error('Error in CustomerController@show', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'customer_id' => $id
-            ]);
-
-            return response()->json([
-                'message' => 'Error fetching customer details',
-                'error' => $e->getMessage(),
-                'debug_info' => [
-                    'file' => $e->getFile(),
-                    'line' => $e->getLine()
-                ]
-            ], 500);
+        // Add fields from profile
+        if ($customer->profile) {
+            $customerData['full_name'] = $customer->profile->full_name ?? null;
+            $customerData['phone'] = $customer->profile->phone ?? null;
+            $customerData['gender'] = $customer->profile->gender ?? null;
+            $customerData['date_of_birth'] = $customer->profile->date_of_birth ?? null;
         }
+
+        // Set user_id explicitly
+        $customerData['user_id'] = $customer->id;
+
+        // Handle the default shipping address
+        $customerData['defaultShippingAddress'] = !empty($customer->shippingAddresses)
+            ? $customer->shippingAddresses[0]
+            : null;
+
+        Log::info('Show customer data prepared:', [
+            'has_profile' => isset($customer->profile),
+            'has_address' => !empty($customerData['defaultShippingAddress']),
+            'orders_count' => count($customerData['orders'] ?? [])
+        ]);
+
+        return response()->json($customerData);
+
+    } catch (\Exception $e) {
+        Log::error('Error in CustomerController@show', [
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+            'customer_id' => $id
+        ]);
+
+        return response()->json([
+            'message' => 'Error fetching customer details',
+            'error' => $e->getMessage(),
+            'debug_info' => [
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]
+        ], 500);
     }
 }
+}
+
