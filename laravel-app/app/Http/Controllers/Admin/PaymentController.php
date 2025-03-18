@@ -215,8 +215,6 @@ class PaymentController extends Controller
         $period = $request->query('period', 'day');
         $startDate = $request->query('start_date', now()->subDays(30)->format('Y-m-d'));
         $endDate = $request->query('end_date', now()->format('Y-m-d'));
-
-        // Lấy dữ liệu báo cáo theo khoảng thời gian
         $reportData = $this->getReportData($period, $startDate, $endDate);
 
         return Inertia::render('Admin/Payments/Report', [

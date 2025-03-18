@@ -10,78 +10,18 @@ import {
     TableHeader,
     TableRow,
 } from '@/Components/ui/table';
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
 import Breadcrumb from '@/Components/Breadcrumb';
 import axios from 'axios';
 import { ArrowUpDown } from 'lucide-react';
-
-// Customer Details Dialog Component
-const CustomerDetailsDialog = ({ customer, onClose }) => {
-    if (!customer) return null;
-
-    return (
-        <Dialog open={true} onOpenChange={onClose}>
-            <DialogContent className="max-w-2xl">
-                <DialogHeader>
-                    <DialogTitle>Customer Details</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <h3 className="font-semibold">Full Name</h3>
-                            <p>{customer.full_name}</p>
-                        </div>
-                        <div>
-                            <h3 className="font-semibold">Email</h3>
-                            <p>{customer.email}</p>
-                        </div>
-                        <div>
-                            <h3 className="font-semibold">Phone</h3>
-                            <p>{customer.phone || 'Not provided'}</p>
-                        </div>
-                        <div>
-                            <h3 className="font-semibold">Gender</h3>
-                            <p>{customer.gender || 'Not specified'}</p>
-                        </div>
-                        <div>
-                            <h3 className="font-semibold">Date of Birth</h3>
-                            <p>{customer.date_of_birth || 'Not provided'}</p>
-                        </div>
-                        <div>
-                            <h3 className="font-semibold">Account Status</h3>
-                            <p className={`font-semibold ${customer.is_active ? 'text-green-600' : 'text-red-600'}`}>
-                                {customer.is_active ? 'Active' : 'Inactive'}
-                            </p>
-                        </div>
-                    </div>
-
-                    {customer.shipping_address && (
-                        <div className="mt-6">
-                            <h3 className="font-semibold mb-2">Shipping Address</h3>
-                            <div className="bg-gray-50 p-4 rounded-lg">
-                                <p>{customer.shipping_address.street_address}</p>
-                                <p>{customer.shipping_address.ward}, {customer.shipping_address.district}</p>
-                                <p>{customer.shipping_address.province}</p>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            </DialogContent>
-        </Dialog>
-    );
-};
+import CustomerDetailsDialog from './CustomerDetailsDialog';
 
 // Main Customer Management Component
 export default function CustomerManagement() {
     const [customers, setCustomers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
-    const [selectedCustomer, setSelectedCustomer] = useState(null);
+    const [selectedCustomerId, setSelectedCustomerId] = useState(null);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [pagination, setPagination] = useState({
         current_page: 1,
         per_page: 10,
@@ -136,6 +76,16 @@ export default function CustomerManagement() {
             setSortField(field);
             setSortDirection('asc');
         }
+    };
+
+    const handleViewDetails = (customerId) => {
+        setSelectedCustomerId(customerId);
+        setIsDialogOpen(true);
+    };
+
+    const handleCloseDialog = () => {
+        setIsDialogOpen(false);
+        setSelectedCustomerId(null);
     };
 
     const breadcrumbItems = [
@@ -229,7 +179,7 @@ export default function CustomerManagement() {
                                             </TableCell>
                                             <TableCell className="py-4 px-6 text-sm text-gray-900">
                                                 <button
-                                                    onClick={() => setSelectedCustomer(customer)}
+                                                    onClick={() => handleViewDetails(customer.user_id)}
                                                     className="text-blue-600 hover:text-blue-800 font-medium"
                                                 >
                                                     View Details
@@ -243,12 +193,14 @@ export default function CustomerManagement() {
                     </div>
                 </div>
 
-                {selectedCustomer && (
-                    <CustomerDetailsDialog
-                        customer={selectedCustomer}
-                        onClose={() => setSelectedCustomer(null)}
-                    />
-                )}
+                {/* Pagination controls could be added here */}
+
+                {/* Import the full-featured CustomerDetailsDialog */}
+                <CustomerDetailsDialog
+                    customerId={selectedCustomerId}
+                    isOpen={isDialogOpen}
+                    onClose={handleCloseDialog}
+                />
             </div>
         </AdminLayout>
     );
