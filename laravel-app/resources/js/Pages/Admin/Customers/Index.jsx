@@ -54,7 +54,6 @@ export default function CustomerManagement() {
                 });
             }
         } catch (error) {
-            console.error('Error fetching customers:', error);
             setCustomers([]);
         } finally {
             setLoading(false);
@@ -89,7 +88,7 @@ export default function CustomerManagement() {
     };
 
     const breadcrumbItems = [
-        { label: 'Customers', href: '/admin/customers' }
+        { label: 'Khách Hàng', href: '/admin/customers' }
     ];
 
     const SortableHeader = ({ field, children }) => (
@@ -106,16 +105,16 @@ export default function CustomerManagement() {
 
     return (
         <AdminLayout>
-            <Head title="Customer Management" />
+            <Head title="Quản Lý Khách Hàng" />
 
             <div className="container mx-auto py-6 px-4">
                 <Breadcrumb items={breadcrumbItems} />
 
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                    <h1 className="text-3xl font-bold text-gray-900">Customers</h1>
+                    <h1 className="text-3xl font-bold text-gray-900">Khách Hàng</h1>
                     <Input
                         type="text"
-                        placeholder="Search customers..."
+                        placeholder="Tìm kiếm khách hàng..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         className="w-full sm:w-64"
@@ -128,11 +127,11 @@ export default function CustomerManagement() {
                             <TableHeader>
                                 <TableRow className="bg-gray-50">
                                     <SortableHeader field="id">ID</SortableHeader>
-                                    <SortableHeader field="full_name">Full Name</SortableHeader>
+                                    <SortableHeader field="full_name">Họ Tên</SortableHeader>
                                     <SortableHeader field="email">Email</SortableHeader>
-                                    <SortableHeader field="phone">Phone</SortableHeader>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead>Actions</TableHead>
+                                    <SortableHeader field="phone">Điện Thoại</SortableHeader>
+                                    <TableHead>Trạng Thái</TableHead>
+                                    <TableHead>Hành Động</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -147,7 +146,7 @@ export default function CustomerManagement() {
                                 ) : !customers || customers.length === 0 ? (
                                     <TableRow>
                                         <TableCell colSpan={6} className="text-center py-4 text-gray-500">
-                                            No customers found
+                                            Không tìm thấy khách hàng
                                         </TableCell>
                                     </TableRow>
                                 ) : (
@@ -174,7 +173,7 @@ export default function CustomerManagement() {
                                                         ? 'bg-green-100 text-green-800'
                                                         : 'bg-red-100 text-red-800'
                                                 }`}>
-                                                    {customer.is_active ? 'Active' : 'Inactive'}
+                                                    {customer.is_active ? 'Hoạt động' : 'Không hoạt động'}
                                                 </span>
                                             </TableCell>
                                             <TableCell className="py-4 px-6 text-sm text-gray-900">
@@ -182,7 +181,7 @@ export default function CustomerManagement() {
                                                     onClick={() => handleViewDetails(customer.user_id)}
                                                     className="text-blue-600 hover:text-blue-800 font-medium"
                                                 >
-                                                    View Details
+                                                    Xem Chi Tiết
                                                 </button>
                                             </TableCell>
                                         </TableRow>
@@ -193,9 +192,6 @@ export default function CustomerManagement() {
                     </div>
                 </div>
 
-                {/* Pagination controls could be added here */}
-
-                {/* Import the full-featured CustomerDetailsDialog */}
                 <CustomerDetailsDialog
                     customerId={selectedCustomerId}
                     isOpen={isDialogOpen}
