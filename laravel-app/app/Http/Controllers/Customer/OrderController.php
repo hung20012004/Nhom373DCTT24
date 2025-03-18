@@ -349,4 +349,43 @@ class OrderController extends Controller
             'orderHistory' => $order->history,
         ]);
     }
+    public function confirmReceived($orderId)
+{
+    try {
+        $order = Order::where('order_id', $orderId)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
+        if ($order->order_status !== 'delivered') {
+            return response()->json([
+                'error' => 'Đơn hàng chưa được giao hoặc đã được xác nhận trước đó.',
+            ], 400);
+        }
+
+        DB::beginTransaction();
+
+        // Update order status to completed or any other final status you prefer
+        $order->update([
+            'order_status' => 'completed',
+        ]);
+
+        // Create order history entry
+        OrderHistory::create([
+            'order_id' => $order->order_id,
+            'status' => 'completed',
+            'comment' => 'Khách hàng đã xác nhận nhận được hàng',
+            'processed_by_user_id' => Auth::id(),
+        ]);
+
+        DB::commit();
+
+        return redirect()->back()->with('success', 'Đã xác nhận nhận hàng thành công.');
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json([
+            'error' => 'Đã xảy ra lỗi: ' . $e->getMessage(),
+        ], 500);
+    }
+}
 }

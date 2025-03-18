@@ -228,6 +228,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
         Route::post('/', [OrderController::class, 'checkout'])->name('order.checkout');
         Route::get('/confirmation/{order}', [OrderController::class, 'confirmation'])->name('order.confirmation');
         Route::post('/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+        Route::post('/{orderId}/confirm-received', [OrderController::class, 'confirmReceived']);
     });
     Route::prefix('support-requests')->group(function () {
         Route::get('/', [CustomerSupportRequestController::class, 'index'])->name('orders.index');

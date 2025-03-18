@@ -47,6 +47,8 @@ const OrderIndex = ({ orders }) => {
                 return { label: 'Đã giao hàng', color: 'bg-green-500' };
             case 'cancelled':
                 return { label: 'Đã hủy', color: 'bg-red-500' };
+            case 'completed':
+                return { label: 'Đã nhận hàng', color: 'bg-green-500' };
             default:
                 return { label: 'Khác', color: 'bg-gray-500' };
         }
@@ -78,6 +80,7 @@ const OrderIndex = ({ orders }) => {
         { value: 'packed', label: 'Đã đóng hàng' },
         { value: 'shipping', label: 'Đang giao' },
         { value: 'delivered', label: 'Đã giao' },
+        { value: 'completed', label: 'Đã nhận hàng' },
         { value: 'cancelled', label: 'Đã hủy' }
     ];
 

@@ -49,7 +49,8 @@ export default function KanbanOrders() {
         'packed': 'Đã đóng gói',
         'shipping': 'Đang giao hàng',
         'delivered': 'Giao hàng thành công',
-        'shipping_failed': 'Giao không thành công'
+        'shipping_failed': 'Giao không thành công',
+        'completed': 'Đã nhận hàng'
     };
 
     // Tất cả các trạng thái để hiển thị
@@ -64,7 +65,8 @@ export default function KanbanOrders() {
         'packed': 'bg-purple-100 text-purple-800',
         'shipping': 'bg-indigo-100 text-indigo-800',
         'delivered': 'bg-emerald-100 text-emerald-800',
-        'shipping_failed': 'bg-rose-100 text-rose-800'
+        'shipping_failed': 'bg-rose-100 text-rose-800',
+        'completed': 'bg-teal-100 text-teal-800'
     };
 
     const paymentStatusLabels = {
@@ -278,7 +280,7 @@ export default function KanbanOrders() {
                                     size="sm"
                                     className="text-blue-600 hover:text-blue-700"
                                     onClick={(e) => {
-                                        e.stopPropagation(); // Prevent drag events from being triggered
+                                        e.stopPropagation();
                                         openOrderDialog(order.order_id);
                                     }}
                                 >

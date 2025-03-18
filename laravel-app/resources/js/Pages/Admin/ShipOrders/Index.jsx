@@ -28,20 +28,19 @@ export default function KanbanOrders() {
     const [selectedOrderId, setSelectedOrderId] = useState(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-    // Trạng thái có thể cập nhật trong Kanban
     const kanbanStatuses = {
         'packed': 'Đã đóng gói',
         'shipping': 'Đang giao hàng',
         'delivered': 'Giao hàng thành công',
-        'shipping_failed': 'Giao không thành công'
+        'shipping_failed': 'Giao không thành công',
+
     };
 
-    // Trạng thái chỉ xem, không thể cập nhật qua Kanban
+
     const readOnlyStatuses = {
-        // You can add read-only statuses here if needed
+        'completed': 'Hoàn thành'
     };
 
-    // Tất cả các trạng thái để hiển thị
     const allStatuses = { ...kanbanStatuses, ...readOnlyStatuses };
 
     const statusClasses = {
@@ -52,7 +51,8 @@ export default function KanbanOrders() {
         'packed': 'bg-purple-100 text-purple-800',
         'shipping': 'bg-indigo-100 text-indigo-800',
         'delivered': 'bg-emerald-100 text-emerald-800',
-        'shipping_failed': 'bg-rose-100 text-rose-800'
+        'shipping_failed': 'bg-rose-100 text-rose-800',
+        'completed': 'bg-teal-100 text-teal-800' // Added styling for completed status
     };
 
     const paymentStatusLabels = {
@@ -179,6 +179,14 @@ export default function KanbanOrders() {
                     confirmMessage = `Bạn có xác nhận đã giao hàng thành công và đã nhận đủ ${formatCurrency(order.total_amount)} từ khách hàng?`;
                 }
 
+                if (!window.confirm(confirmMessage)) {
+                    return; // Cancel the status update if user doesn't confirm
+                }
+            }
+
+            // Add special confirmation for delivered -> completed
+            if (originalStatus === 'delivered' && newStatus === 'completed') {
+                const confirmMessage = 'Bạn có xác nhận đơn hàng đã hoàn thành và không cần xử lý thêm?';
                 if (!window.confirm(confirmMessage)) {
                     return; // Cancel the status update if user doesn't confirm
                 }
@@ -336,7 +344,7 @@ export default function KanbanOrders() {
                     </div>
                 ) : (
                     <DragDropContext onDragEnd={onDragEnd}>
-                        <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-5 lg:grid-cols-5 gap-4">
                             {/* Các cột trạng thái có thể cập nhật */}
                             {Object.keys(kanbanStatuses).map((status) => (
                                 <div key={status} className="bg-gray-50 rounded-lg p-4">
