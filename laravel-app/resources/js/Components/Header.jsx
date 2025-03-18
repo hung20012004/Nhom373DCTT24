@@ -120,12 +120,12 @@ const Header = () => {
         setIsMobileSearchOpen(false);
     }, [url]);
 
-    // Fixed search handler - uses Inertia router for proper page updates
+    // Fixed search handler - uses Inertia router correctly
     const handleSearch = (e) => {
         e.preventDefault();
         if (searchQuery.trim()) {
             // Use Inertia router to navigate with the search parameter
-            router.visit(`/products?search=${encodeURIComponent(searchQuery)}`);
+            router.visit(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
 
             // Reset search state
             setIsSearchOpen(false);
@@ -475,9 +475,9 @@ const Header = () => {
                                         Thông tin cá nhân
                                     </Link>
                                     <Link
-                                        href="/orders"
+                                        href="/order"
                                         className={getMobileLinkClasses(
-                                            "/orders"
+                                            "/order"
                                         )}
                                     >
                                         Lịch sử mua hàng
