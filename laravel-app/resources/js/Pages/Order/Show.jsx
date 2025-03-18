@@ -36,9 +36,7 @@ import {
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import SupportForm from './SupportForm';
+import SupportForm from '@/Pages/SupportRequests/SupportForm';
 
 const formatCurrency = (value) => {
     if (value == null || isNaN(value)) return '0 ₫';
