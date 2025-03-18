@@ -100,25 +100,43 @@ const OrderDialog = ({ orderId, isOpen, onClose }) => {
     };
 
     const handlePrint = () => {
-        // Create a new window for printing
         const printWindow = window.open("", "_blank");
         const printContent = document.getElementById("print-content").innerHTML;
+        const currentDate = format(new Date(), "dd/MM/yyyy HH:mm", { locale: vi });
 
         printWindow.document.write(`
             <html>
                 <head>
                     <title>Đơn hàng #${order?.order_id || ""}</title>
                     <style>
+                        @page { size: A4; margin: 1cm }
                         body {
                             font-family: Arial, sans-serif;
                             padding: 20px;
+                            line-height: 1.5;
                         }
-                        .status-badge {
-                            padding: 4px 8px;
-                            border-radius: 9999px;
+                        .header {
+                            text-align: center;
+                            margin-bottom: 20px;
+                            padding-bottom: 20px;
+                            border-bottom: 2px solid #000;
+                        }
+                        .shop-info {
                             font-size: 12px;
-                            font-weight: 600;
-                            display: inline-block;
+                            margin-bottom: 10px;
+                        }
+                        .document-title {
+                            font-size: 24px;
+                            font-weight: bold;
+                            margin: 10px 0;
+                        }
+                        .order-info {
+                            margin-bottom: 20px;
+                            display: flex;
+                            justify-content: space-between;
+                        }
+                        .order-info-section {
+                            width: 48%;
                         }
                         table {
                             width: 100%;
@@ -126,74 +144,153 @@ const OrderDialog = ({ orderId, isOpen, onClose }) => {
                             margin-bottom: 20px;
                         }
                         th, td {
-                            border: 1px solid #ddd;
+                            border: 1px solid #000;
                             padding: 8px;
                             text-align: left;
+                            font-size: 12px;
                         }
                         th {
                             background-color: #f2f2f2;
                         }
                         .total-section {
-                            text-align: right;
-                            margin-top: 20px;
+                            width: 300px;
+                            margin-left: auto;
+                            font-size: 12px;
                         }
-                        .signature-section {
-                            display: grid;
-                            grid-template-columns: 1fr 1fr;
-                            gap: 40px;
-                            margin-top: 100px;
-                            text-align: center;
-                        }
-                        .print-title {
-                            text-align: center;
-                            margin-bottom: 20px;
-                        }
-                        .order-header {
-                            display: grid;
-                            grid-template-columns: 1fr 1fr;
-                            gap: 20px;
-                            margin-bottom: 20px;
-                        }
-                        .card {
-                            border: 1px solid #e5e7eb;
-                            border-radius: 8px;
-                            overflow: hidden;
-                            margin-bottom: 16px;
-                        }
-                        .card-header {
-                            background-color: #f9fafb;
-                            padding: 12px 16px;
-                            border-bottom: 1px solid #e5e7eb;
-                        }
-                        .card-title {
-                            margin: 0;
-                            font-size: 16px;
-                            font-weight: bold;
-                        }
-                        .card-content {
-                            padding: 16px;
-                        }
-                        .flex-between {
+                        .total-row {
                             display: flex;
                             justify-content: space-between;
-                            margin-bottom: 8px;
+                            padding: 5px 0;
                         }
+                        .total-final {
+                            font-weight: bold;
+                            border-top: 1px solid #000;
+                            padding-top: 5px;
+                        }
+                        .signature-section {
+                            display: flex;
+                            justify-content: space-between;
+                            margin-top: 50px;
+                            text-align: center;
+                        }
+                        .signature-box {
+                            width: 200px;
+                        }
+                        .signature-title {
+                            font-weight: bold;
+                            margin-bottom: 60px;
+                        }
+                        .text-right { text-align: right; }
+                        .text-center { text-align: center; }
                     </style>
                 </head>
                 <body>
-                    <div class="print-title">
-                        <h1>HÓA ĐƠN BÁN HÀNG</h1>
-                        <p>Mã đơn: #${order?.order_id || ""}</p>
-                    </div>
-                    ${printContent}
-                    <div class="signature-section">
-                        <div>
-                            <p>Người bán hàng</p>
-                            <p style="font-size: 12px; color: #6b7280;">(Ký, họ tên)</p>
+                    <div class="header">
+                        <div class="shop-info">
+                            <div>TÊN CỬA HÀNG THỜI TRANG</div>
+                            <div>Địa chỉ: 123 Đường ABC, Quận XYZ, TP.HCM</div>
+                            <div>Điện thoại: 0123.456.789 - Email: example@email.com</div>
                         </div>
-                        <div>
-                            <p>Người nhận hàng</p>
-                            <p style="font-size: 12px; color: #6b7280;">(Ký, họ tên)</p>
+                        <div class="document-title">PHIẾU MUA HÀNG</div>
+                        <div>Số: #${order?.order_id || ""}</div>
+                    </div>
+
+                    <div class="order-info">
+                        <div class="order-info-section">
+                            <p><strong>Thông tin người nhận:</strong></p>
+                            <p>Họ tên: ${order.shipping_address?.recipient_name}</p>
+                            <p>SĐT: ${order.shipping_address?.phone}</p>
+                            <p>Địa chỉ: ${order.shipping_address?.street_address}, ${
+            order.shipping_address?.ward
+        }, ${order.shipping_address?.district}, ${order.shipping_address?.province}</p>
+                        </div>
+                        <div class="order-info-section">
+                            <p><strong>Thông tin đơn hàng:</strong></p>
+                            <p>Ngày đặt: ${formatDate(order.order_date)}</p>
+                            <p>Ngày in: ${currentDate}</p>
+                            <p>Phương thức thanh toán: ${order.payment_method}</p>
+                        </div>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Tên sản phẩm</th>
+                                <th>Thuộc tính</th>
+                                <th class="text-right">SL</th>
+                                <th class="text-right">Đơn giá</th>
+                                <th class="text-right">Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${order.details
+                                .map(
+                                    (detail, index) => `
+                                <tr>
+                                    <td class="text-center">${index + 1}</td>
+                                    <td>${detail.variant?.product?.name}</td>
+                                    <td>${detail.variant?.attribute_values
+                                        ?.map((attr) => attr.value)
+                                        .join(", ")}</td>
+                                    <td class="text-right">${detail.quantity}</td>
+                                    <td class="text-right">${formatCurrency(
+                                        detail.unit_price
+                                    )}</td>
+                                    <td class="text-right">${formatCurrency(
+                                        detail.subtotal
+                                    )}</td>
+                                </tr>
+                            `
+                                )
+                                .join("")}
+                        </tbody>
+                    </table>
+
+                    <div class="total-section">
+                        <div class="total-row">
+                            <span>Tổng tiền hàng:</span>
+                            <span>${formatCurrency(order.subtotal)}</span>
+                        </div>
+                        ${
+                            order.discount_amount > 0
+                                ? `
+                        <div class="total-row">
+                            <span>Giảm giá:</span>
+                            <span>-${formatCurrency(order.discount_amount)}</span>
+                        </div>
+                        `
+                                : ""
+                        }
+                        <div class="total-row">
+                            <span>Phí vận chuyển:</span>
+                            <span>${formatCurrency(order.shipping_fee)}</span>
+                        </div>
+                        <div class="total-row total-final">
+                            <span>Tổng thanh toán:</span>
+                            <span>${formatCurrency(order.total_amount)}</span>
+                        </div>
+                    </div>
+
+                    ${
+                        order.note
+                            ? `
+                    <div style="margin: 20px 0;">
+                        <strong>Ghi chú:</strong>
+                        <p>${order.note}</p>
+                    </div>
+                    `
+                            : ""
+                    }
+
+                    <div class="signature-section">
+                        <div class="signature-box">
+                            <p class="signature-title">Người lập phiếu</p>
+                            <p>(Ký, họ tên)</p>
+                        </div>
+                        <div class="signature-box">
+                            <p class="signature-title">Người nhận hàng</p>
+                            <p>(Ký, họ tên)</p>
                         </div>
                     </div>
                 </body>
