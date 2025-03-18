@@ -219,7 +219,7 @@ class PaymentController extends Controller
         // Lấy dữ liệu báo cáo theo khoảng thời gian
         $reportData = $this->getReportData($period, $startDate, $endDate);
 
-        return Inertia::render('Payments/Report', [
+        return Inertia::render('Admin/Payments/Report', [
             'reportData' => $reportData,
             'filters' => [
                 'period' => $period,
@@ -265,38 +265,66 @@ class PaymentController extends Controller
     }
 
     private function getReportData($period, $startDate, $endDate)
-    {
-        $groupBy = match($period) {
-            'day' => 'date(created_at)',
-            'week' => 'YEARWEEK(created_at)',
-            'month' => 'YEAR(created_at), MONTH(created_at)',
-            default => 'date(created_at)'
-        };
+{
+    $groupBy = match($period) {
+        'day' => 'date(created_at)',
+        'week' => 'YEARWEEK(created_at)',
+        'month' => 'YEAR(created_at), MONTH(created_at)',
+        default => 'date(created_at)'
+    };
 
-        $codData = Payment::where('payment_method', 'cod')
-            ->where('payment_status', 'confirmed')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->selectRaw("$groupBy as period, SUM(amount) as total")
-            ->groupBy('period')
-            ->orderBy('period')
-            ->get();
+    $formatPeriod = match($period) {
+        'day' => "DATE_FORMAT(created_at, '%Y-%m-%d')",
+        'week' => "CONCAT('Tuần ', WEEK(created_at), ' năm ', YEAR(created_at))",
+        'month' => "DATE_FORMAT(created_at, '%m-%Y')",
+        default => "DATE_FORMAT(created_at, '%Y-%m-%d')"
+    };
 
-        $vnpayData = Payment::where('payment_method', 'vnpay')
-            ->where('payment_status', 'confirmed')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->selectRaw("$groupBy as period, SUM(amount) as total")
-            ->groupBy('period')
-            ->orderBy('period')
-            ->get();
+    $codData = Payment::where('payment_method', 'cod')
+        ->where('payment_status', 'confirmed')
+        ->whereBetween('created_at', [$startDate, $endDate])
+        ->selectRaw("$formatPeriod as period, SUM(amount) as total")
+        ->groupBy('period')
+        ->orderBy('period')
+        ->get();
 
-        return [
-            'cod' => $codData,
-            'vnpay' => $vnpayData,
-            'summary' => [
-                'cod_total' => $codData->sum('total'),
-                'vnpay_total' => $vnpayData->sum('total'),
-                'grand_total' => $codData->sum('total') + $vnpayData->sum('total')
-            ]
+    $vnpayData = Payment::where('payment_method', 'vnpay')
+        ->where('payment_status', 'confirmed')
+        ->whereBetween('created_at', [$startDate, $endDate])
+        ->selectRaw("$formatPeriod as period, SUM(amount) as total")
+        ->groupBy('period')
+        ->orderBy('period')
+        ->get();
+
+    // Tính toán dữ liệu cho bảng và biểu đồ
+    $data = [];
+    $periods = array_unique(array_merge(
+        $codData->pluck('period')->toArray(),
+        $vnpayData->pluck('period')->toArray()
+    ));
+    sort($periods);
+
+    foreach ($periods as $p) {
+        $codTotal = $codData->firstWhere('period', $p)['total'] ?? 0;
+        $vnpayTotal = $vnpayData->firstWhere('period', $p)['total'] ?? 0;
+
+        $data[] = [
+            'period' => $p,
+            'cod_total' => $codTotal,
+            'vnpay_total' => $vnpayTotal,
+            'grand_total' => $codTotal + $vnpayTotal
         ];
     }
+
+    return [
+        'cod' => $codData,
+        'vnpay' => $vnpayData,
+        'data' => $data,
+        'summary' => [
+            'cod_total' => $codData->sum('total'),
+            'vnpay_total' => $vnpayData->sum('total'),
+            'grand_total' => $codData->sum('total') + $vnpayData->sum('total')
+        ]
+    ];
+}
 }
