@@ -5,18 +5,12 @@ import { Button } from '@/Components/ui/button';
 import { Input } from '@/Components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/ui/card';
 import { Badge } from '@/Components/ui/badge';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/Components/ui/select';
 import Breadcrumb from '@/Components/Breadcrumb';
 import axios from 'axios';
 import { Eye, Calendar, Search, LockIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import OrderDialog from '@/Pages/Admin/Orders/OrderDialog';
 
 export default function KanbanOrders() {
     const [orders, setOrders] = useState([]);
@@ -30,6 +24,9 @@ export default function KanbanOrders() {
         total: 0,
         last_page: 1
     });
+    // Add state for dialog
+    const [selectedOrderId, setSelectedOrderId] = useState(null);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
 
     // Trạng thái có thể cập nhật trong Kanban
     const kanbanStatuses = {
@@ -41,7 +38,7 @@ export default function KanbanOrders() {
 
     // Trạng thái chỉ xem, không thể cập nhật qua Kanban
     const readOnlyStatuses = {
-
+        // You can add read-only statuses here if needed
     };
 
     // Tất cả các trạng thái để hiển thị
@@ -165,8 +162,6 @@ export default function KanbanOrders() {
             return;
         }
 
-        // Other existing checks...
-
         if (destination.droppableId !== source.droppableId) {
             const orderId = draggableId;
             const newStatus = destination.droppableId;
@@ -203,6 +198,17 @@ export default function KanbanOrders() {
 
             const success = await handleStatusChange(orderId, newStatus, originalStatus);
         }
+    };
+
+    // Handle opening the order dialog
+    const handleViewOrderDetails = (orderId) => {
+        setSelectedOrderId(orderId);
+        setIsDialogOpen(true);
+    };
+
+    // Handle closing the order dialog
+    const handleCloseDialog = () => {
+        setIsDialogOpen(false);
     };
 
     const breadcrumbItems = [
@@ -262,7 +268,10 @@ export default function KanbanOrders() {
                                     variant="outline"
                                     size="sm"
                                     className="text-blue-600 hover:text-blue-700"
-                                    onClick={() => window.location.href = `/admin/orders/${order.order_id}`}
+                                    onClick={(e) => {
+                                        e.stopPropagation(); // Prevent drag event from triggering
+                                        handleViewOrderDetails(order.order_id);
+                                    }}
                                 >
                                     <Eye className="h-4 w-4 mr-1" />
                                     Chi tiết
@@ -438,6 +447,13 @@ export default function KanbanOrders() {
                         </div>
                     </div>
                 )}
+
+                {/* Order Dialog Component */}
+                <OrderDialog
+                    orderId={selectedOrderId}
+                    isOpen={isDialogOpen}
+                    onClose={handleCloseDialog}
+                />
             </div>
         </AdminLayout>
     );

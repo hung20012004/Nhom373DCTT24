@@ -13,6 +13,7 @@ import {
 } from '@/Components/ui/table';
 import Breadcrumb from '@/Components/Breadcrumb';
 import { ArrowUpDown } from 'lucide-react';
+import OrderDialog from '@/Pages/Admin/Orders/OrderDialog';
 
 export default function Index({ payments, summary, filters }) {
     const { flash } = usePage().props;
@@ -26,6 +27,11 @@ export default function Index({ payments, summary, filters }) {
     const [loading, setLoading] = useState(false);
     const [sortField, setSortField] = useState('created_at');
     const [sortDirection, setSortDirection] = useState('desc');
+
+    // Add state for the dialog
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [selectedOrderId, setSelectedOrderId] = useState(null);
+
     const formatCurrency = (amount, locale = 'vi-VN', currency = 'VND') => {
         return new Intl.NumberFormat(locale, {
           style: 'currency',
@@ -91,6 +97,17 @@ export default function Index({ payments, summary, filters }) {
         if (confirm('Bạn có chắc chắn muốn xác minh thanh toán VNPay này?')) {
             router.post(route('admin.payments.verify-vnpay', paymentId));
         }
+    };
+
+    // Add function to open the dialog
+    const handleOpenOrderDetails = (orderId) => {
+        setSelectedOrderId(orderId);
+        setIsDialogOpen(true);
+    };
+
+    // Add function to close the dialog
+    const handleCloseOrderDetails = () => {
+        setIsDialogOpen(false);
     };
 
     const breadcrumbItems = [
@@ -420,14 +437,14 @@ export default function Index({ payments, summary, filters }) {
                                                             Xác minh VNPay
                                                         </Button>
                                                     )}
-                                                    <Link href={payment.order && payment.order.id ? route('admin.orders.show', payment.order.id) : '#'}>
-                                                        <Button
-                                                            variant="outline"
-                                                            className="text-gray-600 border-gray-300 hover:bg-gray-50"
-                                                        >
-                                                            Chi tiết
-                                                        </Button>
-                                                    </Link>
+
+                                                    <Button
+                                                        variant="outline"
+                                                        className="text-gray-600 border-gray-300 hover:bg-gray-50"
+                                                        onClick={() => handleOpenOrderDetails(payment.order.order_id)}
+                                                    >
+                                                        Chi tiết
+                                                    </Button>
                                                 </div>
                                             </TableCell>
                                         </TableRow>
@@ -450,6 +467,15 @@ export default function Index({ payments, summary, filters }) {
                     )}
                 </div>
             </div>
+
+            {/* Order Details Dialog */}
+            {isDialogOpen && (
+                <OrderDialog
+                    orderId={selectedOrderId}
+                    isOpen={isDialogOpen}
+                    onClose={handleCloseOrderDetails}
+                />
+            )}
         </AdminLayout>
     );
 }

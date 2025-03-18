@@ -17,6 +17,7 @@ import axios from 'axios';
 import { Eye, Calendar, Search, LockIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import OrderDialog from '@/Pages/Admin/Orders/OrderDialog';
 
 export default function KanbanOrders() {
     const [orders, setOrders] = useState([]);
@@ -24,6 +25,8 @@ export default function KanbanOrders() {
     const [search, setSearch] = useState('');
     const [fromDate, setFromDate] = useState('');
     const [toDate, setToDate] = useState('');
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [selectedOrderId, setSelectedOrderId] = useState(null);
     const [pagination, setPagination] = useState({
         current_page: 1,
         per_page: 30,
@@ -73,6 +76,12 @@ export default function KanbanOrders() {
         'failed': 'bg-red-100 text-red-800',
     };
 
+    // Function to open order dialog
+    const openOrderDialog = (orderId) => {
+        setSelectedOrderId(orderId);
+        setIsDialogOpen(true);
+    };
+
     const fetchOrders = async () => {
         try {
             setLoading(true);
@@ -92,7 +101,6 @@ export default function KanbanOrders() {
 
             params.page = pagination.current_page;
             params.per_page = pagination.per_page;
-
 
             params.order_status = Object.keys(allStatuses).join(',');
 
@@ -138,7 +146,6 @@ export default function KanbanOrders() {
         } catch (error) {
             console.error('Lỗi khi cập nhật trạng thái đơn hàng:', error);
             alert(error.response?.data?.message || 'Lỗi khi cập nhật trạng thái đơn hàng');
-
 
             const updatedOrders = [...orders];
             const orderIndex = updatedOrders.findIndex(order => order.order_id.toString() === orderId);
@@ -255,7 +262,7 @@ export default function KanbanOrders() {
                                     variant="outline"
                                     size="sm"
                                     className="text-blue-600 hover:text-blue-700"
-                                    onClick={() => window.location.href = `/admin/orders/${order.order_id}`}
+                                    onClick={() => openOrderDialog(order.order_id)}
                                 >
                                     <Eye className="h-4 w-4 mr-1" />
                                     Chi tiết
@@ -432,6 +439,13 @@ export default function KanbanOrders() {
                     </div>
                 )}
             </div>
+
+            {/* Add OrderDialog component */}
+            <OrderDialog
+                orderId={selectedOrderId}
+                isOpen={isDialogOpen}
+                onClose={() => setIsDialogOpen(false)}
+            />
         </AdminLayout>
     );
 }

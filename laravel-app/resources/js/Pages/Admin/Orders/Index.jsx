@@ -17,6 +17,7 @@ import axios from 'axios';
 import { Eye, Calendar, Search, LockIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import OrderDialog from './OrderDialog'; // Import the OrderDialog component
 
 export default function KanbanOrders() {
     const [orders, setOrders] = useState([]);
@@ -30,6 +31,9 @@ export default function KanbanOrders() {
         total: 0,
         last_page: 1
     });
+    // New state for dialog
+    const [selectedOrderId, setSelectedOrderId] = useState(null);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
 
     // Trạng thái có thể cập nhật trong Kanban
     const kanbanStatuses = {
@@ -76,6 +80,18 @@ export default function KanbanOrders() {
         'paid': 'bg-green-100 text-green-800',
         'refunded': 'bg-purple-100 text-purple-800',
         'failed': 'bg-red-100 text-red-800',
+    };
+
+    // Function to open dialog
+    const openOrderDialog = (orderId) => {
+        setSelectedOrderId(orderId);
+        setIsDialogOpen(true);
+    };
+
+    // Function to close dialog
+    const closeOrderDialog = () => {
+        setIsDialogOpen(false);
+        setSelectedOrderId(null);
     };
 
     const fetchOrders = async () => {
@@ -261,7 +277,10 @@ export default function KanbanOrders() {
                                     variant="outline"
                                     size="sm"
                                     className="text-blue-600 hover:text-blue-700"
-                                    onClick={() => window.location.href = `/admin/orders/${order.order_id}`}
+                                    onClick={(e) => {
+                                        e.stopPropagation(); // Prevent drag events from being triggered
+                                        openOrderDialog(order.order_id);
+                                    }}
                                 >
                                     <Eye className="h-4 w-4 mr-1" />
                                     Chi tiết
@@ -437,6 +456,13 @@ export default function KanbanOrders() {
                         </div>
                     </div>
                 )}
+
+                {/* Order Dialog Component */}
+                <OrderDialog
+                    orderId={selectedOrderId}
+                    isOpen={isDialogOpen}
+                    onClose={closeOrderDialog}
+                />
             </div>
         </AdminLayout>
     );
