@@ -1,75 +1,76 @@
-import React from 'react';
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
-import { Transition } from '@headlessui/react';
-import { Link, useForm } from '@inertiajs/react';
+import React from "react";
+import InputError from "@/Components/InputError";
+import InputLabel from "@/Components/InputLabel";
+import PrimaryButton from "@/Components/PrimaryButton";
+import TextInput from "@/Components/TextInput";
+import { Transition } from "@headlessui/react";
+import { Link, useForm } from "@inertiajs/react";
 
 export default function UpdateProfileInformation({
     mustVerifyEmail,
     status,
     user,
-    className = '',
+    className = "",
     translations = {}, // Add translations prop with default empty object
 }) {
     const { data, setData, post, errors, processing, recentlySuccessful } =
         useForm({
-            full_name: user.profile?.full_name || '',
+            full_name: user.profile?.full_name || "",
             email: user.email,
-            phone: user.profile?.phone || '',
+            phone: user.profile?.phone || "",
             date_of_birth: user.profile?.date_of_birth
-            ? user.profile.date_of_birth.split('T')[0]
-            : '',
-            gender: user.profile?.gender || '',
+                ? user.profile.date_of_birth.split("T")[0]
+                : "",
+            gender: user.profile?.gender || "",
             avatar_url: null,
         });
 
     const submit = (e) => {
         e.preventDefault();
 
-        post(route('profile.update'), {
+        post(route("profile.update"), {
             forceFormData: true,
         });
     };
 
     // Merge default translations with provided translations
     const t = {
-        title: 'Thông tin cá nhân',
-        description: 'Cập nhật thông tin tài khoản và địa chỉ email của bạn.',
-        fullNameLabel: 'Họ và tên',
-        emailLabel: 'Địa chỉ Email',
-        phoneLabel: 'Số điện thoại',
-        dobLabel: 'Ngày sinh',
-        genderLabel: 'Giới tính',
-        avatarLabel: 'Ảnh đại diện',
-        saveButton: 'Lưu thay đổi',
-        savingButton: 'Đang lưu...',
-        successMessage: 'Lưu thành công.',
+        title: "Thông tin cá nhân",
+        description: "Cập nhật thông tin tài khoản và địa chỉ email của bạn.",
+        fullNameLabel: "Họ và tên",
+        emailLabel: "Địa chỉ Email",
+        phoneLabel: "Số điện thoại",
+        dobLabel: "Ngày sinh",
+        genderLabel: "Giới tính",
+        avatarLabel: "Ảnh đại diện",
+        saveButton: "Lưu thay đổi",
+        savingButton: "Đang lưu...",
+        successMessage: "Lưu thành công.",
         genderOptions: {
-            default: 'Chọn giới tính',
-            male: 'Nam',
-            female: 'Nữ',
-            other: 'Khác'
+            default: "Chọn giới tính",
+            male: "Nam",
+            female: "Nữ",
+            other: "Khác",
         },
         emailVerification: {
-            unverified: 'Địa chỉ email của bạn chưa được xác minh.',
-            resendLink: 'Nhấn vào đây để gửi lại email xác minh.',
-            linkSent: 'Một liên kết xác minh mới đã được gửi đến địa chỉ email của bạn.'
+            unverified: "Địa chỉ email của bạn chưa được xác minh.",
+            resendLink: "Nhấn vào đây để gửi lại email xác minh.",
+            linkSent:
+                "Một liên kết xác minh mới đã được gửi đến địa chỉ email của bạn.",
         },
-        ...translations // Allow overriding of default translations
+        ...translations, // Allow overriding of default translations
     };
 
     return (
-        <section className={`${className} bg-white rounded-2xl shadow-xl p-6 md:p-8`}>
+        <section
+            className={`${className} bg-white rounded-2xl shadow-xl p-6 md:p-8`}
+        >
             <header className="mb-6">
                 <h2 className="text-2xl font-semibold text-gray-800">
                     {t.title}
                 </h2>
 
-                <p className="mt-2 text-sm text-gray-600">
-                    {t.description}
-                </p>
+                <p className="mt-2 text-sm text-gray-600">{t.description}</p>
             </header>
 
             <form
@@ -89,13 +90,18 @@ export default function UpdateProfileInformation({
                             id="full_name"
                             className="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                             value={data.full_name}
-                            onChange={(e) => setData('full_name', e.target.value)}
+                            onChange={(e) =>
+                                setData("full_name", e.target.value)
+                            }
                             required
                             isFocused
                             autoComplete="name"
                         />
 
-                        <InputError className="mt-2 text-sm" message={errors.full_name} />
+                        <InputError
+                            className="mt-2 text-sm"
+                            message={errors.full_name}
+                        />
                     </div>
 
                     <div>
@@ -110,13 +116,16 @@ export default function UpdateProfileInformation({
                             type="email"
                             className="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                             value={data.email}
-                            onChange={(e) => setData('email', e.target.value)}
+                            onChange={(e) => setData("email", e.target.value)}
                             required
                             autoComplete="email"
                             readOnly
                         />
 
-                        <InputError className="mt-2 text-sm" message={errors.email} />
+                        <InputError
+                            className="mt-2 text-sm"
+                            message={errors.email}
+                        />
                     </div>
                 </div>
 
@@ -133,11 +142,22 @@ export default function UpdateProfileInformation({
                             type="tel"
                             className="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                             value={data.phone}
-                            onChange={(e) => setData('phone', e.target.value)}
+                            onChange={(e) => setData("phone", e.target.value)}
+                            onBlur={(e) => {
+                                const value = e.target.value;
+                                if (!/^0\d{9}$/.test(value)) {
+                                    setData("phone", "");
+                                }
+                            }}
                             autoComplete="tel"
                         />
+                        {data.phone && !/^0\d{9}$/.test(data.phone) && (
+                            <InputError
+                                className="mt-2 text-sm"
+                                message="Số điện thoại phải có 10 số và bắt đầu bằng 0."
+                            />
+                        )}
 
-                        <InputError className="mt-2 text-sm" message={errors.phone} />
                     </div>
 
                     <div>
@@ -152,10 +172,15 @@ export default function UpdateProfileInformation({
                             type="date"
                             className="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                             value={data.date_of_birth}
-                            onChange={(e) => setData('date_of_birth', e.target.value)}
+                            onChange={(e) =>
+                                setData("date_of_birth", e.target.value)
+                            }
                         />
 
-                        <InputError className="mt-2 text-sm" message={errors.date_of_birth} />
+                        <InputError
+                            className="mt-2 text-sm"
+                            message={errors.date_of_birth}
+                        />
                     </div>
                 </div>
 
@@ -171,15 +196,22 @@ export default function UpdateProfileInformation({
                             id="gender"
                             className="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                             value={data.gender}
-                            onChange={(e) => setData('gender', e.target.value)}
+                            onChange={(e) => setData("gender", e.target.value)}
                         >
                             <option value="">{t.genderOptions.default}</option>
                             <option value="male">{t.genderOptions.male}</option>
-                            <option value="female">{t.genderOptions.female}</option>
-                            <option value="other">{t.genderOptions.other}</option>
+                            <option value="female">
+                                {t.genderOptions.female}
+                            </option>
+                            <option value="other">
+                                {t.genderOptions.other}
+                            </option>
                         </select>
 
-                        <InputError className="mt-2 text-sm" message={errors.gender} />
+                        <InputError
+                            className="mt-2 text-sm"
+                            message={errors.gender}
+                        />
                     </div>
 
                     <div>
@@ -198,11 +230,16 @@ export default function UpdateProfileInformation({
                                 file:text-sm file:font-semibold
                                 file:bg-indigo-50 file:text-indigo-700
                                 hover:file:bg-indigo-100"
-                            onChange={(e) => setData('avatar_url', e.target.files[0])}
+                            onChange={(e) =>
+                                setData("avatar_url", e.target.files[0])
+                            }
                             accept="image/*"
                         />
 
-                        <InputError className="mt-2 text-sm" message={errors.avatar_url} />
+                        <InputError
+                            className="mt-2 text-sm"
+                            message={errors.avatar_url}
+                        />
                     </div>
                 </div>
 
@@ -211,7 +248,7 @@ export default function UpdateProfileInformation({
                         <p className="text-yellow-700">
                             {t.emailVerification.unverified}
                             <Link
-                                href={route('verification.send')}
+                                href={route("verification.send")}
                                 method="post"
                                 as="button"
                                 className="ml-2 text-indigo-600 hover:text-indigo-900 font-semibold"
@@ -220,7 +257,7 @@ export default function UpdateProfileInformation({
                             </Link>
                         </p>
 
-                        {status === 'verification-link-sent' && (
+                        {status === "verification-link-sent" && (
                             <div className="mt-2 text-sm text-green-600">
                                 {t.emailVerification.linkSent}
                             </div>
