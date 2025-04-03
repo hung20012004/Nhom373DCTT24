@@ -8,6 +8,7 @@ use App\Http\Controllers\Customer\WishlistController;
 use App\Http\Controllers\Customer\ShippingAddressController;
 use App\Http\Controllers\Customer\ProductReviewController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ApiKeyController;
 use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ReportController;
@@ -43,7 +44,10 @@ Route::get('/about', function () {
 Route::get('/products', function () {
     return Inertia::render('Products');
 });
-
+Route::middleware(['auth'])->group(function () {
+    Route::get('/api-key', [ApiKeyController::class, 'show'])->name('api-key.show');
+    Route::post('/api-key/regenerate', [ApiKeyController::class, 'regenerate'])->name('api-key.regenerate');
+});
 Route::middleware(['auth', 'verified','check.role'])->prefix('admin')->group(function () {
     Route::get('/customers', function () {
         return Inertia::render('Admin/Customers/Index');
@@ -226,17 +230,15 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
         Route::get('/{order}', [OrderController::class, 'show'])->name('orders.show');
         Route::get('/confirmation/{order}', [OrderController::class, 'confirmation'])->name('order.confirmation');
         Route::post('/', [OrderController::class, 'checkout'])->name('order.checkout');
-        Route::get('/confirmation/{order}', [OrderController::class, 'confirmation'])->name('order.confirmation');
         Route::post('/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
         Route::post('/{orderId}/confirm-received', [OrderController::class, 'confirmReceived']);
     });
     Route::prefix('support-requests')->group(function () {
-        Route::get('/', [CustomerSupportRequestController::class, 'index'])->name('orders.index');
-        Route::get('/{order}', [CustomerSupportRequestController::class, 'show'])->name('orders.show');
-        Route::get('/confirmation/{order}', [CustomerSupportRequestController::class, 'confirmation'])->name('order.confirmation');
-        Route::post('/', [CustomerSupportRequestController::class, 'checkout'])->name('order.checkout');
-        Route::get('/confirmation/{order}', [CustomerSupportRequestController::class, 'confirmation'])->name('order.confirmation');
-        Route::post('/{order}/cancel', [CustomerSupportRequestController::class, 'cancel'])->name('orders.cancel');
+        Route::get('/', [CustomerSupportRequestController::class, 'index'])->name('support-orders.index');
+        Route::get('/{order}', [CustomerSupportRequestController::class, 'show'])->name('support-orders.show');
+        Route::post('/', [CustomerSupportRequestController::class, 'checkout'])->name('support-order.checkout');
+        Route::get('/confirmation/{order}', [CustomerSupportRequestController::class, 'confirmation'])->name('support-order.confirmation');
+        Route::post('/{order}/cancel', [CustomerSupportRequestController::class, 'cancel'])->name('support-orders.cancel');
     });
     Route::post('/products/{productId}/reviews', [ProductReviewController::class, 'store']);
     Route::put('/products/{productId}/reviews/{reviewId}', [ProductReviewController::class, 'update']);
