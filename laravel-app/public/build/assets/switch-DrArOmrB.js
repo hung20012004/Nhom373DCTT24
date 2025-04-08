@@ -1,0 +1,34 @@
+import{r as i,j as t}from"./app-DM5lWH7w.js";const c=i.forwardRef(({checked:e,onCheckedChange:a,disabled:s,className:r="",...n},o)=>t.jsx("button",{type:"button",role:"switch","aria-checked":e,"data-state":e?"checked":"unchecked",disabled:s,onClick:()=>a(!e),className:`
+        peer
+        inline-flex
+        h-6
+        w-11
+        shrink-0
+        cursor-pointer
+        items-center
+        rounded-full
+        border-2
+        border-transparent
+        transition-colors
+        focus-visible:outline-none
+        focus-visible:ring-2
+        focus-visible:ring-offset-2
+        focus-visible:ring-offset-white
+        disabled:cursor-not-allowed
+        disabled:opacity-50
+        data-[state=checked]:bg-blue-600
+        data-[state=unchecked]:bg-gray-200
+        ${r}
+      `,...n,ref:o,children:t.jsx("span",{"data-state":e?"checked":"unchecked",className:`
+          pointer-events-none
+          block
+          h-5
+          w-5
+          rounded-full
+          bg-white
+          shadow-lg
+          ring-0
+          transition-transform
+          data-[state=checked]:translate-x-5
+          data-[state=unchecked]:translate-x-0
+        `})}));c.displayName="Switch";export{c as S};
