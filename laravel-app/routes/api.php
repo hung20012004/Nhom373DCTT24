@@ -34,7 +34,7 @@ Route::prefix('v1')->group(function () {
     Route::middleware(['api.key'])->group(function () {
         Route::prefix('cart')->group(function () {
             Route::get('/', [CartController::class, 'index'])->name('apicart.index');
-            Route::post('/add', [CartController::class, 'add'])->name('apicart.add');
+            Route::post('/add', [CartController::class, 'add'])->name('apicarttest.add');
             Route::put('/{cartItem}', [CartController::class, 'update'])->name('apicart.update');
             Route::delete('/{cartItem}', [CartController::class, 'remove'])->name('apicart.remove');
             Route::delete('/', [CartController::class, 'clear'])->name('apicart.clear');
