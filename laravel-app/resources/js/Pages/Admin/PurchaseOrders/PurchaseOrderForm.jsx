@@ -344,7 +344,7 @@ export default function BieuMauDonDatHang({ purchaseOrder, onClose, onSuccess })
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="pending">Chờ xử lý</SelectItem>
-                                    <SelectItem value="processing">Đã đặt hàng</SelectItem>
+                                    <SelectItem value="processing">Đang xử lí</SelectItem>
                                     <SelectItem value="completed">Đã nhận hàng</SelectItem>
                                     <SelectItem value="cancelled">Đã hủy</SelectItem>
                                 </SelectContent>
