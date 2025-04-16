@@ -37,6 +37,8 @@ class ReportController extends Controller
         ]);
     }
 
+    
+
     public function getReportData(Request $request)
     {
         $type = $request->input('type', 'sales');

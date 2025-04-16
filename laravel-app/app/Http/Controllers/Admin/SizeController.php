@@ -29,6 +29,8 @@ class SizeController extends Controller
         }
     }
 
+
+    
     public function update(Request $request, $sizeId)
     {
         $rules = [
