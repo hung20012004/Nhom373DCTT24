@@ -33,7 +33,7 @@ Route::get('/wards/{districtCode}', function ($districtCode) {
 Route::prefix('v1')->group(function () {
     Route::middleware(['api.key'])->group(function () {
         Route::prefix('cart')->group(function () {
-            Route::get('/', [CartController::class, 'index'])->name('apicart.index');
+            Route::get('/', [CartController::class, 'index'])->name('apicart.index1');
             Route::post('/add', [CartController::class, 'add'])->name('apicarttest.add');
             Route::put('/{cartItem}', [CartController::class, 'update'])->name('apicartconflig.update');
             Route::delete('/{cartItem}', [CartController::class, 'remove'])->name('apicart.remove');
