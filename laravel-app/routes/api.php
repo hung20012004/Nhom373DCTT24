@@ -115,37 +115,37 @@ Route::prefix('v2')->group(function () {
         });
         Route::prefix('categories')->group(function () {
             Route::post('/', [AdminCategoryController::class, 'store']);
-            Route::post('/{categoryId}', [AdminCategoryController::class, 'update']);
+            Route::put('/{categoryId}', [AdminCategoryController::class, 'update']);
             Route::delete('/{categoryId}', [AdminCategoryController::class, 'destroy']);
         });
         Route::prefix('colors')->group(function () {
             Route::post('/', [AdminColorController::class, 'store']);
-            Route::post('/{colorId}', [AdminColorController::class, 'update']);
+            Route::put('/{colorId}', [AdminColorController::class, 'update']);
             Route::delete('/{colorId}', [AdminColorController::class, 'destroy']);
         });
         Route::prefix('products')->group(function () {
             Route::post('/', [AdminProductController::class, 'store']);
-            Route::post('/{productId}', [AdminProductController::class, 'update']);
+            Route::put('/{productId}', [AdminProductController::class, 'update']);
             Route::delete('/{productId}', [AdminProductController::class, 'destroy']);
         });
         Route::prefix('materials')->group(function () {
             Route::post('/', [AdminMaterialController::class, 'store']);
-            Route::post('/{materialId}', [AdminMaterialController::class, 'update']);
+            Route::put('/{materialId}', [AdminMaterialController::class, 'update']);
             Route::delete('/{materialId}', [AdminMaterialController::class, 'destroy']);
         });
         Route::prefix('suppliers')->group(function () {
             Route::post('/', [AdminSupplierController::class, 'store']);
-            Route::post('/{supplierId}', [AdminSupplierController::class, 'update']);
+            Route::put('/{supplierId}', [AdminSupplierController::class, 'update']);
             Route::delete('/{supplierId}', [AdminSupplierController::class, 'destroy']);
         });
         Route::prefix('sizes')->group(function () {
             Route::post('/', [AdminSizeController::class, 'store']);
-            Route::post('/{sizeId}', [AdminSizeController::class, 'update']);
+            Route::put('/{sizeId}', [AdminSizeController::class, 'update']);
             Route::delete('/{sizeId}', [AdminSizeController::class, 'destroy']);
         });
         Route::prefix('tags')->group(function () {
             Route::post('/', [AdminTagController::class, 'store']);
-            Route::post('/{tagId}', [AdminTagController::class, 'update']);
+            Route::put('/{tagId}', [AdminTagController::class, 'update']);
             Route::delete('/{tagId}', [AdminTagController::class, 'destroy']);
         });
         Route::prefix('users')->group(function () {
@@ -170,58 +170,4 @@ Route::prefix('v2')->group(function () {
             Route::delete('/{id}', [AdminSupportRequestController::class, 'destroy']);
         });
     });
-
-
-    Route::middleware(['api.key'])->group(function () {
-        Route::prefix('profile')->group(function () {
-            Route::get('/', [ProfileController::class, 'edit'])->name('profile.edit');
-            Route::post('/', [ProfileController::class, 'update'])->name('profile.update');
-            Route::delete('/', [ProfileController::class, 'destroy'])->name('profile.destroy');
-        });
-        Route::prefix('cart')->group(function () {
-            Route::get('/', [AdminCartController::class, 'index'])->name('cart.index');
-            Route::post('/add', [AdminCartController::class, 'add'])->name('cart.add');
-            Route::put('/{cartItem}', [AdminCartController::class, 'update'])->name('cart.update');
-            Route::delete('/{cartItem}', [AdminCartController::class, 'remove'])->name('cart.remove');
-            Route::delete('/', [AdminCartController::class, 'clear'])->name('cart.clear');
-        });
-        Route::prefix('shipping-addresses')->group(function () {
-            Route::get('/', [ShippingAddressController::class, 'index']);
-            Route::post('/', [ShippingAddressController::class, 'store']);
-            Route::put('/{address}', [ShippingAddressController::class, 'update']);
-            Route::delete('/{address}', [ShippingAddressController::class, 'destroy']);
-            Route::put('/{address}/set-default', [ShippingAddressController::class, 'setDefault']);
-        });
-        Route::prefix('order')->group(function () {
-            Route::get('/', [CustomerOrderController::class, 'index'])->name('orders.index');
-            Route::get('/{order}', [CustomerOrderController::class, 'show'])->name('orders.show');
-            Route::get('/confirmation/{order}', [CustomerOrderController::class, 'confirmation'])->name('order.confirmation');
-            Route::post('/', [CustomerOrderController::class, 'checkout'])->name('order.checkout');
-            Route::post('/{order}/cancel', [CustomerOrderController::class, 'cancel'])->name('orders.cancel');
-            Route::post('/{orderId}/confirm-received', [CustomerOrderController::class, 'confirmReceived']);
-        });
-        Route::prefix('support-requests')->group(function () {
-            Route::get('/', [CustomerSupportRequestController::class, 'index'])->name('support-orders.index');
-            Route::get('/{order}', [CustomerSupportRequestController::class, 'show'])->name('support-orders.show');
-            Route::post('/', [CustomerSupportRequestController::class, 'checkout'])->name('support-order.checkout');
-            Route::get('/confirmation/{order}', [CustomerSupportRequestController::class, 'confirmation'])->name('support-order.confirmation');
-            Route::post('/{order}/cancel', [CustomerSupportRequestController::class, 'cancel'])->name('support-orders.cancel');
-        });
-        Route::post('/products/{productId}/reviews', [ProductReviewController::class, 'store']);
-        Route::put('/products/{productId}/reviews/{reviewId}', [ProductReviewController::class, 'update']);
-        Route::delete('/products/{productId}/reviews/{reviewId}', [ProductReviewController::class, 'destroy']);
-
-    });
-    Route::prefix('wishlist')->group(function () {
-        Route::get('/', [WishlistController::class, 'index']);
-        Route::post('/add', [WishlistController::class, 'add']);
-        Route::delete('/{id}', [WishlistController::class, 'remove']);
-        Route::delete('/', [WishlistController::class, 'clear']);
-        Route::get('/check/{productId}', [WishlistController::class, 'check']);
-    });
-    Route::prefix('support-requests')->group(function () {
-        Route::post('/{orderId}', [AdminSupportRequestController::class, 'store']);
-    });
-    Route::get('/products/{productId}/reviews', [ProductReviewController::class, 'getProductReviews']);
-    Route::get('/products/{productId}/reviews/user', [ProductReviewController::class, 'getUserReview']);
 });
