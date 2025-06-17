@@ -1,6 +1,5 @@
 <?php
 use App\Http\Controllers\API\CategoryController;
-use App\Http\Controllers\API\CartController;
 use App\Http\Controllers\API\ProductController;
 use App\Http\Controllers\API\MaterialController;
 use App\Http\Controllers\API\SupplierController;
@@ -15,6 +14,7 @@ use App\Http\Controllers\API\SupportRequestController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Http;
 
+// These routes should be directly under the /api prefix
 Route::get('/provinces', function () {
     $response = Http::get('https://provinces.open-api.vn/api/p/');
     return $response->json();
@@ -31,6 +31,7 @@ Route::get('/wards/{districtCode}', function ($districtCode) {
 });
 
 Route::prefix('v1')->group(function () {
+<<<<<<< HEAD
     Route::middleware(['api.key'])->group(function () {
         Route::prefix('cart')->group(function () {
             Route::get('/', [CartController::class, 'index'])->name('apicart.index');
@@ -40,6 +41,8 @@ Route::prefix('v1')->group(function () {
             Route::delete('/', [CartController::class, 'clear'])->name('apicart.clear');
         });
     });
+=======
+>>>>>>> parent of d8a929f (update api_key)
     Route::get('/categories', [CategoryController::class, 'index']);
     Route::get('/categories/featured', [CategoryController::class, 'featured']);
     Route::get('/colors', [ColorController::class, 'index']);

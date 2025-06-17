@@ -3,8 +3,6 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use App\Http\Middleware\ApiKeyMiddleware;
-use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -20,13 +18,8 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         $middleware->alias([
             'check.role' => \App\Http\Middleware\CheckRole::class,
-            'api.key' => ApiKeyMiddleware::class,
-            'auth:sanctum' => EnsureFrontendRequestsAreStateful::class
         ]);
-        $middleware->validateCsrfTokens(except: [
-            'api/login',
-            'api/register',
-        ]);
+        //
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
