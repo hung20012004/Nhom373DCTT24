@@ -5,24 +5,16 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Inertia\Inertia;
 
 class CustomerController extends Controller
 {
-    protected function getUserId(Request $request = null)
-    {
-        if (Auth::check()) {
-            return Auth::id();
-        }
-        return $request->attributes->get('user')->id;
-    }
-
+    // Trong App\Http\Controllers\Admin\CustomerController.php
     public function index(Request $request)
     {
         try {
+            // Enable query logging for debugging
             DB::enableQueryLog();
 
             $query = User::query()
@@ -95,16 +87,7 @@ class CustomerController extends Controller
                 'queries' => DB::getQueryLog()
             ]);
 
-            if ($request->wantsJson()) {
-                return response()->json([
-                    'status' => 'success',
-                    'data' => $customers
-                ]);
-            }
-
-            return Inertia::render('Admin/Customers/Index', [
-                'customers' => $customers
-            ]);
+            return response()->json($customers);
 
         } catch (\Exception $e) {
             Log::error('Error in CustomerController@index', [
@@ -113,86 +96,44 @@ class CustomerController extends Controller
                 'request' => $request->all()
             ]);
 
-            if ($request->wantsJson()) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Error fetching customers',
-                    'error' => $e->getMessage(),
-                    'debug_info' => [
-                        'file' => $e->getFile(),
-                        'line' => $e->getLine()
-                    ]
-                ], 500);
-            }
-
-            return redirect()->back()->with('error', 'Error fetching customers');
+            return response()->json([
+                'message' => 'Error fetching customers',
+                'error' => $e->getMessage(),
+                'debug_info' => [
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine()
+                ]
+            ], 500);
         }
     }
+    public function show($id)
+{
+    try {
+        DB::enableQueryLog();
 
-    public function show(Request $request, $id)
-    {
-        try {
-            DB::enableQueryLog();
+        // First find the user with the customer role
+        $user = User::where('id', $id)
+            ->join('roles', 'users.role_id', '=', 'roles.role_id')
+            ->where('roles.name', '=', 'customer')
+            ->firstOrFail();
 
-            // First find the user with the customer role
-            $user = User::where('id', $id)
-                ->join('roles', 'users.role_id', '=', 'roles.role_id')
-                ->where('roles.name', '=', 'customer')
-                ->firstOrFail();
+        // Then load the user with all required relationships
+        $customer = User::where('id', $user->id)
+            ->with([
+                'profile',
+                'shippingAddresses' => function($query) {
+                    $query->where('is_default', true);
+                },
+                'orders' => function ($query) {
+                    $query->latest()->limit(5);
+                }
+            ])
+            ->first();
 
-            // Then load the user with all required relationships
-            $customer = User::where('id', $user->id)
-                ->with([
-                    'profile',
-                    'shippingAddresses' => function($query) {
-                        $query->where('is_default', true);
-                    },
-                    'orders' => function ($query) {
-                        $query->latest()->limit(5);
-                    }
-                ])
-                ->first();
-
-            $customerData = $this->transformCustomerData($customer);
-
-            if ($request->wantsJson()) {
-                return response()->json([
-                    'status' => 'success',
-                    'data' => $customerData
-                ]);
-            }
-
-            return Inertia::render('Admin/Customers/Show', [
-                'customer' => $customerData
-            ]);
-
-        } catch (\Exception $e) {
-            Log::error('Error in CustomerController@show', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'customer_id' => $id
-            ]);
-
-            if ($request->wantsJson()) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Error fetching customer details',
-                    'error' => $e->getMessage(),
-                    'debug_info' => [
-                        'file' => $e->getFile(),
-                        'line' => $e->getLine()
-                    ]
-                ], 500);
-            }
-
-            return redirect()->back()->with('error', 'Error fetching customer details');
-        }
-    }
-
-    protected function transformCustomerData($customer)
-    {
+        // Transform the data to match the frontend expectations
         $customerData = $customer->toArray();
 
+        // Add fields from profile
         if ($customer->profile) {
             $customerData['full_name'] = $customer->profile->full_name ?? null;
             $customerData['phone'] = $customer->profile->phone ?? null;
@@ -200,12 +141,38 @@ class CustomerController extends Controller
             $customerData['date_of_birth'] = $customer->profile->date_of_birth ?? null;
         }
 
+        // Set user_id explicitly
         $customerData['user_id'] = $customer->id;
+
+        // Handle the default shipping address
         $customerData['defaultShippingAddress'] = !empty($customer->shippingAddresses)
             ? $customer->shippingAddresses[0]
             : null;
 
-        return $customerData;
+        Log::info('Show customer data prepared:', [
+            'has_profile' => isset($customer->profile),
+            'has_address' => !empty($customerData['defaultShippingAddress']),
+            'orders_count' => count($customerData['orders'] ?? [])
+        ]);
+
+        return response()->json($customerData);
+
+    } catch (\Exception $e) {
+        Log::error('Error in CustomerController@show', [
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+            'customer_id' => $id
+        ]);
+
+        return response()->json([
+            'message' => 'Error fetching customer details',
+            'error' => $e->getMessage(),
+            'debug_info' => [
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]
+        ], 500);
     }
+}
 }
 

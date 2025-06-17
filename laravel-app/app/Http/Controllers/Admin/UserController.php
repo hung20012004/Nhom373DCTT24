@@ -14,8 +14,6 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\Auth\Events\Registered;
-use Inertia\Inertia;
-
 class UserController extends Controller
 {
     public function index(Request $request)
@@ -32,6 +30,7 @@ class UserController extends Controller
             $query->where(function ($q) use ($searchTerm) {
                 $q->where('name', 'like', "%{$searchTerm}%")
                     ->orWhere('email', 'like', "%{$searchTerm}%");
+
             });
         }
 
@@ -62,26 +61,18 @@ class UserController extends Controller
 
         $users = $query->paginate($perPage);
 
-        $data = [
+        return [
             'data' => UserResource::collection($users),
-            'meta' => [
-                'current_page' => $users->currentPage(),
-                'per_page' => $users->perPage(),
-                'last_page' => $users->lastPage(),
-                'total' => $users->total(),
-                'sort' => [
-                    'field' => $sortField,
-                    'direction' => $sortDirection
-                ]
+            'current_page' => $users->currentPage(),
+            'per_page' => $users->perPage(),
+            'last_page' => $users->lastPage(),
+            'total' => $users->total(),
+            'sort' => [
+                'field' => $sortField,
+                'direction' => $sortDirection
             ],
             'roles' => Role::where('name', '!=', 'Customer')->get(['role_id', 'name'])
         ];
-
-        if ($request->wantsJson()) {
-            return response()->json($data);
-        }
-
-        return Inertia::render('Admin/Users/Index', $data);
     }
 
     public function store(Request $request)
@@ -123,55 +114,17 @@ class UserController extends Controller
             event(new Registered($user));
 
             DB::commit();
-
-            if ($request->wantsJson()) {
-                return response()->json([
-                    'status' => 'success',
-                    'data' => new UserResource($user->load('profile'))
-                ], 201);
-            }
-
-            return redirect()->back()->with('success', 'User created successfully');
+            return response()->json(new UserResource($user->load('profile')), 201);
         } catch (\Exception $e) {
             DB::rollBack();
-
-            if ($request->wantsJson()) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Error creating user: ' . $e->getMessage()
-                ], 500);
-            }
-
-            return redirect()->back()->with('error', 'Error creating user');
+            return response()->json(['message' => 'Lỗi khi tạo nhân viên: ' . $e->getMessage()], 500);
         }
     }
 
-    public function show(Request $request, $id)
+    public function show($id)
     {
-        try {
-            $user = User::with(['profile', 'role'])->findOrFail($id);
-            $data = new UserResource($user);
-
-            if ($request->wantsJson()) {
-                return response()->json([
-                    'status' => 'success',
-                    'data' => $data
-                ]);
-            }
-
-            return Inertia::render('Admin/Users/Show', [
-                'user' => $data
-            ]);
-        } catch (\Exception $e) {
-            if ($request->wantsJson()) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Error fetching user details'
-                ], 500);
-            }
-
-            return redirect()->back()->with('error', 'Error fetching user details');
-        }
+        $user = User::with(['profile', 'role'])->findOrFail($id);
+        return response()->json(new UserResource($user));
     }
 
     public function update(Request $request, $id)
@@ -245,79 +198,50 @@ class UserController extends Controller
             }
 
             DB::commit();
-
-            if ($request->wantsJson()) {
-                return response()->json([
-                    'status' => 'success',
-                    'data' => new UserResource($user->load('profile'))
-                ]);
-            }
-
-            return redirect()->back()->with('success', 'User updated successfully');
+            return response()->json(new UserResource($user->load('profile')));
         } catch (\Exception $e) {
             DB::rollBack();
-
-            if ($request->wantsJson()) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Error updating user: ' . $e->getMessage()
-                ], 500);
-            }
-
-            return redirect()->back()->with('error', 'Error updating user');
+            return response()->json(['message' => 'Lỗi khi cập nhật nhân viên: ' . $e->getMessage()], 500);
         }
     }
 
-    public function destroy(Request $request, $id)
+    public function destroy($id)
     {
         DB::beginTransaction();
+
         try {
             $user = User::findOrFail($id);
 
-            // Kiểm tra các ràng buộc trước khi xóa
-            if ($user->orders()->exists()) {
-                throw new \Exception('Cannot delete user because they have associated orders');
+            // Check if user has related data in inventory_history
+            if ($user->inventoryHistory()->exists()) {
+                return response()->json([
+                    'message' => 'Không thể xóa nhân viên vì có lịch sử kho liên quan'
+                ], 400);
             }
 
-            // Xóa các dữ liệu liên quan theo thứ tự
+            // Check if user has related data in orders
+            if ($user->orders()->exists()) {
+                return response()->json([
+                    'message' => 'Không thể xóa nhân viên vì có đơn hàng liên quan'
+                ], 400);
+            }
+
+            // Delete profile first (if exists)
             if ($user->profile) {
                 $user->profile->delete();
             }
 
-            // Xóa các shipping addresses
-            $user->shippingAddresses()->delete();
-
-            // Xóa cart items và cart
-            if ($user->cart) {
-                $user->cart->items()->delete();
-                $user->cart->delete();
-            }
-
-            // Cuối cùng xóa user
+            // Delete user
             $user->delete();
 
             DB::commit();
-
-            if ($request->wantsJson()) {
-                return response()->json([
-                    'status' => 'success',
-                    'message' => 'User deleted successfully'
-                ]);
-            }
-
-            return redirect()->back()->with('success', 'User deleted successfully');
+            return response()->json([
+                'message' => 'Nhân viên đã được xóa thành công'
+            ], 200);
 
         } catch (\Exception $e) {
             DB::rollBack();
-
-            if ($request->wantsJson()) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => $e->getMessage()
-                ], 500);
-            }
-
-            return redirect()->back()->with('error', $e->getMessage());
+            return response()->json(['message' => 'Không thể xóa nhân viên: ' . $e->getMessage()], 500);
         }
     }
 }

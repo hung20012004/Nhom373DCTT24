@@ -7,7 +7,6 @@ use App\Http\Resources\ColorResource;
 use App\Models\Color;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Inertia\Inertia;
 
 class ColorController extends Controller
 {
@@ -41,7 +40,7 @@ class ColorController extends Controller
 
         $colors = $query->paginate($perPage);
 
-        $data = [
+        return [
             'data' => ColorResource::collection($colors),
             'current_page' => $colors->currentPage(),
             'per_page' => $colors->perPage(),
@@ -52,14 +51,7 @@ class ColorController extends Controller
                 'direction' => $sortDirection
             ]
         ];
-
-        if ($request->wantsJson()) {
-            return response()->json($data);
-        }
-
-        return Inertia::render('Admin/Colors/Index', $data);
     }
-
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -70,28 +62,12 @@ class ColorController extends Controller
         DB::beginTransaction();
         try {
             $color = Color::create($validated);
+
             DB::commit();
-
-            if ($request->wantsJson()) {
-                return response()->json([
-                    'status' => 'success',
-                    'data' => $color
-                ], 201);
-            }
-
-            return redirect()->back()->with('success', 'Color created successfully');
-
+            return response()->json($color, 201);
         } catch (\Exception $e) {
             DB::rollBack();
-
-            if ($request->wantsJson()) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Error creating color'
-                ], 500);
-            }
-
-            return redirect()->back()->with('error', 'Error creating color');
+            return response()->json(['message' => 'Error creating color'], 500);
         }
     }
 
@@ -122,33 +98,19 @@ class ColorController extends Controller
             }
 
             DB::commit();
-
-            if ($request->wantsJson()) {
-                return response()->json([
-                    'status' => 'success',
-                    'data' => $color
-                ]);
-            }
-
-            return redirect()->back()->with('success', 'Color updated successfully');
+            return response()->json($color);
 
         } catch (\Exception $e) {
             DB::rollBack();
-
-            if ($request->wantsJson()) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Error updating color',
-                    'error' => $e->getMessage(),
-                    'data' => $request->all()
-                ], 500);
-            }
-
-            return redirect()->back()->with('error', 'Error updating color');
+            return response()->json([
+                'message' => 'Error updating color',
+                'error' => $e->getMessage(),
+                'data' => $request->all()
+            ], 500);
         }
     }
 
-    public function destroy(Request $request, $colorId)
+    public function destroy($colorId)
     {
         DB::beginTransaction();
 
@@ -157,40 +119,21 @@ class ColorController extends Controller
 
             // Check if color has associated variants
             if ($color->variants()->exists()) {
-                if ($request->wantsJson()) {
-                    return response()->json([
-                        'status' => 'error',
-                        'message' => 'Cannot delete color because it has associated product variants'
-                    ], 400);
-                }
-
-                return redirect()->back()->with('error', 'Cannot delete color because it has associated product variants');
+                return response()->json([
+                    'message' => 'Cannot delete color because it has associated product variants'
+                ], 400);
             }
 
             $color->delete();
 
             DB::commit();
-
-            if ($request->wantsJson()) {
-                return response()->json([
-                    'status' => 'success',
-                    'message' => 'Color deleted successfully'
-                ], 200);
-            }
-
-            return redirect()->back()->with('success', 'Color deleted successfully');
+            return response()->json([
+                'message' => 'Color deleted successfully'
+            ], 200);
 
         } catch (\Exception $e) {
             DB::rollBack();
-
-            if ($request->wantsJson()) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Unable to delete color'
-                ], 500);
-            }
-
-            return redirect()->back()->with('error', 'Unable to delete color');
+            return response()->json(['message' => 'Unable to delete color'], 500);
         }
     }
 }

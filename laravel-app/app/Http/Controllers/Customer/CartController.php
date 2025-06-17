@@ -12,37 +12,24 @@ use Illuminate\Support\Facades\DB;
 
 class CartController extends Controller
 {
-    protected function getUserId(Request $request = null): int
+    public function index(): JsonResponse
     {
-        if (Auth::check()) {
-            return Auth::id();
-        }
-
-        return $request->attributes->get('user')->id;
-    }
-
-    public function index(Request $request): JsonResponse
-    {
-        $userId = $this->getUserId($request);
-
         $cart = Cart::with(['items.variant.product'])
-            ->where('user_id', $userId)
+            ->where('user_id', Auth::id())
             ->first();
 
         if (!$cart) {
-            $cart = Cart::create(['user_id' => $userId]);
+            $cart = Cart::create(['user_id' => Auth::id()]);
         }
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Cart retrieved successfully',
             'data' => $cart
         ]);
     }
 
     public function add(Request $request): JsonResponse
     {
-        $userId = $this->getUserId($request);
         $request->validate([
             'variant_id' => 'required|exists:product_variants,variant_id',
             'quantity' => 'required|integer|min:1'
@@ -61,7 +48,7 @@ class CartController extends Controller
             }
 
             $cart = Cart::firstOrCreate([
-                'user_id' => $userId
+                'user_id' => Auth::id()
             ]);
 
             $existingItem = CartItem::where([
@@ -102,7 +89,7 @@ class CartController extends Controller
 
             // Trả về cart đã cập nhật
             $updatedCart = Cart::with(['items.variant.product'])
-                ->where('user_id', $userId)
+                ->where('user_id', Auth::id())
                 ->first();
 
             return response()->json([
@@ -122,7 +109,6 @@ class CartController extends Controller
 
     public function update(Request $request, CartItem $cartItem): JsonResponse
     {
-        $userId = $this->getUserId($request);
         $request->validate([
             'quantity' => 'required|integer|min:1'
         ]);
@@ -130,7 +116,7 @@ class CartController extends Controller
         try {
             DB::beginTransaction();
 
-            if ($cartItem->cart->user_id !== $userId) {
+            if ($cartItem->cart->user_id !== Auth::id()) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Unauthorized'
@@ -162,7 +148,7 @@ class CartController extends Controller
 
             // Trả về cart đã cập nhật
             $updatedCart = Cart::with(['items.variant.product'])
-                ->where('user_id', $userId)
+                ->where('user_id', Auth::id())
                 ->first();
 
             return response()->json([
@@ -179,14 +165,12 @@ class CartController extends Controller
         }
     }
 
-    public function remove(Request $request, CartItem $cartItem): JsonResponse
+    public function remove(CartItem $cartItem): JsonResponse
     {
-        $userId = $this->getUserId($request);
-
         try {
             DB::beginTransaction();
 
-            if ($cartItem->cart->user_id !== $userId) {
+            if ($cartItem->cart->user_id !== Auth::id()) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Unauthorized'
@@ -204,7 +188,7 @@ class CartController extends Controller
 
             // Trả về cart đã cập nhật
             $updatedCart = Cart::with(['items.variant.product'])
-                ->where('user_id', $userId)
+                ->where('user_id', Auth::id())
                 ->first();
 
             return response()->json([
@@ -221,14 +205,12 @@ class CartController extends Controller
         }
     }
 
-    public function clear(Request $request): JsonResponse
+    public function clear(): JsonResponse
     {
-        $userId = $this->getUserId($request);
-
         try {
             DB::beginTransaction();
 
-            $cart = Cart::where('user_id', $userId)->first();
+            $cart = Cart::where('user_id', Auth::id())->first();
 
             if ($cart) {
                 // Khôi phục số lượng sản phẩm vào kho cho tất cả sản phẩm trong giỏ hàng
