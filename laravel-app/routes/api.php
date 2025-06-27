@@ -31,18 +31,6 @@ Route::get('/wards/{districtCode}', function ($districtCode) {
 });
 
 Route::prefix('v1')->group(function () {
-<<<<<<< HEAD
-    Route::middleware(['api.key'])->group(function () {
-        Route::prefix('cart')->group(function () {
-            Route::get('/', [CartController::class, 'index'])->name('apicart.index');
-            Route::post('/add', [CartController::class, 'add'])->name('apicart.add');
-            Route::put('/{cartItem}', [CartController::class, 'update'])->name('apicartconflig.update');
-            Route::delete('/{cartItem}', [CartController::class, 'remove'])->name('apicart.remove');
-            Route::delete('/', [CartController::class, 'clear'])->name('apicart.clear');
-        });
-    });
-=======
->>>>>>> parent of d8a929f (update api_key)
     Route::get('/categories', [CategoryController::class, 'index']);
     Route::get('/categories/featured', [CategoryController::class, 'featured']);
     Route::get('/colors', [ColorController::class, 'index']);

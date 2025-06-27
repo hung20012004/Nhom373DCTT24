@@ -130,37 +130,37 @@ Route::middleware(['auth', 'verified','check.role'])->prefix('admin')->group(fun
     });
     Route::prefix('categories')->group(function () {
         Route::post('/', [CategoryController::class, 'store']);
-        Route::post('/{categoryId}', [CategoryController::class, 'update']);
+        Route::put('/{categoryId}', [CategoryController::class, 'update']);
         Route::delete('/{categoryId}', [CategoryController::class, 'destroy']);
     });
     Route::prefix('colors')->group(function () {
         Route::post('/', [ColorController::class, 'store']);
-        Route::post('/{colorId}', [ColorController::class, 'update']);
+        Route::put('/{colorId}', [ColorController::class, 'update']);
         Route::delete('/{colorId}', [ColorController::class, 'destroy']);
     });
     Route::prefix('products')->group(function () {
         Route::post('/', [ProductController::class, 'store']);
-        Route::post('/{productId}', [ProductController::class, 'update']);
+        Route::put('/{productId}', [ProductController::class, 'update']);
         Route::delete('/{productId}', [ProductController::class, 'destroy']);
     });
     Route::prefix('materials')->group(function () {
         Route::post('/', [MaterialController::class, 'store']);
-        Route::post('/{materialId}', [MaterialController::class, 'update']);
+        Route::put('/{materialId}', [MaterialController::class, 'update']);
         Route::delete('/{materialId}', [MaterialController::class, 'destroy']);
     });
     Route::prefix('suppliers')->group(function () {
         Route::post('/', [SupplierController::class, 'store']);
-        Route::post('/{supplierId}', [SupplierController::class, 'update']);
+        Route::put('/{supplierId}', [SupplierController::class, 'update']);
         Route::delete('/{supplierId}', [SupplierController::class, 'destroy']);
     });
     Route::prefix('sizes')->group(function () {
         Route::post('/', [SizeController::class, 'store']);
-        Route::post('/{sizeId}', [SizeController::class, 'update']);
+        Route::put('/{sizeId}', [SizeController::class, 'update']);
         Route::delete('/{sizeId}', [SizeController::class, 'destroy']);
     });
     Route::prefix('tags')->group(function () {
         Route::post('/', [TagController::class, 'store']);
-        Route::post('/{tagId}', [TagController::class, 'update']);
+        Route::put('/{tagId}', [TagController::class, 'update']);
         Route::delete('/{tagId}', [TagController::class, 'destroy']);
     });
     Route::prefix('users')->group(function () {
