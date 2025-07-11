@@ -10,9 +10,58 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
+use Inertia\Inertia;
 
 class ProductController extends Controller
 {
+    public function index(Request $request)
+    {
+        $query = Product::with(['category', 'material', 'images', 'variants.color', 'variants.size', 'tags']);
+
+        // Handle search
+        if ($request->filled('search')) {
+            $query->where('name', 'like', "%{$request->search}%");
+        }
+
+        // Handle sorting
+        $sortField = $request->input('sort_field', 'name');
+        $sortDirection = $request->input('sort_direction', 'asc');
+
+        $allowedSortFields = [
+            'name' => 'name',
+            'price' => 'price',
+            'created_at' => 'created_at'
+        ];
+
+        if (array_key_exists($sortField, $allowedSortFields)) {
+            $query->orderBy($allowedSortFields[$sortField], $sortDirection);
+        }
+
+        // Handle pagination
+        $perPage = $request->input('per_page', 10);
+        $products = $query->paginate($perPage);
+
+        $data = [
+            'data' => ProductResource::collection($products),
+            'meta' => [
+                'current_page' => $products->currentPage(),
+                'per_page' => $products->perPage(),
+                'last_page' => $products->lastPage(),
+                'total' => $products->total(),
+                'sort' => [
+                    'field' => $sortField,
+                    'direction' => $sortDirection
+                ]
+            ]
+        ];
+
+        if ($request->wantsJson()) {
+            return response()->json($data);
+        }
+
+        return Inertia::render('Admin/Products/Index', $data);
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -116,6 +165,39 @@ class ProductController extends Controller
                 'error' => $e->getMessage(),
                 'request_data' => $request->all() // Thêm dữ liệu request vào response
             ], 500);
+        }
+    }
+
+    public function show(Request $request, $productId)
+    {
+        try {
+            $product = Product::with(['category', 'material', 'images', 'variants.color', 'variants.size', 'tags'])
+                ->findOrFail($productId);
+
+            $data = new ProductResource($product);
+
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'status' => 'success',
+                    'data' => $data
+                ]);
+            }
+
+            return Inertia::render('Admin/Products/Show', [
+                'product' => $data
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error fetching product: ' . $e->getMessage());
+
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Error fetching product details'
+                ], 500);
+            }
+
+            return redirect()->back()->with('error', 'Error fetching product details');
         }
     }
 

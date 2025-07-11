@@ -19,7 +19,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'check.role' => \App\Http\Middleware\CheckRole::class,
         ]);
-        //
+        $middleware->validateCsrfTokens(except: [
+            'api/login',
+            'api/register',
+            // 'cart',
+            'admin/*',
+            '*'
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
