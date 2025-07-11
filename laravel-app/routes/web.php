@@ -8,7 +8,6 @@ use App\Http\Controllers\Customer\WishlistController;
 use App\Http\Controllers\Customer\ShippingAddressController;
 use App\Http\Controllers\Customer\ProductReviewController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\ApiKeyController;
 use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ReportController;
@@ -44,10 +43,7 @@ Route::get('/about', function () {
 Route::get('/products', function () {
     return Inertia::render('Products');
 });
-Route::middleware(['auth'])->group(function () {
-    Route::get('/api-key', [ApiKeyController::class, 'show'])->name('api-key.show');
-    Route::post('/api-key/regenerate', [ApiKeyController::class, 'regenerate'])->name('api-key.regenerate');
-});
+
 Route::middleware(['auth', 'verified','check.role'])->prefix('admin')->group(function () {
     Route::get('/customers', function () {
         return Inertia::render('Admin/Customers/Index');
@@ -134,37 +130,37 @@ Route::middleware(['auth', 'verified','check.role'])->prefix('admin')->group(fun
     });
     Route::prefix('categories')->group(function () {
         Route::post('/', [CategoryController::class, 'store']);
-        Route::post('/{categoryId}', [CategoryController::class, 'update']);
+        Route::put('/{categoryId}', [CategoryController::class, 'update']);
         Route::delete('/{categoryId}', [CategoryController::class, 'destroy']);
     });
     Route::prefix('colors')->group(function () {
         Route::post('/', [ColorController::class, 'store']);
-        Route::post('/{colorId}', [ColorController::class, 'update']);
+        Route::put('/{colorId}', [ColorController::class, 'update']);
         Route::delete('/{colorId}', [ColorController::class, 'destroy']);
     });
     Route::prefix('products')->group(function () {
         Route::post('/', [ProductController::class, 'store']);
-        Route::post('/{productId}', [ProductController::class, 'update']);
+        Route::put('/{productId}', [ProductController::class, 'update']);
         Route::delete('/{productId}', [ProductController::class, 'destroy']);
     });
     Route::prefix('materials')->group(function () {
         Route::post('/', [MaterialController::class, 'store']);
-        Route::post('/{materialId}', [MaterialController::class, 'update']);
+        Route::put('/{materialId}', [MaterialController::class, 'update']);
         Route::delete('/{materialId}', [MaterialController::class, 'destroy']);
     });
     Route::prefix('suppliers')->group(function () {
         Route::post('/', [SupplierController::class, 'store']);
-        Route::post('/{supplierId}', [SupplierController::class, 'update']);
+        Route::put('/{supplierId}', [SupplierController::class, 'update']);
         Route::delete('/{supplierId}', [SupplierController::class, 'destroy']);
     });
     Route::prefix('sizes')->group(function () {
         Route::post('/', [SizeController::class, 'store']);
-        Route::post('/{sizeId}', [SizeController::class, 'update']);
+        Route::put('/{sizeId}', [SizeController::class, 'update']);
         Route::delete('/{sizeId}', [SizeController::class, 'destroy']);
     });
     Route::prefix('tags')->group(function () {
         Route::post('/', [TagController::class, 'store']);
-        Route::post('/{tagId}', [TagController::class, 'update']);
+        Route::put('/{tagId}', [TagController::class, 'update']);
         Route::delete('/{tagId}', [TagController::class, 'destroy']);
     });
     Route::prefix('users')->group(function () {
@@ -230,15 +226,17 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
         Route::get('/{order}', [OrderController::class, 'show'])->name('orders.show');
         Route::get('/confirmation/{order}', [OrderController::class, 'confirmation'])->name('order.confirmation');
         Route::post('/', [OrderController::class, 'checkout'])->name('order.checkout');
+        Route::get('/confirmation/{order}', [OrderController::class, 'confirmation'])->name('order.confirmation');
         Route::post('/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
         Route::post('/{orderId}/confirm-received', [OrderController::class, 'confirmReceived']);
     });
     Route::prefix('support-requests')->group(function () {
-        Route::get('/', [CustomerSupportRequestController::class, 'index'])->name('support-orders.index');
-        Route::get('/{order}', [CustomerSupportRequestController::class, 'show'])->name('support-orders.show');
-        Route::post('/', [CustomerSupportRequestController::class, 'checkout'])->name('support-order.checkout');
-        Route::get('/confirmation/{order}', [CustomerSupportRequestController::class, 'confirmation'])->name('support-order.confirmation');
-        Route::post('/{order}/cancel', [CustomerSupportRequestController::class, 'cancel'])->name('support-orders.cancel');
+        Route::get('/', [CustomerSupportRequestController::class, 'index'])->name('orders.index');
+        Route::get('/{order}', [CustomerSupportRequestController::class, 'show'])->name('orders.show');
+        Route::get('/confirmation/{order}', [CustomerSupportRequestController::class, 'confirmation'])->name('order.confirmation');
+        Route::post('/', [CustomerSupportRequestController::class, 'checkout'])->name('order.checkout');
+        Route::get('/confirmation/{order}', [CustomerSupportRequestController::class, 'confirmation'])->name('order.confirmation');
+        Route::post('/{order}/cancel', [CustomerSupportRequestController::class, 'cancel'])->name('orders.cancel');
     });
     Route::post('/products/{productId}/reviews', [ProductReviewController::class, 'store']);
     Route::put('/products/{productId}/reviews/{reviewId}', [ProductReviewController::class, 'update']);

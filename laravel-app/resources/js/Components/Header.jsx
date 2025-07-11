@@ -472,7 +472,6 @@ const Header = () => {
                                     </div>
                                 </div>
                                 <div className="mt-3 space-y-1">
-
                                     <Link
                                         href="/profile"
                                         className={getMobileLinkClasses(

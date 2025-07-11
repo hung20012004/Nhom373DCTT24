@@ -8,10 +8,9 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasFactory, Notifiable,HasApiTokens;
+    use HasFactory, Notifiable;
 
     /**
      * The table associated with the model.
@@ -40,7 +39,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'note',
         'is_active',
         'last_login',
-        'api_key',
     ];
 
     /**
