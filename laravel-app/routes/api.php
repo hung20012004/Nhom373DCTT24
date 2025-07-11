@@ -106,37 +106,37 @@ Route::prefix('v2')->group(function () {
         });
         Route::prefix('categories')->group(function () {
             Route::post('/', [AdminCategoryController::class, 'store']);
-            Route::post('/{categoryId}', [AdminCategoryController::class, 'update']);
+            Route::put('/{categoryId}', [AdminCategoryController::class, 'update']);
             Route::delete('/{categoryId}', [AdminCategoryController::class, 'destroy']);
         });
         Route::prefix('colors')->group(function () {
             Route::post('/', [AdminColorController::class, 'store']);
-            Route::post('/{colorId}', [AdminColorController::class, 'update']);
+            Route::put('/{colorId}', [AdminColorController::class, 'update']);
             Route::delete('/{colorId}', [AdminColorController::class, 'destroy']);
         });
         Route::prefix('products')->group(function () {
             Route::post('/', [AdminProductController::class, 'store']);
-            Route::post('/{productId}', [AdminProductController::class, 'update']);
+            Route::put('/{productId}', [AdminProductController::class, 'update']);
             Route::delete('/{productId}', [AdminProductController::class, 'destroy']);
         });
         Route::prefix('materials')->group(function () {
             Route::post('/', [AdminMaterialController::class, 'store']);
-            Route::post('/{materialId}', [AdminMaterialController::class, 'update']);
+            Route::put('/{materialId}', [AdminMaterialController::class, 'update']);
             Route::delete('/{materialId}', [AdminMaterialController::class, 'destroy']);
         });
         Route::prefix('suppliers')->group(function () {
             Route::post('/', [AdminSupplierController::class, 'store']);
-            Route::post('/{supplierId}', [AdminSupplierController::class, 'update']);
+            Route::put('/{supplierId}', [AdminSupplierController::class, 'update']);
             Route::delete('/{supplierId}', [AdminSupplierController::class, 'destroy']);
         });
         Route::prefix('sizes')->group(function () {
             Route::post('/', [AdminSizeController::class, 'store']);
-            Route::post('/{sizeId}', [AdminSizeController::class, 'update']);
+            Route::put('/{sizeId}', [AdminSizeController::class, 'update']);
             Route::delete('/{sizeId}', [AdminSizeController::class, 'destroy']);
         });
         Route::prefix('tags')->group(function () {
             Route::post('/', [AdminTagController::class, 'store']);
-            Route::post('/{tagId}', [AdminTagController::class, 'update']);
+            Route::put('/{tagId}', [AdminTagController::class, 'update']);
             Route::delete('/{tagId}', [AdminTagController::class, 'destroy']);
         });
         Route::prefix('users')->group(function () {
